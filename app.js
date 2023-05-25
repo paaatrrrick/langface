@@ -177,6 +177,10 @@ app.post('/run', (req, res) => {
     res.send('running');
 });
 
+app.get('/data', (req, res) => {
+    res.send('data');
+});
+
 
 io.on('connection', (socket) => {
     console.log('New client connected');
@@ -202,4 +206,11 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(8000, () => console.log('Server is running on port 8000'));
+
+let PORT = process.env.PORT;
+if (PORT == null || PORT == "") {
+    PORT = 8000;
+}
+server.listen(PORT, () => {
+    return console.log(`✅ We're live: ${PORT}`);
+});

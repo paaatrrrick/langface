@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 import './App.css';
-
+import constants from './constants';
 let socket;
 
 const App = () => {
@@ -21,7 +21,7 @@ const App = () => {
     // Parameters to pass to OAuth 2.0 endpoint.
     var params = {
       'client_id': '406198750695-i6p3k9r380io0tlre38j8jsvv2o4vmk7.apps.googleusercontent.com',
-      'redirect_uri': 'http://localhost:3000',
+      'redirect_uri': constants.localUrl,
       'response_type': 'token',
       'scope': 'https://www.googleapis.com/auth/blogger',
       'include_granted_scopes': 'true',
@@ -55,7 +55,7 @@ const App = () => {
 
 
   useEffect(() => {
-    socket = io('http://localhost:8000');
+    socket = io(constants.url);
     return () => {
       socket.disconnect();
     };
