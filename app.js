@@ -4,7 +4,7 @@ const socketIo = require('socket.io');
 const cors = require('cors');
 const app = express();
 const { ChatOpenAI } = require("langchain/chat_models/openai");
-const { StructuredOutputParser } = require("langchain/output_parsers");
+const { StructuredOutputParser, CustomListOutputParser } = require("langchain/output_parsers");
 const { PromptTemplate } = require("langchain/prompts");
 const { HumanChatMessage, SystemChatMessage, AIChatMessage } = require("langchain/schema");
 const bodyParser = require('body-parser');
@@ -51,17 +51,13 @@ class User {
         this.content = content;
         this.loops = loops;
         this.sendData = sendData;
-        this.model = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0.35, openAIApiKey: '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' });
-        // this.model = new OpenAI({ temperature: 0.2, openAIApiKey: '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' });
+        this.model = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0, openAIApiKey: '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' });
+        // this.model = new OpenAI({ temperature: 0.2, openAIApiKey: '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' });
 
     }
     run = async () => {
-        var errorCount = 0;
-        var i = 0;
-        console.log('running');
-        while (i < this.loops) {
-            console.log('looping')
-            if (TESTING) {
+        if (TESTING) {
+            for (let i = 0; i < 10; i++) {
                 console.log('about to send');
                 this.sendData({
                     title: 'Welcome to the Purrfect Blog!', content:
@@ -70,8 +66,32 @@ class User {
                 });
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 i++;
-            } else {
-                const result = await this.writePost();
+            }
+        } else {
+            const parser = new CustomListOutputParser({ length: this.loops, separator: "\n" });
+            const formatInstructions = parser.getFormatInstructions();
+            const prompt = new PromptTemplate({
+                template:
+                    `Provide an unordered and unumbered list of catchy blog post titles for a blog called "{subject}". \n{format_instructions}`,
+                inputVariables: ["subject"],
+                partialVariables: { format_instructions: formatInstructions },
+            });
+            const input = await prompt.format({
+                subject: this.content,
+            });
+            var answers = null;
+            try {
+                const response = await this.model.call([
+                    new HumanChatMessage(input),
+                ]);
+                answers = await parser.parse(response.text);
+            } catch (e) {
+                this.sendData({ type: 'ending', error: "To many errors, ending the program" });
+                return;
+            }
+            for (let title of answers) {
+                var errorCount = 0;
+                const result = await this.writePost(title);
                 if (result === 'Formatting error' || result === 'Error posting to blogger') {
                     console.log('error');
                     errorCount++;
@@ -80,38 +100,55 @@ class User {
                         this.sendData({ type: 'ending', error: "To many errors, ending the program" });
                         break;
                     }
-
                 } else {
                     this.sendData(result);
-                    i++;
                 }
             }
         }
-        console.log('loop ended')
     }
 
-    writePost = async () => {
-        const input = 'Write a blog post HTML and a title for the following prompt ' + this.content + 'Output format: only a valid JSON string in the format of ```json{"body": "CONTENT_HERE", "title": "TITLE_HERE"}```. An example output (assume a much large body) would be ```json{"body": "<div><p>This is a blog post</p></div>", "title": "My Blog Post"}```.';
-        console.log(input);
+    writePost = async (title) => {
+        const input = `Write a blog post in HTML given the title: ${title}.`;
         const messages = [
+            new SystemChatMessage(
+                'You are an AI assitant that is a world class writer. You are given a blog title, then you write a blog post. You write all content only in valid HTML',
+            ),
             new HumanChatMessage(input),
         ]
-        const response = await this.model.call(messages);
-
-        var answer = response.text;
-        //trim whitespace
-        answer = answer.trim();
-        console.log(answer);
-        const jsonString = extractJson(answer);
-        const json = JSON.parse(jsonString);
-        console.log('4')
-        console.log(json);
-        const title = json.title || json.Title || json.TITLE;
-        const body = json.body || json.Body || json.BODY;
-        if (!title || !body) {
-            return 'Formatting error'
+        var htmlContent = null;
+        try {
+            const response = await this.model.call(messages);
+            console.log(response);
+            htmlContent = response.text;
+        } catch (e) {
+            return 'Formatting error';
         }
-        return await this.postToBlogger(body, title);
+        if (!htmlContent) {
+            return 'Formatting error';
+        }
+        return await this.postToBlogger(htmlContent, title);
+        // console.log('at write post');
+        // const input = 'Write a blog post HTML and a title for the following prompt ' + this.content + 'Output format: only a valid JSON string in the format of ```json{"body": "CONTENT_HERE", "title": "TITLE_HERE"}```. An example output (assume a much large body) would be ```json{"body": "<div><p>This is a blog post</p></div>", "title": "My Blog Post"}```.';
+        // console.log(input);
+        // const messages = [
+        //     new HumanChatMessage(input),
+        // ]
+        // const response = await this.model.call(messages);
+
+        // var answer = response.text;
+        // //trim whitespace
+        // answer = answer.trim();
+        // console.log(answer);
+        // const jsonString = extractJson(answer);
+        // const json = JSON.parse(jsonString);
+        // console.log('4')
+        // console.log(json);
+        // const title = json.title || json.Title || json.TITLE;
+        // const body = json.body || json.Body || json.BODY;
+        // if (!title || !body) {
+        //     return 'Formatting error'
+        // }
+        // return await this.postToBlogger(body, title);
     }
     postToBlogger = async (content, title) => {
         const response = await fetch(`https://www.googleapis.com/blogger/v3/blogs/${this.blogID}/posts/`, {
