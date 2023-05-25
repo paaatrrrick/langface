@@ -18,9 +18,13 @@ const App = () => {
   const getJwt = async () => {
     var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
 
+    console.log(constants.localUrl);
     // Parameters to pass to OAuth 2.0 endpoint.
     var params = {
-      'client_id': '406198750695-i6p3k9r380io0tlre38j8jsvv2o4vmk7.apps.googleusercontent.com',
+      // 'client_id': '406198750695-i6p3k9r380io0tlre38j8jsvv2o4vmk7.apps.googleusercontent.com',
+      'client_id': '704178374790-ifgbedjlnfm7cpgjrdju7n1psbmm88j8.apps.googleusercontent.com',
+      // 'client_id': '654856777688-mjq8db4r06oiseq0fffu7co3cdmbheq3.apps.googleusercontent.com',
+      // 'client_id': '17461614817-5t83skk10v7oodivj19g8k6numghbbo0.apps.googleusercontent.com',
       'redirect_uri': constants.localUrl,
       'response_type': 'token',
       'scope': 'https://www.googleapis.com/auth/blogger',
@@ -61,6 +65,7 @@ const App = () => {
     };
   }, []);
 
+
   useEffect(() => {
     scrollToBottom();
   }, [data])
@@ -79,6 +84,7 @@ const App = () => {
       console.log(incomingData);
       if (incomingData.type === 'ending') {
         setHasStarted(false);
+        socket.off('updateData');
       }
       setData(prevData => [...prevData, incomingData]);
     })

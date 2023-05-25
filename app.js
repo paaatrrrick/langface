@@ -13,7 +13,8 @@ const { PromptTemplate } = require("langchain/prompts");
 const { HumanChatMessage, SystemChatMessage, AIChatMessage } = require("langchain/schema");
 const bodyParser = require('body-parser');
 const { error } = require('console');
-const TESTING = false;
+const fetch = require('node-fetch');	//npm install node-fetch
+const TESTING = true;
 
 
 
@@ -34,7 +35,7 @@ class User {
     }
     run = async () => {
         if (TESTING) {
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 5; i++) {
                 console.log('about to send');
                 this.sendData({
                     title: 'Welcome to the Purrfect Blog!', content:
@@ -42,8 +43,8 @@ class User {
                     url: 'https://www.blogger.com/profile/05904937201937380783', type: 'success'
                 });
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                i++;
             }
+            this.sendData({ type: 'ending', content: "Process Complete" });
         } else {
             console.log('running')
             const parser = new CustomListOutputParser({ length: this.loops, separator: "\n" });
@@ -186,8 +187,6 @@ io.on('connection', (socket) => {
     console.log('New client connected');
 
     socket.on('addData', (newData) => {
-        console.log('adding data');
-        console.log(newData);
         const { id } = newData;
         const sendData = async (data123) => {
             socket.emit('updateData', data123); // sends data only to the connected socket
