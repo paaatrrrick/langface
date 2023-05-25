@@ -50,7 +50,7 @@ const App = () => {
       } catch (e) {
         console.log('bad location');
       }
-    }, 1000);
+    }, 50);
   };
 
 
@@ -61,17 +61,25 @@ const App = () => {
     };
   }, []);
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [data])
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
   const handleSubmit = () => {
-    // if (hasStarted) return
+    if (hasStarted) return
+    setData([]);
     setHasStarted(true);
     const newData = { jwt, loops, id, content };
     socket.on('updateData', (incomingData) => {
       console.log('data is updating')
       console.log(incomingData);
+      if (incomingData.type === 'ending') {
+        setHasStarted(false);
+      }
       setData(prevData => [...prevData, incomingData]);
     })
     socket.emit('addData', newData);
@@ -104,6 +112,13 @@ const App = () => {
                 <div className="error" >
                   <p>{item.error}</p>
                 </div>}
+              {item.type === 'ending' &&
+                <div className="success" >
+                  <h4>
+                    {item.content}
+                  </h4>
+                </div>
+              }
             </div>
           ))}
           <div ref={messagesEndRef} />
@@ -114,7 +129,7 @@ const App = () => {
             <input className='loops' type='number' value={loops} onChange={e => setLoops(e.target.value)} placeholder='How many posts do you want' />
             <input type='text' value={id} onChange={e => setId(e.target.value)} placeholder='Enter your blogger.com ID' />
             {/* <a href={'https://www.blogger.com/'} target='_blank'>Create an account here</a> */}
-            <button onClick={getJwt} className={`google ${jwt !== '' && 'googleGood'}`} disabled={jwt !== ''}>Login With Google</button>
+            <button onClick={getJwt} className={`google ${jwt !== '' && 'googleGood'}`} disabled={jwt !== ''}>{jwt ? 'Logged In' : 'Login With Google'}</button>
             <button onClick={handleSubmit} disabled={!(!hasStarted && canStart)} className='runButton'>Run!</button>
           </div>
         </div>

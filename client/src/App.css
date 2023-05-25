@@ -235,3 +235,8 @@ button:hover {
   flex-grow: 1;
   color: #18181b;
 }
+
+/* have disabled buttons have a hover effect of none */
+button:disabled:hover {
+  cursor: not-allowed !important;
+}

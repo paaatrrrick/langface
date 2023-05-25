@@ -1,3 +1,7 @@
+//require dotenv
+if (process.env.NODE_ENV !== "production") {
+    require('dotenv').config();
+}
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -8,6 +12,7 @@ const { StructuredOutputParser, CustomListOutputParser } = require("langchain/ou
 const { PromptTemplate } = require("langchain/prompts");
 const { HumanChatMessage, SystemChatMessage, AIChatMessage } = require("langchain/schema");
 const bodyParser = require('body-parser');
+const { error } = require('console');
 const TESTING = false;
 
 
@@ -15,43 +20,15 @@ const TESTING = false;
 app.use(bodyParser.json(), bodyParser.urlencoded({ extended: false }))
 app.use(cors());
 
-
-function extractJson(json) {
-    try {
-        JSON.parse(json);
-        return json
-    } catch (e) {
-        var startPattern = '```json';
-        var endPattern = '```';
-        let startIndex = json.indexOf(startPattern);
-        let endIndex = json.lastIndexOf(endPattern);
-        if (startIndex !== -1 && endIndex !== -1) {
-            let cleanedString = json.slice(startIndex + startPattern.length, endIndex);
-            return cleanedString.trim();
-        }
-        var startPattern = '{';
-        var endPattern = '}';
-        startIndex = json.indexOf(startPattern);
-        endIndex = json.lastIndexOf(endPattern);
-        if (startIndex !== -1 && endIndex !== -1) {
-            let cleanedString = json.slice(startIndex + startPattern.length, endIndex);
-            return cleanedString.trim();
-        }
-        return json;
-    }
-}
-
 //create a userClass
 class User {
     constructor(jwt, blogID, content, loops, sendData) {
-        console.log('creating user');
-        console.log(jwt, blogID, content, loops, sendData);
         this.jwt = jwt;
         this.blogID = blogID;
         this.content = content;
         this.loops = loops;
         this.sendData = sendData;
-        this.model = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0, openAIApiKey: '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' });
+        this.model = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0, maxTokens: 1000 });
         // this.model = new OpenAI({ temperature: 0.2, openAIApiKey: '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' });
 
     }
@@ -68,28 +45,40 @@ class User {
                 i++;
             }
         } else {
+            console.log('running')
             const parser = new CustomListOutputParser({ length: this.loops, separator: "\n" });
             const formatInstructions = parser.getFormatInstructions();
             const prompt = new PromptTemplate({
                 template:
-                    `Provide an unordered and unumbered list of catchy blog post titles for a blog called "{subject}". \n{format_instructions}`,
+                    `Provide an unordered and unumbered list of length ${this.loops} of catchy blog post titles for a blog called "{subject}". \n{format_instructions}`,
                 inputVariables: ["subject"],
                 partialVariables: { format_instructions: formatInstructions },
             });
             const input = await prompt.format({
                 subject: this.content,
             });
-            var answers = null;
+            var titles = null;
             try {
                 const response = await this.model.call([
                     new HumanChatMessage(input),
                 ]);
-                answers = await parser.parse(response.text);
+                console.log(response)
+                titles = response.text.split('\n');
             } catch (e) {
-                this.sendData({ type: 'ending', error: "To many errors, ending the program" });
+                console.log('we had an error')
+                console.log(e);
+                this.sendData({ type: 'ending', content: "To many errors, ending the program" });
                 return;
             }
-            for (let title of answers) {
+            var i = 0;
+            console.log(titles);
+            for (let title of titles) {
+                i++;
+                if (i > this.loops) {
+                    break;
+                }
+                console.log('looop')
+                console.log(title);
                 var errorCount = 0;
                 const result = await this.writePost(title);
                 if (result === 'Formatting error' || result === 'Error posting to blogger') {
@@ -97,18 +86,22 @@ class User {
                     errorCount++;
                     this.sendData({ type: 'error', error: result });
                     if (errorCount > 5) {
-                        this.sendData({ type: 'ending', error: "To many errors, ending the program" });
+                        this.sendData({ type: 'ending', content: "To many errors, ending the program" });
                         break;
                     }
                 } else {
                     this.sendData(result);
                 }
             }
+            this.sendData({ type: 'ending', content: "Process Complete" });
+            return
         }
     }
 
     writePost = async (title) => {
-        const input = `Write a blog post in HTML given the title: ${title}.`;
+        console.log('writing post');
+        console.log(title);
+        const input = `Write a blog post in HTML given the title: ${title}.  Do not restate the title. Start and end with a div, the content will be added inside the body`;
         const messages = [
             new SystemChatMessage(
                 'You are an AI assitant that is a world class writer. You are given a blog title, then you write a blog post. You write all content only in valid HTML',
@@ -121,34 +114,16 @@ class User {
             console.log(response);
             htmlContent = response.text;
         } catch (e) {
+            console.log('second error point');
+            console.log(e);
             return 'Formatting error';
         }
+        console.log(htmlContent);
         if (!htmlContent) {
+            console.log('no html content');
             return 'Formatting error';
         }
         return await this.postToBlogger(htmlContent, title);
-        // console.log('at write post');
-        // const input = 'Write a blog post HTML and a title for the following prompt ' + this.content + 'Output format: only a valid JSON string in the format of ```json{"body": "CONTENT_HERE", "title": "TITLE_HERE"}```. An example output (assume a much large body) would be ```json{"body": "<div><p>This is a blog post</p></div>", "title": "My Blog Post"}```.';
-        // console.log(input);
-        // const messages = [
-        //     new HumanChatMessage(input),
-        // ]
-        // const response = await this.model.call(messages);
-
-        // var answer = response.text;
-        // //trim whitespace
-        // answer = answer.trim();
-        // console.log(answer);
-        // const jsonString = extractJson(answer);
-        // const json = JSON.parse(jsonString);
-        // console.log('4')
-        // console.log(json);
-        // const title = json.title || json.Title || json.TITLE;
-        // const body = json.body || json.Body || json.BODY;
-        // if (!title || !body) {
-        //     return 'Formatting error'
-        // }
-        // return await this.postToBlogger(body, title);
     }
     postToBlogger = async (content, title) => {
         const response = await fetch(`https://www.googleapis.com/blogger/v3/blogs/${this.blogID}/posts/`, {
@@ -172,7 +147,7 @@ class User {
         } else {
             const result = await response.json();
             console.log(result);
-            return { title, content, url: response.selfLink, type: 'success' };
+            return { title: title, content: content, url: result.selfLink, type: 'success' };
         }
     }
 }
