@@ -17,7 +17,7 @@ let fetch;
 import('node-fetch').then(nodeFetch => {
     fetch = nodeFetch.default || nodeFetch;
 });
-const TESTING = true;
+const TESTING = false;
 
 
 
