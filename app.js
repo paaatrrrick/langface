@@ -13,7 +13,10 @@ const { PromptTemplate } = require("langchain/prompts");
 const { HumanChatMessage, SystemChatMessage, AIChatMessage } = require("langchain/schema");
 const bodyParser = require('body-parser');
 const { error } = require('console');
-const fetch = require('node-fetch');	//npm install node-fetch
+let fetch;
+import('node-fetch').then(nodeFetch => {
+    fetch = nodeFetch.default || nodeFetch;
+});
 const TESTING = true;
 
 
