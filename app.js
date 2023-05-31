@@ -17,24 +17,25 @@ let fetch;
 import('node-fetch').then(nodeFetch => {
     fetch = nodeFetch.default || nodeFetch;
 });
-const TESTING = false;
-
-
-
+const TESTING = process.env.TESTING === 'true';
+var counter = 0
 app.use(bodyParser.json(), bodyParser.urlencoded({ extended: false }))
 app.use(cors());
 
 //create a userClass
 class User {
-    constructor(jwt, blogID, content, loops, sendData) {
+    constructor(jwt, blogID, content, loops, openAIKey, sendData) {
+        console.log('creating user');
+        console.log(openAIKey);
         this.jwt = jwt;
         this.blogID = blogID;
         this.content = content;
         this.loops = loops;
         this.sendData = sendData;
-        this.model = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0, maxTokens: 1000 });
+        this.openAIKey = openAIKey ? openAIKey : process.env.OPENAI_API_KEY;
+        console.log(this.openAIKey);
+        this.model = new ChatOpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0.1, maxTokens: 3000, openAIApiKey: this.openAIKey });
         // this.model = new OpenAI({ temperature: 0.2, openAIApiKey: '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' });
-
     }
     run = async () => {
         if (TESTING) {
@@ -54,7 +55,7 @@ class User {
             const formatInstructions = parser.getFormatInstructions();
             const prompt = new PromptTemplate({
                 template:
-                    `Provide an unordered and unumbered list of length ${this.loops} of catchy blog post titles for a blog called "{subject}". \n{format_instructions}`,
+                    `Provide an unordered list of length ${this.loops} of niche blog titles:\n It's a blog about "{subject}". \n{format_instructions} The titles should not be number.`,
                 inputVariables: ["subject"],
                 partialVariables: { format_instructions: formatInstructions },
             });
@@ -105,10 +106,10 @@ class User {
     writePost = async (title) => {
         console.log('writing post');
         console.log(title);
-        const input = `Write a blog post in HTML given the title: ${title}.  Do not restate the title. Start and end with a div, the content will be added inside the body`;
+        const input = `Write a blog post in HTML given the title: ${title}. Here is a description and guidance about the blog as a whole:\n It's a blog about ${this.content}\n\n\n. Formatting Instructions: Write only HTML. Start and end with a div, the content will be added inside the body tags. Give the blog structure with various html headers and lists as needed. DO NOT SAY THE TITLE. YOU SHOULD START WITH THE FIRST CONTENT SENTENCE, WHICH SHOULD BE A DIV, then a p tag, then the first sentence.`;
         const messages = [
             new SystemChatMessage(
-                'You are an AI assitant that is a world class writer. You are given a blog title, then you write a blog post. You write all content only in valid HTML',
+                'You are an AI assitant that is a world class writer. You are given a blog title and a description/guidance about the blog, then you write a blog post. You write all content only in valid HTML',
             ),
             new HumanChatMessage(input),
         ]
@@ -151,7 +152,7 @@ class User {
         } else {
             const result = await response.json();
             console.log(result);
-            return { title: title, content: content, url: result.selfLink, type: 'success' };
+            return { title: title, content: content, url: result.url, type: 'success' };
         }
     }
 }
@@ -192,9 +193,15 @@ io.on('connection', (socket) => {
     socket.on('addData', (newData) => {
         const { id } = newData;
         const sendData = async (data123) => {
+            counter += 1;
+            console.log(counter);
             socket.emit('updateData', data123); // sends data only to the connected socket
         }
-        const user = new User(newData.jwt, newData.id, newData.content, newData.loops, sendData);
+        if (newData.loops > 50) {
+            socket.emit('updateData', { type: 'ending', error: 'Please do 50 or less loops' });
+            return;
+        }
+        const user = new User(newData.jwt, newData.id, newData.content, newData.loops, newData.openAIKey, sendData);
         data[id] = user;
 
         user.run();

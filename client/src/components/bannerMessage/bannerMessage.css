@@ -1,0 +1,31 @@
+.banner-message {
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 2px;
+    padding: 5px 25px;
+    max-width: 90%;
+    height: 35px;
+    width: 800px;
+}
+
+.banner-message.error-message {
+    background-color: #fe3d67;
+}
+
+.banner-message.success-message {
+    background-color: #6cd06c;
+}
+
+.banner-message>button {
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+}

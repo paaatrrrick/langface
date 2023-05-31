@@ -1,34 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,300;0,500;1,600&display=swap');
 
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Montserrat', sans-serif;
-  box-sizing: border-box;
-  color: #fff;
-}
-
-
-
-
-.App {
+.Home {
+  width: 100%;
+  height: 100%;
   display: flex;
-  width: 100vw;
-  height: 100vh;
-  background-color: #282c34;
   justify-content: center;
   align-items: center;
 }
 
-
-h5 {
-  font-size: 24px;
-  font-weight: 400;
-  margin-top: 0px;
-  color: #a4a4a4;
-}
 
 
 .container {
@@ -52,14 +31,14 @@ h5 {
 }
 
 
-h3 {
+.title>h3 {
   color: #fff;
   font-size: 40px;
   text-align: center;
 }
 
 
-.title p {
+.title>p {
   color: #fff;
   margin-top: 20px;
   font-size: 18px;
@@ -89,10 +68,22 @@ h3 {
   height: 60%;
   padding-bottom: 50px;
   overflow-y: scroll;
-
-
 }
 
+.emptyData-messages {
+  display: flex;
+}
+
+.emptyData-messages h5 {
+  color: #fff;
+  font-size: 18px;
+  margin-right: 10px;
+  text-decoration: underline;
+}
+
+.emptyData-messages>h5:hover {
+  cursor: pointer;
+}
 
 
 
@@ -151,7 +142,7 @@ h3 {
 
 .inputs textarea {
   width: 100%;
-  height: 100px;
+  height: 200px;
   border-radius: 10px;
   border: 1px solid #fff;
   padding: 15px;
@@ -207,9 +198,6 @@ h3 {
   margin-right: 10px;
 }
 
-
-
-
 .google {
   width: 200px;
   font-size: 16px;
@@ -236,7 +224,14 @@ button:hover {
   color: #18181b;
 }
 
-/* have disabled buttons have a hover effect of none */
 button:disabled:hover {
   cursor: not-allowed !important;
+}
+
+.loader-container {
+  margin-top: 20px;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
 }

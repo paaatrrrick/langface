@@ -1,62 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
-import './App.css';
-import constants from './constants';
+import './home.css';
+import constants from '../../constants';
+import Loader from '../loader';
+import getJwt from '../../utils/getJwt';
+import { setPopUpMessage } from '../../store';
+import { useDispatch } from 'react-redux';
+import PopUp from '../popup';
 let socket;
 
-const App = () => {
+const Home = () => {
+  const dispatch = useDispatch();
+
   const [loops, setLoops] = useState('');
   const [jwt, setJwt] = useState('');
   const [id, setId] = useState('');
   const [content, setContent] = useState('');
   const [data, setData] = useState([]);
   const [hasStarted, setHasStarted] = useState(false);
+  const [showPopUp, setShowPopUp] = useState('');
   const messagesEndRef = useRef(null);
-
-
-
-  const getJwt = async () => {
-    var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
-
-    console.log(constants.localUrl);
-    // Parameters to pass to OAuth 2.0 endpoint.
-    var params = {
-      // 'client_id': '406198750695-i6p3k9r380io0tlre38j8jsvv2o4vmk7.apps.googleusercontent.com',
-      'client_id': '704178374790-ifgbedjlnfm7cpgjrdju7n1psbmm88j8.apps.googleusercontent.com',
-      // 'client_id': '654856777688-mjq8db4r06oiseq0fffu7co3cdmbheq3.apps.googleusercontent.com',
-      // 'client_id': '17461614817-5t83skk10v7oodivj19g8k6numghbbo0.apps.googleusercontent.com',
-      'redirect_uri': constants.localUrl,
-      'response_type': 'token',
-      'scope': 'https://www.googleapis.com/auth/blogger',
-      'include_granted_scopes': 'true',
-      'state': 'pass-through value'
-    };
-    // Create the OAuth URL
-    var url = oauth2Endpoint + '?' + Object.keys(params).map(k => `${k}=${encodeURIComponent(params[k])}`).join('&');
-    // Open the new window
-    const newWin = window.open(url, "_blank");
-    // Poll the new window's location for the access token
-    var tokenCheckInterval = setInterval(() => {
-      try {
-        console.log('checking location');
-        //@ts-ignore
-        if (newWin.location.href.includes('access_token')) {
-          clearInterval(tokenCheckInterval);
-          //@ts-ignore
-          const newWinURI = newWin.location.href;
-          const token = newWinURI.substring(newWinURI.indexOf("access_token=") + 13, newWinURI.indexOf("&token_type"));
-          console.log(token);
-          console.log('done');
-          //@ts-ignore
-          newWin.close();
-          setJwt(token);
-        }
-      } catch (e) {
-        console.log('bad location');
-      }
-    }, 50);
-  };
-
 
   useEffect(() => {
     socket = io(constants.url);
@@ -74,13 +37,20 @@ const App = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
-  const handleSubmit = () => {
+  const handleJWT = async () => {
+    getJwt(setJwt, (myStr) => {
+      dispatch(setPopUpMessage({ message: myStr, type: 'error', timeout: 3000 }))
+    });
+  }
+
+
+  const handleSubmit = async () => {
     if (hasStarted) return
     setData([]);
     setHasStarted(true);
-    const newData = { jwt, loops, id, content };
+    const openAIKey = localStorage.getItem('openAIKey');
+    const newData = { jwt, loops, id, content, openAIKey };
     socket.on('updateData', (incomingData) => {
-      console.log('data is updating')
       console.log(incomingData);
       if (incomingData.type === 'ending') {
         setHasStarted(false);
@@ -92,17 +62,24 @@ const App = () => {
   };
 
   const canStart = jwt !== '' && id !== '' && content !== '' && loops !== '';
-  console.log('re rendering');
-  console.log(data);
   return (
-    <div className="App">
+    <div className="Home">
+      {showPopUp && <PopUp close={() => { setShowPopUp('') }} template={showPopUp} />}
       <div className="container">
         <div className="title">
           <h3>bloggerGPT</h3>
           <p>Post hundreds of blog posts with just a click of a button</p>
         </div>
         <div className="data">
-          {data.length === 0 && <h5>nothing created yet</h5>}
+          {(!hasStarted && data.length === 0) &&
+            <div className='emptyData-messages'>
+              <h5
+                onClick={() => { setShowPopUp('tutorial') }}>
+                How to get started?
+              </h5>
+              <h5 onClick={() => { setShowPopUp('settings') }}>Settings</h5>
+            </div>
+          }
           {data.map((item, index) => (
             <div key={index} className='mainDiv'>
               {item.type === 'success' &&
@@ -127,15 +104,19 @@ const App = () => {
               }
             </div>
           ))}
-          <div ref={messagesEndRef} />
+          {
+            hasStarted &&
+            <div ref={messagesEndRef} className='loader-container'>
+              <Loader />
+            </div>
+          }
         </div>
         <div className="inputs">
           <textarea value={content} onChange={e => setContent(e.target.value)} placeholder='What is your blog post about' />
           <div className='inputsCont'>
             <input className='loops' type='number' value={loops} onChange={e => setLoops(e.target.value)} placeholder='How many posts do you want' />
             <input type='text' value={id} onChange={e => setId(e.target.value)} placeholder='Enter your blogger.com ID' />
-            {/* <a href={'https://www.blogger.com/'} target='_blank'>Create an account here</a> */}
-            <button onClick={getJwt} className={`google ${jwt !== '' && 'googleGood'}`} disabled={jwt !== ''}>{jwt ? 'Logged In' : 'Login With Google'}</button>
+            <button onClick={handleJWT} className={`google ${jwt !== '' && 'googleGood'}`} disabled={jwt !== ''}>{jwt ? 'Logged In' : 'Login With Google'}</button>
             <button onClick={handleSubmit} disabled={!(!hasStarted && canStart)} className='runButton'>Run!</button>
           </div>
         </div>
@@ -144,4 +125,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Home;
