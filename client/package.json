@@ -16,8 +16,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "netlify": "npm install && npm run build",
     "build": "react-scripts build",
+    "netlify": "CI=false npm run build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
