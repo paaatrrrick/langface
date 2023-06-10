@@ -1,72 +1,113 @@
 .guidePopUp {
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 20px;
-    border-radius: 10px;
-    border: 2px solid white;
-    background-color: #18181b;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    min-height: 300px;
-    width: 700px;
-    max-width: 90vw;
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  border-radius: 10px;
+  border: 2px solid white;
+  background-color: #18181b;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-height: 300px;
+  width: 700px;
+  max-width: 90vw;
 }
 
 .guidePopUp.settingsType {
-    min-height: 200px;
-    width: 500px;
-
+  min-height: 200px;
+  width: 500px;
 }
 
-.guidePopUp>button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
+.guidePopUp > button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
 }
 
-.guidePopUp>p {
-    margin-top: 20px;
-    font-weight: 300;
+.guidePopUp > p {
+  margin-top: 20px;
+  font-weight: 300;
 }
 
-.guidePopUp>.addOpenAIKey {
-    display: flex;
-    margin-top: 15px;
+.guidePopUp > .addOpenAIKey {
+  display: flex;
+  margin-top: 15px;
 }
 
-.guidePopUp>.addOpenAIKey>input {
-    width: 300px;
-    padding: 5px;
-    border-radius: 5px 0px 0px 5px;
-    border: none;
-    background-color: #fff;
-    color: #18181b;
-    font-size: 14px;
-    font-weight: 300;
+.guidePopUp > .addOpenAIKey > input {
+  width: 300px;
+  padding: 5px;
+  border-radius: 5px 0px 0px 5px;
+  border: none;
+  background-color: #fff;
+  color: #18181b;
+  font-size: 14px;
+  font-weight: 300;
 }
 
-.guidePopUp>.addOpenAIKey>input:focus {
-    outline: none;
+.guidePopUp > .addOpenAIKey > input:focus {
+  outline: none;
 }
 
-.guidePopUp>.addOpenAIKey>button {
-    padding: 5px;
-    border-radius: 0px 5px 5px 0px;
-    border: none;
-    background-color: #e8e8e8;
-    color: #18181b;
-    width: 80px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 1s;
+.guidePopUp > .addOpenAIKey > button {
+  padding: 5px;
+  border-radius: 0px 5px 5px 0px;
+  border: none;
+  background-color: #e8e8e8;
+  color: #18181b;
+  width: 80px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 1s;
+}
+
+input[type="checkbox"] {
+  height: 0;
+  width: 0;
+  visibility: hidden;
+}
+
+.setting-label {
+  cursor: pointer;
+  text-indent: -9999px;
+  width: 200px;
+  height: 100px;
+  background: grey;
+  display: block;
+  border-radius: 100px;
+  position: relative;
+}
+
+.setting-label:after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 90px;
+  height: 90px;
+  background: #fff;
+  border-radius: 90px;
+  transition: 0.3s;
+}
+
+input:checked + .setting-label {
+  background: #bada55;
+}
+
+input:checked + .setting-label:after {
+  left: calc(100% - 5px);
+  transform: translateX(-100%);
+}
+
+.setting-label:active:after {
+  width: 130px;
 }
