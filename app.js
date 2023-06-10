@@ -6,12 +6,14 @@ const app = express();
 const bodyParser = require("body-parser");
 const { User } = require("./User");
 const FormData = require("form-data");
+const fetch = require("node-fetch");
+
 var SuccesfulPostsCount = 0; // counts how many blog posts were succesfully posted
 
-let fetch;
-import("node-fetch").then((nodeFetch) => {
-  fetch = nodeFetch.default || nodeFetch;
-});
+// let fetch;
+// import("node-fetch").then((nodeFetch) => {
+//   fetch = nodeFetch.default || nodeFetch;
+// });
 
 //require dotenv
 if (process.env.NODE_ENV !== "production") {
@@ -40,8 +42,6 @@ app.get("/data", (req, res) => {
 
 // get full WP API token using temporary code
 app.post("/wordpress", async (req, res) => {
-  console.log("we have been hit here");
-  console.log(req.body);
   const { code } = req.body;
   console.log("code", code);
   var formdata = new FormData();
@@ -50,7 +50,6 @@ app.post("/wordpress", async (req, res) => {
   formdata.append("client_secret", process.env.WORDPRESS_CLIENT_SECRET);
   formdata.append("code", code);
   formdata.append("grant_type", "authorization_code");
-  console.log(formdata);
   var requestOptions = {
     method: "POST",
     body: formdata,
@@ -59,7 +58,6 @@ app.post("/wordpress", async (req, res) => {
   fetch("https://public-api.wordpress.com/oauth2/token", requestOptions)
     .then((response) => response.text())
     .then((result) => {
-      console.log(result);
       res.send(result);
     })
     .catch((error) => {
