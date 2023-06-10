@@ -62,30 +62,27 @@ class User {
           if (tooManyErrors) {
             break;
           }
-          continue; // do not post the error to the blog
         } else {
-          this.sendData(post);
-        }
-
-        // Posting the blog post
-        var result;
-        if (this.variation === "blogger") {
-          result = await this.postToBlogger(post, title);
-        } else {
-          result = await this.postToWordpress(post, title);
-        }
-        console.log(`Done posting: ${result}`);
-        if (
-          result === "Error posting to blogger" ||
-          result === "Error posting to wordpress"
-        ) {
-          errorCount++;
-          const tooManyErrors = this.handleError(post, errorCount);
-          if (tooManyErrors) {
-            break;
+          // Posting the blog post
+          var result;
+          if (this.variation === "blogger") {
+            result = await this.postToBlogger(post, title);
+          } else {
+            result = await this.postToWordpress(post, title);
           }
-        } else {
-          this.sendData(result);
+          console.log(`Done posting: ${result}`);
+          if (
+            result === "Error posting to blogger" ||
+            result === "Error posting to wordpress"
+          ) {
+            errorCount++;
+            const tooManyErrors = this.handleError(post, errorCount);
+            if (tooManyErrors) {
+              break;
+            }
+          } else {
+            this.sendData(result);
+          }
         }
       }
       this.sendData({ type: "ending", content: "Process Complete" });
@@ -174,7 +171,7 @@ class User {
         }),
       }
     );
-    if (response.status !== 200) {
+    if (!response.ok) {
       return "Error posting to wordpress";
     } else {
       const result = await response.json();
@@ -207,11 +204,11 @@ class User {
         }),
       }
     );
-    if (response.status !== 200) {
+    if (!response.ok) {
       return "Error posting to blogger";
     } else {
       const result = await response.json();
-      console.log(result);
+      console.log(result.url);
       return {
         title: title,
         content: content,
