@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { setPopUpMessage } from "../../../store";
+import { setPopUpMessage, setVersion } from "../../../store";
 import { useDispatch, useSelector } from "react-redux";
 
 const Settings = ({ close }) => {
@@ -38,13 +38,41 @@ const Settings = ({ close }) => {
         />
         <button onClick={addOpenAIKeyToLocalStorage}>Save</button>
       </div>
-      <input type="checkbox" id="switch" />
-      <label for="switch" className="setting-label">
-        Toggle
-      </label>
-      <div className="addOpenAIKe">
-        <p>Use Wordpress</p>
+      <div className="toggleContent">
+        <div className="toggleContentRow">
+          <p>Use Wordpress</p>
+          <div>
+            <input
+              type="checkbox"
+              id="switch"
+              checked={version === "wordpress"}
+              onChange={() => {
+                dispatch(setVersion("wordpress"));
+              }}
+            />
+            <label for="switch" className="setting-label">
+              Toggle
+            </label>
+          </div>
+        </div>
+        <div className="toggleContentRow">
+          <p>Use Blogger</p>
+          <div>
+            <input
+              type="checkbox"
+              id="switch"
+              checked={version !== "wordpress"}
+              onChange={() => {
+                dispatch(setVersion("blogger"));
+              }}
+            />
+            <label for="switch" className="setting-label">
+              Toggle
+            </label>
+          </div>
+        </div>
       </div>
+      <div className="addOpenAIKe"></div>
       <button onClick={close}>x</button>
     </div>
   );
