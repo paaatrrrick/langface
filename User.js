@@ -59,7 +59,7 @@ class User {
         if (post === "Formatting error") {
           errorCount++;
           const tooManyErrors = this.handleError(post, errorCount);
-          if (tooManyErrors){
+          if (tooManyErrors) {
             break;
           }
           continue; // do not post the error to the blog
@@ -81,7 +81,7 @@ class User {
         ) {
           errorCount++;
           const tooManyErrors = this.handleError(post, errorCount);
-          if (tooManyErrors){
+          if (tooManyErrors) {
             break;
           }
         } else {
@@ -94,7 +94,6 @@ class User {
   };
 
   handleError = async (err, errorCount) => {
-    console.log(err);
     this.sendData({ type: "error", error: err });
     if (errorCount > 5) {
       this.sendData({
@@ -124,7 +123,6 @@ class User {
     var titles = null;
     try {
       const response = await this.model.call([new HumanChatMessage(input)]);
-      console.log(response);
       titles = response.text.split("\n");
     } catch (e) {
       console.log("we had an error");
@@ -150,7 +148,6 @@ class User {
     var htmlContent = null;
     try {
       const response = await this.model.call(messages);
-      console.log(response);
       htmlContent = response.text;
     } catch (e) {
       return "Formatting error";
@@ -178,7 +175,6 @@ class User {
       }
     );
     if (response.status !== 200) {
-      console.log(response);
       return "Error posting to wordpress";
     } else {
       const result = await response.json();
@@ -212,7 +208,6 @@ class User {
       }
     );
     if (response.status !== 200) {
-      console.log(response);
       return "Error posting to blogger";
     } else {
       const result = await response.json();

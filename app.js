@@ -11,15 +11,8 @@ const bodyParser = require("body-parser");
 const { User } = require("./User");
 const FormData = require("form-data");
 const fetch = require("node-fetch");
-console.log(process.env);
-console.log(process.env.WORDPRESS_CLIENT_ID);
 
 var SuccesfulPostsCount = 0; // counts how many blog posts were succesfully posted
-
-// let fetch;
-// import("node-fetch").then((nodeFetch) => {
-//   fetch = nodeFetch.default || nodeFetch;
-// });
 
 app.use(bodyParser.json(), bodyParser.urlencoded({ extended: false }));
 app.use(cors());
