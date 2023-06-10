@@ -2,15 +2,10 @@ node_modules/
 package-lock.json
 .env
 
-/client/node_modules
+/client/build
 /client/.pnp
 /client/.pnp.js
 
-# testing
-/client/coverage
-
-# production
-/client/build
 
 # misc
 /client/.DS_Store

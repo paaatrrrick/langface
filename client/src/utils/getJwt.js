@@ -45,30 +45,24 @@ const getJwt = async (setToken, setError) => {
 
 export default getJwt;
 
-const wordpressGetJwt = async (setToken, setError, fetchWordpress) => {
-  const state = Math.random().toString(36).substring(7); // This is a simple example, consider using a more robust method
-  localStorage.setItem("oauth2_state", state); // Storing in localStorage as an example, consider more secure options in a production app
+const wordpressGetJwt = async (setError, fetchWordpress) => {
   const client_id = constants.WP_CLIENT_ID;
   const redirect_url = constants.WP_REDIRECT_URI;
   const url = `https://public-api.wordpress.com/oauth2/authorize?client_id=${client_id}&redirect_uri=${redirect_url}&response_type=code`;
   const newWin = window.open(url, "_blank");
   const tokenCheckInterval = setInterval(() => {
     try {
+      //Don't get rid of this
       const url = newWin.location.href;
       try {
         if (newWin?.location?.href && newWin.location.href.includes("code")) {
-          console.log("4");
-          console.log("we are in");
           clearInterval(tokenCheckInterval);
           const urlObj = new URL(newWin.location.href);
           const params = new URLSearchParams(urlObj.search);
           const code = params.get("code");
           newWin.close();
-          console.log(code);
-          setToken(code);
-          console.log("about to fecth");
           fetchWordpress(code);
-          return code;
+          return;
         }
       } catch (e) {
         setError("Failed to login with Wordpress. Please try again.");

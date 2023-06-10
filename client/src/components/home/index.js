@@ -38,33 +38,28 @@ const Home = () => {
   };
 
   const fetchWordpress = async (code) => {
-    console.log("at fetch wordpress");
-    console.log(code);
-    let url = "https://public-api.wordpress.com/oauth2/token";
-    let params = new URLSearchParams({
-      client_id: constants.WP_CLIENT_ID,
-      redirect_uri: constants.WP_REDIRECT_URI,
-      client_secret:
-        "nG82OJmS7eyWXEjk590BpuMtrpE8z0gHsjA2Uoc75s9t1Io8JchkhVVZ2oOj5Y6s",
-      code,
-      grant_type: "authorization_code",
-    });
-    console.log(params);
-    fetch(url, {
+    const res = await fetch(`${constants.url}/wordpress`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/json",
       },
-      body: params,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        let access_key = data.access_token;
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+      body: JSON.stringify({ code }),
+    });
+    if (res.status !== 200) {
+      dispatch(
+        setPopUpMessage({
+          message: "Error logging in to wordpress",
+          type: "error",
+          timeout: 3000,
+        })
+      );
+      return;
+    }
+    const data = await res.json();
+    console.log(data);
+    const accessToken = data.access_token;
+    setJwt(data.access_token);
+    setId(data.blog_id);
   };
 
   const handleJWT = async () => {
@@ -74,8 +69,7 @@ const Home = () => {
       );
     };
     if (version === "wordpress") {
-      console.log("asdf");
-      wordpressGetJwt(setJwt, errorDispact, fetchWordpress);
+      wordpressGetJwt(errorDispact, fetchWordpress);
     } else {
       getJwt(setJwt, errorDispact);
     }

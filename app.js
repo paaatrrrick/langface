@@ -33,15 +33,14 @@ app.use(cors());
 
 //create a userClass
 class User {
-  constructor(jwt, blogID, content, loops, openAIKey, sendData) {
-    console.log("creating user");
-    console.log(openAIKey);
+  constructor(jwt, blogID, content, loops, openAIKey, variation, sendData) {
     this.jwt = jwt;
     this.blogID = blogID;
     this.content = content;
     this.loops = loops;
     this.sendData = sendData;
     this.openAIKey = openAIKey ? openAIKey : process.env.OPENAI_API_KEY;
+    this.variation = variation;
     console.log(this.openAIKey);
     this.model = new ChatOpenAI({
       modelName: "gpt-3.5-turbo",
@@ -49,7 +48,6 @@ class User {
       maxTokens: 3000,
       openAIApiKey: this.openAIKey,
     });
-    // this.model = new OpenAI({ temperature: 0.2, openAIApiKey: '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' });
   }
   run = async () => {
     if (TESTING) {
@@ -106,7 +104,8 @@ class User {
         const result = await this.writePost(title);
         if (
           result === "Formatting error" ||
-          result === "Error posting to blogger"
+          result === "Error posting to blogger" ||
+          result === "Error posting to wordpress"
         ) {
           console.log("error");
           errorCount++;
@@ -143,17 +142,49 @@ class User {
       console.log(response);
       htmlContent = response.text;
     } catch (e) {
-      console.log("second error point");
-      console.log(e);
       return "Formatting error";
     }
     console.log(htmlContent);
     if (!htmlContent) {
-      console.log("no html content");
       return "Formatting error";
     }
-    return await this.postToBlogger(htmlContent, title);
+    if (this.variation === "blogger") {
+      return await this.postToBlogger(htmlContent, title);
+    } else {
+      return await this.postToWordpress(htmlContent, title);
+    }
   };
+
+  postToWordpress = async (content, title) => {
+    console.log("at post to wordpres");
+    const response = await fetch(
+      `https://public-api.wordpress.com/rest/v1/sites/${this.blogID}/posts/new`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.jwt}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: content,
+        }),
+      }
+    );
+    if (response.status !== 200) {
+      console.log(response);
+      return "Error posting to wordpress";
+    } else {
+      const result = await response.json();
+      console.log(result);
+      return {
+        title: title,
+        content: content,
+        url: result.URL,
+        type: "success",
+      };
+    }
+  };
+
   postToBlogger = async (content, title) => {
     const response = await fetch(
       `https://www.googleapis.com/blogger/v3/blogs/${this.blogID}/posts/`,
@@ -216,40 +247,32 @@ app.get("/data", (req, res) => {
   res.send("data");
 });
 
-app.get("/wordpress", (req, res) => {
-  const CLIENT_ID = process.env.CLIENT_ID;
-  const CLIENT_SECRET = process.env.CLIENT_SECRET;
-  const REDIRECT_URI = process.env.REDIRECT_URI;
-  const authCode = req.query.code;
-  const options = {
-    url: "https://public-api.wordpress.com/oauth2/token",
+app;
+
+app.post("/wordpress", async (req, res) => {
+  const { code } = req.body;
+  console.log("code", code);
+  var formdata = new FormData();
+  formdata.append("client_id", process.env.WORDPRESS_CLIENT_ID);
+  formdata.append("redirect_uri", "http://localhost:3000");
+  formdata.append("client_secret", process.env.WORDPRESS_CLIENT_SECRET);
+  formdata.append("code", code);
+  formdata.append("grant_type", "authorization_code");
+  var requestOptions = {
     method: "POST",
-    json: true,
-    body: {
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
-      grant_type: "authorization_code",
-      code: authCode,
-      redirect_uri: REDIRECT_URI,
-    },
+    body: formdata,
+    redirect: "follow",
   };
-
-  request(options, (error, response, body) => {
-    if (error) {
-      console.error("Error:", error);
-      res.status(500).send("An error occurred");
-      return;
-    }
-
-    if (body.access_token) {
-      // In a real app, you would probably do something with the access token here
-      // and then redirect the user to a new page
-      res.send("Access Token: " + body.access_token);
-    } else {
-      console.log("Failed to get access token:", body);
-      res.status(500).send("Failed to get access token");
-    }
-  });
+  fetch("https://public-api.wordpress.com/oauth2/token", requestOptions)
+    .then((response) => response.text())
+    .then((result) => {
+      console.log(result);
+      res.send(result);
+    })
+    .catch((error) => {
+      console.log("error", error);
+      res.send(error).status(500);
+    });
 });
 
 io.on("connection", (socket) => {
@@ -269,12 +292,14 @@ io.on("connection", (socket) => {
       });
       return;
     }
+    console.log(newData);
     const user = new User(
       newData.jwt,
       newData.id,
       newData.content,
       newData.loops,
       newData.openAIKey,
+      newData.variation,
       sendData
     );
     data[id] = user;
