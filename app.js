@@ -5,6 +5,7 @@ const cors = require("cors");
 const app = express();
 const bodyParser = require("body-parser");
 const { User } = require("./User");
+const FormData = require("form-data");
 var SuccesfulPostsCount = 0; // counts how many blog posts were succesfully posted
 
 let fetch;
@@ -49,6 +50,7 @@ app.post("/wordpress", async (req, res) => {
   formdata.append("client_secret", process.env.WORDPRESS_CLIENT_SECRET);
   formdata.append("code", code);
   formdata.append("grant_type", "authorization_code");
+  console.log(formdata);
   var requestOptions = {
     method: "POST",
     body: formdata,
@@ -66,7 +68,7 @@ app.post("/wordpress", async (req, res) => {
     });
 });
 
-// establish socket connection 
+// establish socket connection
 io.on("connection", (socket) => {
   console.log("New client connected");
   socket.on("addData", (newData) => {
