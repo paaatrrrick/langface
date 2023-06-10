@@ -48,7 +48,7 @@ class User {
 
             // Writing and posting blog posts for each title
             for (let i = 0; i < this.loops; i++){
-                
+
                 // Writing a blog post
                 const title = titles[i];
                 const post = await this.writePost(title);
@@ -56,6 +56,7 @@ class User {
                 if (post === "Formatting error"){
                     errorCount++;
                     this.handleError(post, errorCount);
+                    continue; // do not post the error to the blog
                 } else {
                     this.sendData(post);
                 }
