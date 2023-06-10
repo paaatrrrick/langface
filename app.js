@@ -23,7 +23,11 @@ app.use(cors());
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: ["http://localhost:3000", "https://langface.netlify.app"],
+    origin: [
+      "http://localhost:3000",
+      "https://langface.netlify.app",
+      "https://langface.ai",
+    ],
     methods: ["GET", "POST"],
   },
 });
@@ -39,7 +43,7 @@ app.post("/wordpress", async (req, res) => {
   console.log("code", code);
   var formdata = new FormData();
   formdata.append("client_id", process.env.WORDPRESS_CLIENT_ID);
-  formdata.append("redirect_uri", "http://localhost:3000");
+  formdata.append("redirect_uri", process.env.WORDPRESS_REDIRECT_URI);
   formdata.append("client_secret", process.env.WORDPRESS_CLIENT_SECRET);
   formdata.append("code", code);
   formdata.append("grant_type", "authorization_code");

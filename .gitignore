@@ -13,6 +13,8 @@ package-lock.json
 /client/.env.development.local
 /client/.env.test.local
 /client/.env.production.local
+/client/package-lock.json
+/client/node_modules
 
 /client/npm-debug.log*
 /client/yarn-debug.log*

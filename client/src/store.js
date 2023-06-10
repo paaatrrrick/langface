@@ -17,6 +17,7 @@ const slice = createSlice({
       state.popUpMessage = null;
     },
     setVersion: (state, action) => {
+      localStorage.setItem("bloggerGPT-version", action.payload);
       state.version = action.payload;
     },
   },
@@ -25,4 +26,4 @@ const slice = createSlice({
 // Now we configure the store
 const store = configureStore({ reducer: { main: slice.reducer } });
 export default store;
-export const { setPopUpMessage, clearPopUpMessage } = slice.actions;
+export const { setPopUpMessage, clearPopUpMessage, setVersion } = slice.actions;

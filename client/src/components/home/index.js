@@ -38,6 +38,8 @@ const Home = () => {
   };
 
   const fetchWordpress = async (code) => {
+    console.log("at fetching wordpresss");
+    console.log(code);
     const res = await fetch(`${constants.url}/wordpress`, {
       method: "POST",
       headers: {
@@ -56,8 +58,6 @@ const Home = () => {
       return;
     }
     const data = await res.json();
-    console.log(data);
-    const accessToken = data.access_token;
     setJwt(data.access_token);
     setId(data.blog_id);
   };
@@ -114,7 +114,7 @@ const Home = () => {
       <div className="container">
         <div className="title">
           <h3>bloggerGPT</h3>
-          <p>Post hundreds of blog posts with just a click of a button</p>
+          <p>Post hundreds of Wordpress blogs with a click of a button</p>
         </div>
         <div className="data">
           {!hasStarted && data.length === 0 && (
@@ -178,12 +178,15 @@ const Home = () => {
               onChange={(e) => setLoops(e.target.value)}
               placeholder="How many posts do you want"
             />
-            <input
-              type="text"
-              value={id}
-              onChange={(e) => setId(e.target.value)}
-              placeholder="Enter your blogger.com ID"
-            />
+
+            {version === "blogger" && (
+              <input
+                type="text"
+                value={id}
+                onChange={(e) => setId(e.target.value)}
+                placeholder="Enter your blogger.com ID"
+              />
+            )}
             <button
               onClick={handleJWT}
               className={`google ${jwt !== "" && "googleGood"}`}
