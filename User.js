@@ -52,7 +52,10 @@ class User {
         console.log(`Done writing post for ${title}... ${post}`);
         if (post === "Formatting error") {
           errorCount++;
-          this.handleError(post, errorCount);
+          const tooManyErrors = this.handleError(post, errorCount);
+          if (tooManyErrors){
+            break;
+          }
           continue; // do not post the error to the blog
         } else {
           this.sendData(post);
@@ -71,7 +74,10 @@ class User {
           result === "Error posting to wordpress"
         ) {
           errorCount++;
-          this.handleError(result, errorCount);
+          const tooManyErrors = this.handleError(post, errorCount);
+          if (tooManyErrors){
+            break;
+          }
         } else {
           this.sendData(result);
         }
@@ -89,8 +95,9 @@ class User {
         type: "ending",
         content: "To many errors, ending the program",
       });
+      return true;
     }
-    return errorCount;
+    return false;
   };
 
   writeTitles = async () => {
