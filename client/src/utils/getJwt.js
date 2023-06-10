@@ -47,7 +47,8 @@ export default getJwt;
 
 const wordpressGetJwt = async (setError, fetchWordpress) => {
   const client_id = constants.WP_CLIENT_ID;
-  const redirect_url = constants.WP_REDIRECT_URI;
+  const redirect_url = constants.localUrl;
+  console.log(redirect_url);
   const url = `https://public-api.wordpress.com/oauth2/authorize?client_id=${client_id}&redirect_uri=${redirect_url}&response_type=code`;
   const newWin = window.open(url, "_blank");
   const tokenCheckInterval = setInterval(() => {

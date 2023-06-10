@@ -242,6 +242,8 @@ app.get("/data", (req, res) => {
 });
 
 app.post("/wordpress", async (req, res) => {
+  console.log("we have been hit here");
+  console.log(req.body);
   const { code } = req.body;
   console.log("code", code);
   var formdata = new FormData();
