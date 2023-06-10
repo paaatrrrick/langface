@@ -67,35 +67,31 @@ class User {
           });
           return;
         }
-        var i = 0;
         console.log(titles);
-        for (let title of titles) {
-          i++;
-          if (i > this.loops) {
-            break;
-          }
-          console.log("looop");
-          console.log(title);
-          var errorCount = 0;
-          const result = await this.writePost(title);
-          if (
-            result === "Formatting error" ||
-            result === "Error posting to blogger" ||
-            result === "Error posting to wordpress"
-          ) {
-            console.log("error");
-            errorCount++;
-            this.sendData({ type: "error", error: result });
-            if (errorCount > 5) {
-              this.sendData({
-                type: "ending",
-                content: "To many errors, ending the program",
-              });
-              break;
+        for (let i = 0; i < this.loops; i++){
+            const title = titles[i];
+            console.log("looop");
+            console.log(title);
+            var errorCount = 0;
+            const result = await this.writePost(title);
+            if (
+                result === "Formatting error" ||
+                result === "Error posting to blogger" ||
+                result === "Error posting to wordpress"
+            ) {
+                console.log("error");
+                errorCount++;
+                this.sendData({ type: "error", error: result });
+                if (errorCount > 5) {
+                this.sendData({
+                    type: "ending",
+                    content: "To many errors, ending the program",
+                });
+                break;
+                }
+            } else {
+                this.sendData(result);
             }
-          } else {
-            this.sendData(result);
-          }
         }
         this.sendData({ type: "ending", content: "Process Complete" });
         return;
