@@ -3,6 +3,7 @@ const { CustomListOutputParser } = require("langchain/output_parsers");
 const { PromptTemplate } = require("langchain/prompts");
 const { HumanChatMessage, SystemChatMessage } = require("langchain/schema");
 const TESTING = process.env.TESTING === "true";
+const fetch = require("node-fetch");
 
 class User {
   constructor(jwt, blogID, content, loops, openAIKey, variation, sendData) {
