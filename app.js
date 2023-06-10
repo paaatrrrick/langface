@@ -228,26 +228,10 @@ const io = socketIo(server, {
   },
 });
 
-let data = {};
-
-//create a route that takes in a jwt, blogID, content, and loops and then runs the user class
-app.post("/run", (req, res) => {
-  console.log(req.body);
-  const { jwt, blogID, content, loops } = req.body;
-  const sendData = async (data) => {
-    io.emit("updateData", data); // sends data to all connected sockets
-  };
-  const user = new User(jwt, blogID, content, loops, sendData);
-  data[blogID] = user;
-  user.run();
-  res.send("running");
-});
-
+// test to data
 app.get("/data", (req, res) => {
   res.send("data");
 });
-
-app;
 
 app.post("/wordpress", async (req, res) => {
   const { code } = req.body;
@@ -277,9 +261,7 @@ app.post("/wordpress", async (req, res) => {
 
 io.on("connection", (socket) => {
   console.log("New client connected");
-
   socket.on("addData", (newData) => {
-    const { id } = newData;
     const sendData = async (data123) => {
       counter += 1;
       console.log(counter);
@@ -302,11 +284,7 @@ io.on("connection", (socket) => {
       newData.variation,
       sendData
     );
-    data[id] = user;
-
     user.run();
-    // if (!data[id]) data[id] = [];
-    // data[id].push(newData);
   });
 
   socket.on("disconnect", () => {
