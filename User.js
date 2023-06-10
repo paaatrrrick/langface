@@ -1,3 +1,7 @@
+//require dotenv
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
 const { ChatOpenAI } = require("langchain/chat_models/openai");
 const { CustomListOutputParser } = require("langchain/output_parsers");
 const { PromptTemplate } = require("langchain/prompts");
@@ -24,6 +28,8 @@ class User {
   }
 
   run = async () => {
+    console.log("at run");
+    console.log(TESTING);
     if (TESTING) {
       for (let i = 0; i < 5; i++) {
         console.log("about to send");
@@ -40,7 +46,7 @@ class User {
       console.log("running");
 
       // Writing all the titles
-      const titles = this.writeTitles();
+      const titles = await this.writeTitles();
       console.log(`Done writing titles... ${titles}`);
       var errorCount = 0;
 

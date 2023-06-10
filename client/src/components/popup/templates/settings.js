@@ -23,6 +23,20 @@ const Settings = ({ close }) => {
       })
     );
   };
+  const toggleCliked = (e, toggle) => {
+    if (
+      (toggle === "wordpress" && version === "wordpress") ||
+      (toggle === "blogger" && version === "wordpress")
+    ) {
+      dispatch(setVersion("blogger"));
+    }
+    if (
+      (toggle === "blogger" && version === "blogger") ||
+      (toggle === "wordpress" && version === "blogger")
+    ) {
+      dispatch(setVersion("wordpress"));
+    }
+  };
   return (
     <div className="guidePopUp settingsType">
       <h4>Settings</h4>
@@ -44,13 +58,13 @@ const Settings = ({ close }) => {
           <div>
             <input
               type="checkbox"
-              id="switch"
+              id="switchWP"
               checked={version === "wordpress"}
-              onChange={() => {
-                dispatch(setVersion("wordpress"));
+              onChange={(e) => {
+                toggleCliked(e, "wordpress");
               }}
             />
-            <label for="switch" className="setting-label">
+            <label htmlFor="switchWP" className="setting-label">
               Toggle
             </label>
           </div>
@@ -60,13 +74,13 @@ const Settings = ({ close }) => {
           <div>
             <input
               type="checkbox"
-              id="switch"
-              checked={version !== "wordpress"}
-              onChange={() => {
-                dispatch(setVersion("blogger"));
+              id="switchBG"
+              checked={version === "blogger"}
+              onChange={(e) => {
+                toggleCliked(e, "blogger");
               }}
             />
-            <label for="switch" className="setting-label">
+            <label htmlFor="switchBG" className="setting-label">
               Toggle
             </label>
           </div>
