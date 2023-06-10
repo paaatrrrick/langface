@@ -39,7 +39,7 @@ class User {
       console.log("running");
 
       // Writing all the titles
-      const titles = writeTitles();
+      const titles = this.writeTitles();
       console.log(`Done writing titles... ${titles}`);
       var errorCount = 0;
 
