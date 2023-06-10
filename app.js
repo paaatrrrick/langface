@@ -226,7 +226,7 @@ const io = socketIo(server, {
     origin: [
       "http://localhost:3000",
       "https://langface.netlify.app",
-      "https://langface.ai/",
+      "https://langface.ai",
     ],
     methods: ["GET", "POST"],
   },

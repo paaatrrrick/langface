@@ -38,6 +38,8 @@ const Home = () => {
   };
 
   const fetchWordpress = async (code) => {
+    console.log("at fetching wordpresss");
+    console.log(code);
     const res = await fetch(`${constants.url}/wordpress`, {
       method: "POST",
       headers: {
