@@ -29,7 +29,11 @@ import("node-fetch").then((nodeFetch) => {
 const TESTING = process.env.TESTING === "true";
 var counter = 0;
 app.use(bodyParser.json(), bodyParser.urlencoded({ extended: false }));
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 //create a userClass
 class User {
