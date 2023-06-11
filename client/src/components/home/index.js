@@ -113,7 +113,7 @@ const Home = () => {
       )}
       <div className="container">
         <div className="title">
-          <h3>bloggerGPT</h3>
+          <h3>BloggerGPT</h3>
           <p>Post hundreds of Wordpress blogs with a click of a button</p>
         </div>
         <div className="data">

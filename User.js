@@ -91,7 +91,7 @@ class User {
     if (errorCount > 5) {
       this.sendData({
         type: "ending",
-        content: "To many errors, ending the program",
+        content: "Too many errors, ending the program",
       });
       return true;
     }
