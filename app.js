@@ -37,7 +37,6 @@ app.get("/data", (req, res) => {
 // get full WP API token using temporary code
 app.post("/wordpress", async (req, res) => {
   const { code } = req.body;
-  console.log("code", code);
   var formdata = new FormData();
   formdata.append("client_id", process.env.WORDPRESS_CLIENT_ID);
   formdata.append("redirect_uri", process.env.WORDPRESS_REDIRECT_URI);
@@ -76,14 +75,13 @@ io.on("connection", (socket) => {
       });
       return;
     }
-    console.log(newData);
     const user = new User(
       newData.jwt,
       newData.id,
       newData.content,
       newData.loops,
       newData.openAIKey,
-      newData.variation,
+      newData.version,
       sendData
     );
     user.run();

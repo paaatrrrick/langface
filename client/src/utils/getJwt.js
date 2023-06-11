@@ -3,11 +3,8 @@ import constants from "../constants";
 const getJwt = async (setToken, setError) => {
   var oauth2Endpoint = "https://accounts.google.com/o/oauth2/v2/auth";
   var params = {
-    // 'client_id': '406198750695-i6p3k9r380io0tlre38j8jsvv2o4vmk7.apps.googleusercontent.com',
     client_id:
       "704178374790-ifgbedjlnfm7cpgjrdju7n1psbmm88j8.apps.googleusercontent.com",
-    // 'client_id': '654856777688-mjq8db4r06oiseq0fffu7co3cdmbheq3.apps.googleusercontent.com',
-    // 'client_id': '17461614817-5t83skk10v7oodivj19g8k6numghbbo0.apps.googleusercontent.com',
     redirect_uri: constants.localUrl,
     response_type: "token",
     scope: "https://www.googleapis.com/auth/blogger",
@@ -23,23 +20,26 @@ const getJwt = async (setToken, setError) => {
   const newWin = window.open(url, "_blank");
   var tokenCheckInterval = setInterval(() => {
     try {
-      if (newWin.location.href.includes("access_token")) {
-        clearInterval(tokenCheckInterval);
-        const newWinURI = newWin.location.href;
-        const token = newWinURI.substring(
-          newWinURI.indexOf("access_token=") + 13,
-          newWinURI.indexOf("&token_type")
-        );
-        newWin.close();
-        console.log(token);
-        setToken(token);
-        return token;
+      const url = newWin.location.href;
+      try {
+        if (newWin.location.href.includes("access_token")) {
+          clearInterval(tokenCheckInterval);
+          const newWinURI = newWin.location.href;
+          const token = newWinURI.substring(
+            newWinURI.indexOf("access_token=") + 13,
+            newWinURI.indexOf("&token_type")
+          );
+          newWin.close();
+          console.log(token);
+          setToken(token);
+          return;
+        }
+      } catch (e) {
+        console.log("we got an error");
+        setError("Failed to login with Google. Please try again.");
+        return null;
       }
-    } catch (e) {
-      console.log("we got an error");
-      setError("Failed to login with Google. Please try again.");
-      return null;
-    }
+    } catch (e) {}
   }, 50);
 };
 

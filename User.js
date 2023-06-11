@@ -10,15 +10,14 @@ const TESTING = process.env.TESTING === "true";
 const fetch = require("node-fetch");
 
 class User {
-  constructor(jwt, blogID, content, loops, openAIKey, variation, sendData) {
+  constructor(jwt, blogID, content, loops, openAIKey, version, sendData) {
     this.jwt = jwt;
     this.blogID = blogID;
     this.content = content;
     this.loops = loops;
     this.sendData = sendData;
     this.openAIKey = openAIKey ? openAIKey : process.env.OPENAI_API_KEY;
-    this.variation = variation;
-    console.log(this.openAIKey);
+    this.version = version;
     this.model = new ChatOpenAI({
       modelName: "gpt-3.5-turbo",
       temperature: 0.1,
@@ -28,8 +27,6 @@ class User {
   }
 
   run = async () => {
-    console.log("at run");
-    console.log(TESTING);
     if (TESTING) {
       for (let i = 0; i < 5; i++) {
         console.log("about to send");
@@ -43,8 +40,6 @@ class User {
       }
       this.sendData({ type: "ending", content: "Process Complete" });
     } else {
-      console.log("running");
-
       // Writing all the titles
       const titles = await this.writeTitles();
       console.log(`Done writing titles... ${titles}`);
@@ -65,7 +60,8 @@ class User {
         } else {
           // Posting the blog post
           var result;
-          if (this.variation === "blogger") {
+          if (this.version === "blogger") {
+            console.log("at bloger");
             result = await this.postToBlogger(post, title);
           } else {
             result = await this.postToWordpress(post, title);
@@ -123,7 +119,6 @@ class User {
       titles = response.text.split("\n");
     } catch (e) {
       console.log("we had an error");
-      console.log(e);
       this.sendData({
         type: "ending",
         content: "To many errors, ending the program",
@@ -134,7 +129,6 @@ class User {
   };
 
   writePost = async (title) => {
-    console.log(`Writing post for ${title}`);
     const input = `Write a blog post in HTML given the title: ${title}. Here is a description and guidance about the blog as a whole:\n It's a blog about ${this.content}\n\n\n. Formatting Instructions: Write only HTML. Start and end with a div, the content will be added inside the body tags. Give the blog structure with various html headers and lists as needed. DO NOT SAY THE TITLE. YOU SHOULD START WITH THE FIRST CONTENT SENTENCE, WHICH SHOULD BE A DIV, then a p tag, then the first sentence.`;
     const messages = [
       new SystemChatMessage(
@@ -149,7 +143,6 @@ class User {
     } catch (e) {
       return "Formatting error";
     }
-    console.log(htmlContent);
     if (!htmlContent) {
       return "Formatting error";
     }
@@ -157,7 +150,6 @@ class User {
   };
 
   postToWordpress = async (content, title) => {
-    console.log("at post to wordpres");
     const response = await fetch(
       `https://public-api.wordpress.com/rest/v1/sites/${this.blogID}/posts/new`,
       {
@@ -175,7 +167,6 @@ class User {
       return "Error posting to wordpress";
     } else {
       const result = await response.json();
-      console.log(result);
       return {
         title: title,
         content: content,
