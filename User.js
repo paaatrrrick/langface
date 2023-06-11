@@ -159,6 +159,7 @@ class User {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          title: title,
           content: content,
         }),
       }
