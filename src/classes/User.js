@@ -165,15 +165,8 @@ class User {
   };
 
   getWordpressImageURLs = async (images) => {
-    console.log("getting images");
-    return [
-      "https://historylover4.files.wordpress.com/2023/06/darth-vader-main_4560aff7-1.jpeg",
-      "https://historylover4.files.wordpress.com/2023/06/simple-cheese-isolated-cartoon_1308-124064.jpg",
-    ];
-    console.log("getting wordpress images");
-    console.log(images);
     const response = await fetch(
-      `https://public-api.wordpress.com/rest/v1/sites/${this.blogID}/posts/new`,
+      `https://public-api.wordpress.com/rest/v1.1/sites/${this.blogID}/media/new`,
       {
         method: "POST",
         headers: {
@@ -181,8 +174,6 @@ class User {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title: "title",
-          content: "content",
           media_urls: images,
         }),
       }
@@ -193,11 +184,10 @@ class User {
       throw new Error("Error getting image URLs");
     }
     const data = await response.json();
-    console.log(data);
-    const imageData = data?.attachments;
+    const imageData = data?.media;
     const imageUrls = [];
-    for (key in Object.keys(imageData)) {
-      imageUrls.push(imageData[key].URL);
+    for (let media of imageData) {
+      imageUrls.push(media.URL);
     }
     return imageUrls;
   };
