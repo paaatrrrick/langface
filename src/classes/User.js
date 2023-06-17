@@ -8,6 +8,7 @@ const { PromptTemplate } = require("langchain/prompts");
 const { HumanChatMessage, SystemChatMessage } = require("langchain/schema");
 const { dummyblog, dummyTitle } = require("../constants/dummyData");
 const FormData = require("form-data");
+const path = require("path");
 const fs = require("fs");
 const TESTING = process.env.TESTING === "true";
 const fetch = require("node-fetch");
@@ -216,30 +217,30 @@ class User {
     // for (let image of images) {
     //   formData.append("media[]", image, { filename: "image.png" });
     // }
-    const file = fs.createReadStream("../constants/test.png");
-    const formData = new FormData();
-    formData.append("media[]", file);
+    const file = fs.promises.readFile(path.resolve("src/constants/test.png"));
+    const fileName = "test.png";
+    // const formData = new FormData();
+    // formData.append("media", file);
+    // console.log(formData);
     const response = await fetch(
-      `https://public-api.wordpress.com/rest/v1.1/sites/${this.blogID}/media/new`,
+      `http://historylover4.wordpress.com/wp-json/wp/v2/media/`,
       {
         method: "POST",
-        body: formData,
+        body: file,
         headers: {
           Authorization: `Bearer ${this.jwt}`,
-          "Content-type": "multipart/form-data",
+          "Content-Disposition": `form-data; filename="${fileName}`,
         },
       }
     );
     if (!response.ok) {
       console.log("error");
-      const error = await response.json();
-      console.log(error);
+      console.log(response);
+      const data = await response.text();
       throw new Error("Error getting image URLs");
     }
-    console.log("we are back");
-    console.log(response);
-    console.log(response.data);
     const data = await response.json();
+    console.log(response);
     console.log("got the images back");
     console.log(data);
     const imageData = data?.media;
@@ -265,6 +266,7 @@ class User {
   };
 
   postToWordpress = async (content, title, images) => {
+    throw new Error("Error posting to wordpress");
     for (let i in images) {
       content = this.replaceStringInsideStringWithNewString(
         content,
