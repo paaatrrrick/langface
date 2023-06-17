@@ -7,6 +7,8 @@ const { CustomListOutputParser } = require("langchain/output_parsers");
 const { PromptTemplate } = require("langchain/prompts");
 const { HumanChatMessage, SystemChatMessage } = require("langchain/schema");
 const { dummyblog, dummyTitle } = require("../constants/dummyData");
+const FormData = require("form-data");
+const fs = require("fs");
 const TESTING = process.env.TESTING === "true";
 const fetch = require("node-fetch");
 
@@ -156,61 +158,90 @@ class User {
     return htmlContent;
   };
 
+  blobToDataUrl(buffer) {
+    // Convert blob to a Buffer if it's not already
+    // Get the image's mime type
+    const mimeType = "image/png"; // Replace this with the actual mime type, if known
+
+    // Convert the buffer to a base64 string
+    const base64 = buffer.toString("base64");
+
+    // Return the data URL
+    return `data:${mimeType};base64,${base64}`;
+  }
+
   getImages = async (title, post) => {
-    const engineId = 'stable-diffusion-v1-5';
-    const apiHost = process.env.API_HOST ?? 'https://api.stability.ai';
+    const engineId = "stable-diffusion-v1-5";
+    const apiHost = process.env.API_HOST ?? "https://api.stability.ai";
     const apiKey = process.env.STABILITY_API_KEY;
 
-    if (!apiKey) throw new Error('Missing Stability API key.');
-    
-    const response = await fetch(
-        `${apiHost}/v1/generation/${engineId}/text-to-image`,
-        {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-                Authorization: `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({
-                text_prompts: [
-                    {
-                        text: `Images for a blog post with the title ${title}`,
-                    },
-                ],
-                samples: 2,
-            }),
-        }
-        )
-    if (!response.ok) {
-        throw new Error(`Non-200 response: ${await response.text()}`)
-    }
-    
-    const responseJSON = await response.json();
-    console.log(responseJSON)
-    return responseJSON;
-};
+    let max = 1;
+    if (!apiKey) throw new Error("Missing Stability API key.");
+    const images = [];
+    // for (let i = 0; i < max; i++) {
+    //   const response = await fetch(
+    //     `${apiHost}/v1/generation/${engineId}/text-to-image`,
+    //     {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         Accept: "image/png",
+    //         Authorization: `Bearer ${apiKey}`,
+    //       },
+    //       body: JSON.stringify({
+    //         text_prompts: [
+    //           {
+    //             text: `Images for a blog post with the title ${title}`,
+    //           },
+    //         ],
+    //         samples: 1,
+    //       }),
+    //     }
+    //   );
+    //   if (!response.ok) {
+    //     throw new Error(`Non-200 response: ${await response.text()}`);
+    //   }
+    //   const image = await response.blob();
+    //   images.push(image);
+    // }
+    const imageUrls = await this.getWordpressImageURLs(images);
+    return imageUrls;
+  };
 
   getWordpressImageURLs = async (images) => {
+    console.log("getting wordpress image urls");
+    console.log(images);
+    // const formData = new FormData();
+    // console.log("getting images");
+    // for (let image of images) {
+    //   formData.append("media[]", image, { filename: "image.png" });
+    // }
+    const file = fs.createReadStream("../constants/test.png");
+    const formData = new FormData();
+    formData.append("media[]", file);
     const response = await fetch(
       `https://public-api.wordpress.com/rest/v1.1/sites/${this.blogID}/media/new`,
       {
         method: "POST",
+        body: formData,
         headers: {
           Authorization: `Bearer ${this.jwt}`,
-          "Content-Type": "application/json",
+          "Content-type": "multipart/form-data",
         },
-        body: JSON.stringify({
-          media_urls: images,
-        }),
       }
     );
     if (!response.ok) {
+      console.log("error");
       const error = await response.json();
       console.log(error);
       throw new Error("Error getting image URLs");
     }
+    console.log("we are back");
+    console.log(response);
+    console.log(response.data);
     const data = await response.json();
+    console.log("got the images back");
+    console.log(data);
     const imageData = data?.media;
     const imageUrls = [];
     for (let media of imageData) {
@@ -234,13 +265,11 @@ class User {
   };
 
   postToWordpress = async (content, title, images) => {
-    const wordpressImageURLS = await this.getWordpressImageURLs(images);
-    console.log(wordpressImageURLS);
     for (let i in images) {
       content = this.replaceStringInsideStringWithNewString(
         content,
         this.imageNames[i],
-        wordpressImageURLS[i]
+        images[i]
       );
     }
     const response = await fetch(

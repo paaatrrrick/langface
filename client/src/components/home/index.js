@@ -20,6 +20,7 @@ const Home = () => {
   const [data, setData] = useState([]);
   const [hasStarted, setHasStarted] = useState(false);
   const [showPopUp, setShowPopUp] = useState("");
+  const [photo, setPhoto] = useState("");
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -58,6 +59,7 @@ const Home = () => {
       return;
     }
     const data = await res.json();
+    console.log(data);
     setJwt(data.access_token);
     setId(data.blog_id);
   };
@@ -101,6 +103,7 @@ const Home = () => {
 
   const canStart = jwt !== "" && id !== "" && content !== "" && loops !== "";
 
+  console.log(photo);
   return (
     <div className="Home">
       {showPopUp && (
@@ -135,6 +138,7 @@ const Home = () => {
               </h5>
             </div>
           )}
+          <input type="file" onChange={(e) => setPhoto(e.target.files[0])} />
           {data.map((item, index) => (
             <div key={index} className="mainDiv">
               {item.type === "success" && (

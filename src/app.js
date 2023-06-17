@@ -2,7 +2,6 @@
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
-console.log(process.env);
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
@@ -38,7 +37,6 @@ app.get("/data", (req, res) => {
 // get full WP API token using temporary code
 app.post("/wordpress", async (req, res) => {
   const { code } = req.body;
-  console.log(process.env.WORDPRESS_CLIENT_ID, process.env.WORDPRESS_REDIRECT_URI, process.env.WORDPRESS_CLIENT_SECRET, code)
   var formdata = new FormData();
   formdata.append("client_id", process.env.WORDPRESS_CLIENT_ID);
   formdata.append("redirect_uri", process.env.WORDPRESS_REDIRECT_URI);
