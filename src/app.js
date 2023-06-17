@@ -8,7 +8,7 @@ const socketIo = require("socket.io");
 const cors = require("cors");
 const app = express();
 const bodyParser = require("body-parser");
-const { User } = require("./User");
+const { User } = require("./classes/User");
 const FormData = require("form-data");
 const fetch = require("node-fetch");
 
@@ -84,7 +84,15 @@ io.on("connection", (socket) => {
       newData.version,
       sendData
     );
-    user.run();
+    try {
+      user.run();
+    } catch (e) {
+      console.log(e);
+      sendData({
+        type: "ending",
+        content: "Oops, we had an error",
+      });
+    }
   });
 
   socket.on("disconnect", () => {
