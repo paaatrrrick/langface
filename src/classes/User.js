@@ -157,12 +157,39 @@ class User {
   };
 
   getImages = async (title, post) => {
-    console.log("get image1 1");
-    return [
-      "https://lumiere-a.akamaihd.net/v1/images/darth-vader-main_4560aff7.jpeg",
-      "https://img.freepik.com/free-vector/simple-cheese-isolated-cartoon_1308-124064.jpg?w=2000",
-    ];
-  };
+    const engineId = 'stable-diffusion-v1-5';
+    const apiHost = process.env.API_HOST ?? 'https://api.stability.ai';
+    const apiKey = process.env.STABILITY_API_KEY;
+
+    if (!apiKey) throw new Error('Missing Stability API key.');
+    
+    const response = await fetch(
+        `${apiHost}/v1/generation/${engineId}/text-to-image`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                Authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+                text_prompts: [
+                    {
+                        text: `Images for a blog post with the title ${title}`,
+                    },
+                ],
+                samples: 2,
+            }),
+        }
+        )
+    if (!response.ok) {
+        throw new Error(`Non-200 response: ${await response.text()}`)
+    }
+    
+    const responseJSON = await response.json();
+    console.log(responseJSON)
+    return responseJSON;
+};
 
   getWordpressImageURLs = async (images) => {
     const response = await fetch(
