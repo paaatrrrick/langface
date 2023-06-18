@@ -37,6 +37,10 @@ app.get("/data", (req, res) => {
 // get full WP API token using temporary code
 app.post("/wordpress", async (req, res) => {
   const { code } = req.body;
+  console.log(code);
+  //wait five seconds
+  console.log("pre wait");
+  console.log("post wait");
   var formdata = new FormData();
   formdata.append("client_id", process.env.WORDPRESS_CLIENT_ID);
   formdata.append("redirect_uri", process.env.WORDPRESS_REDIRECT_URI);
@@ -48,15 +52,21 @@ app.post("/wordpress", async (req, res) => {
     body: formdata,
     redirect: "follow",
   };
-  fetch("https://public-api.wordpress.com/oauth2/token", requestOptions)
-    .then((response) => response.text())
-    .then((result) => {
-      res.send(result);
-    })
-    .catch((error) => {
-      console.log("error", error);
-      res.send(error).status(500);
-    });
+  const result = await fetch(
+    "https://public-api.wordpress.com/oauth2/token",
+    requestOptions
+  );
+  if (!result.ok) {
+    console.log(result);
+    console.log("error");
+    const error = await result.json();
+    console.log(error);
+    res.send(error).status(400);
+  } else {
+    const data = await result.json();
+    console.log(data);
+    res.send(data);
+  }
 });
 
 // establish socket connection
