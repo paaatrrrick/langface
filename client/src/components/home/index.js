@@ -138,7 +138,6 @@ const Home = () => {
               </h5>
             </div>
           )}
-          <input type="file" onChange={(e) => setPhoto(e.target.files[0])} />
           {data.map((item, index) => (
             <div key={index} className="mainDiv">
               {item.type === "success" && (
@@ -152,7 +151,7 @@ const Home = () => {
               )}
               {item.type === "error" && (
                 <div className="error">
-                  <p>{item.error}</p>
+                  <p>{item.content}</p>
                 </div>
               )}
               {item.type === "ending" && (

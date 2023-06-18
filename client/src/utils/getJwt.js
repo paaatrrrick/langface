@@ -52,8 +52,8 @@ const wordpressGetJwt = async (setError, fetchWordpress) => {
   const url = `https://public-api.wordpress.com/oauth2/authorize?client_id=${client_id}&redirect_uri=${redirect_url}&response_type=code`;
   const newWin = window.open(url, "_blank");
   const tokenCheckInterval = setInterval(() => {
+    console.log("checking");
     try {
-      //Don't get rid of this
       const url = newWin.location.href;
       try {
         if (newWin?.location?.href && newWin.location.href.includes("code")) {
@@ -70,7 +70,7 @@ const wordpressGetJwt = async (setError, fetchWordpress) => {
         return null;
       }
     } catch (e) {}
-  }, 50);
+  }, 500);
 };
 
 export { getJwt, wordpressGetJwt };

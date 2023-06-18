@@ -37,10 +37,6 @@ app.get("/data", (req, res) => {
 // get full WP API token using temporary code
 app.post("/wordpress", async (req, res) => {
   const { code } = req.body;
-  console.log(code);
-  //wait five seconds
-  console.log("pre wait");
-  console.log("post wait");
   var formdata = new FormData();
   formdata.append("client_id", process.env.WORDPRESS_CLIENT_ID);
   formdata.append("redirect_uri", process.env.WORDPRESS_REDIRECT_URI);
@@ -57,10 +53,7 @@ app.post("/wordpress", async (req, res) => {
     requestOptions
   );
   if (!result.ok) {
-    console.log(result);
-    console.log("error");
     const error = await result.json();
-    console.log(error);
     res.send(error).status(400);
   } else {
     const data = await result.json();
@@ -73,10 +66,11 @@ app.post("/wordpress", async (req, res) => {
 io.on("connection", (socket) => {
   console.log("New client connected");
   socket.on("addData", (newData) => {
-    const sendData = async (data123) => {
+    const sendData = async (dataForClient) => {
       SuccesfulPostsCount += 1;
-      console.log(SuccesfulPostsCount);
-      socket.emit("updateData", data123); // sends data only to the connected socket
+      console.log(`sending data to client: ${SuccesfulPostsCount}:`);
+      console.log(dataForClient);
+      socket.emit("updateData", dataForClient); // sends data only to the connected socket
     };
     if (newData.loops > 50) {
       socket.emit("updateData", {
@@ -85,26 +79,24 @@ io.on("connection", (socket) => {
       });
       return;
     }
-    const user = new User(
-      newData.jwt,
-      newData.id,
-      newData.content,
-      newData.loops,
-      newData.openAIKey,
-      newData.version,
-      sendData
-    );
     try {
+      const user = new User(
+        newData.jwt,
+        newData.id,
+        newData.content,
+        newData.loops,
+        newData.openAIKey,
+        newData.version,
+        sendData
+      );
       user.run();
     } catch (e) {
-      console.log(e);
       sendData({
         type: "ending",
-        content: "Oops, we had an error",
+        content: e.message,
       });
     }
   });
-
   socket.on("disconnect", () => {
     console.log("Client disconnected");
   });
