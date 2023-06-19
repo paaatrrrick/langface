@@ -40,6 +40,9 @@ Marvel has created a universe that has captured the hearts and imaginations of f
 <img src="image2.png" alt="Marvel Characters">
 </div>`;
 
-const dummyTitle = "Marvel Characters";
+const dummyTitle = [{
+    title: "marvel characters",
+    summary: "everything about marvel's spiderman"
+}];
 
 module.exports = { dummyblog, dummyTitle };

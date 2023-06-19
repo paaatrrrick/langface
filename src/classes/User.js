@@ -3,19 +3,21 @@ if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 const { ChatOpenAI } = require("langchain/chat_models/openai");
-const { CustomListOutputParser } = require("langchain/output_parsers");
+const { z } = require("zod");
+const { StructuredOutputParser } = require("langchain/output_parsers");
 const { PromptTemplate } = require("langchain/prompts");
 const { HumanChatMessage, SystemChatMessage } = require("langchain/schema");
 const { OpenAI } = require("langchain/llms/openai");
 const { MemoryVectorStore } = require("langchain/vectorstores/memory");
-// const { initializeAgentExecutorWithOptions } = require("langchain/agents");
 const { OpenAIEmbeddings } =require("langchain/embeddings/openai");
+
+// const { initializeAgentExecutorWithOptions } = require("langchain/agents");
 // const { SerpAPI } = require("langchain/tools");
 // const { Calculator } = require("langchain/tools/calculator");
 // const { WebBrowser } = require("langchain/tools/webbrowser");
 const { dummyblog, dummyTitle } = require("../constants/dummyData");
 const { blogPost, SystemChatMessageForBlog } = require("../constants/prompts");
-const { getImages, postToWordpress, postToBlogger, getWordpressImageURLs } = require("../utils/api");
+const { getImages, postToWordpress, postToBlogger, getWordpressImageURLs, uploadToCloudinary } = require("../utils/api");
 const TESTING_UI = (process.env.TESTING === "true" || process.env.TESTING_UI === "true") ? true : false;
 
 class User {
@@ -26,9 +28,6 @@ class User {
     this.loops = loops;
     this.sendData = sendData;
     this.summaryVectorStoreLength = 0;
-    this.summaryVectorStore = new MemoryVectorStore(new OpenAIEmbeddings({
-      openAIApiKey: openAIKey,
-    }))
     this.openAIKey = openAIKey ? openAIKey : process.env.OPENAI_API_KEY;
     this.version = version;
     this.summaries = [];
@@ -47,26 +46,24 @@ class User {
       return;
     }
     try {
-      const titles = await this.writeTitles();
+      const titlesAndSummaries = await this.writeTitles();
       console.log(`Done writing titles...`);
-      console.log(`${titles}`);
+      console.log(titlesAndSummaries);
       var errorCount = 0;
-      for (let title of titles) {
+      for (let postBluePrint of titlesAndSummaries) {
         try {
-          const post = await this.writePost(title);
+          const post = await this.writePost(postBluePrint.title);
           if (this.version === "blogger") {
-            const result = await postToBlogger(post, title, images, this.blogID, this.jwt);
+            const result = await postToBlogger(post, postBluePrint.title, this.blogID, this.jwt);
             this.sendData(result);
           } else {
-            const imagesFiles = await getImages(title, post);
+            const imagesFiles = await getImages(post, this.openAIKey, this.imageNames.length);
             const wordpressImageUrls = await getWordpressImageURLs(imagesFiles, this.blogID, this.jwt);
-            const result = await postToWordpress(post, title, wordpressImageUrls, this.imageNames, this.blogID, this.jwt);
+            const result = await postToWordpress(post, postBluePrint.title, wordpressImageUrls, this.imageNames, this.blogID, this.jwt, postBluePrint.summary, this.summaries);
+            this.summaries.push({summary: postBluePrint.summary, url: result.url});
+            result.content = postBluePrint.summary;
             console.log('we got the result');
             try {
-              console.log('trying to summarize');
-              console.log(result.url)
-              const summary = await this.summarize(post, title, result.url);
-              result.content = summary;
               this.sendData(result);
             } catch(e) {
               console.log('error from summarize')
@@ -92,19 +89,26 @@ class User {
   };
 
   writeTitles = async () => {
-    if (process.env.MOCK_TITLES === "true") return [dummyTitle];
-    const parser = new CustomListOutputParser({length: this.loops, separator: "\n"});
-    const formatInstructions = parser.getFormatInstructions();
+    if (process.env.MOCK_TITLES === "true") return dummyTitle;
+    const parserFromZod = StructuredOutputParser.fromZodSchema(
+      z.array(
+        z.object({
+          title: z.string().describe("The seo optimized title of the blog post"),
+          summary: z.string().describe("A short summary of what this blog post should be about. Include long tail keywords"),
+    })));
+    
+    const formatInstructions = parserFromZod.getFormatInstructions()
     const prompt = new PromptTemplate({
-      template: `Provide an unordered list of length "{loops}" of niche blog titles:\n It's a blog about "{subject}". \n{format_instructions} The titles should not be number.`,
+      template: `Provide an unordered list of length "{loops}" of niche blog titles and a short summary:\n It's a blog about "{subject}". \n{format_instructions}.`,
       inputVariables: ["subject", "loops"],
       partialVariables: { format_instructions: formatInstructions },
     });
     const input = await prompt.format({subject: this.content, loops: this.loops});
+    console.log(input);
     try {
-      const response = await this.model.call([new HumanChatMessage(input)]);
-      const titles = response.text.split("\n");
-      return titles;
+      const response = await this.model.call([new HumanChatMessage("input")]);
+      const parsed = await parserFromZod.parse(response.text)
+      return parsed;
     } catch (e) {
       console.error(e)
       console.log('writing titles error');
@@ -138,30 +142,6 @@ class User {
     }
     this.sendData({ type: "error", content: "Test error" });
     this.sendData({ type: "ending", content: "Process Complete" });
-  };
-
-  summarize = async (blogPost, title, url) => {
-    console.log('summarizing')
-    var summary;
-    if (process.env.MOCK_WRITING_SUMMARY === "true") {
-      summary = "A blog post about superheros uniting";
-    } else {
-      const model = new ChatOpenAI({modelName: "gpt-3.5-turbo", temperature: 0, maxTokens: 3000, openAIApiKey: this.openAIKey});
-      const response = await model.call([new HumanChatMessage("Summarize the following html blog post in two sentences in natural language: " + blogPost)]);
-      summary = response.text;
-    }
-    console.log('here')
-    this.summaryVectorStore.addDocuments([{text: summary, id: this.summaryVectorStoreLength, metadata: {url: url, title: title}}]);
-    this.summaryVectorStoreLength += 1;
-    // const resultOne = await this.summaryVectorStore.similaritySearch("hello world", 1);
-    // console.log(resultOne);
-
-    // console.log(summary);
-    // this.summaries.push({summary: summary, url: url});
-    // this.summaryVectorStore.addDocuments([{text: summary, id: this.summaryVectorStoreLength, metadata: {url: url, title: title}}]);
-    // const resultOne = await summaryVectorStore.similaritySearch("hello world", 1);
-    // console.log(resultOne);
-    return summary;
   };
 }
 

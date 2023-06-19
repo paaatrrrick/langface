@@ -102,8 +102,6 @@ const Home = () => {
   };
 
   const canStart = jwt !== "" && id !== "" && content !== "" && loops !== "";
-
-  console.log(photo);
   return (
     <div className="Home">
       {showPopUp && (
