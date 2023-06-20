@@ -10,6 +10,7 @@ const { HumanChatMessage, SystemChatMessage } = require("langchain/schema");
 const { OpenAI } = require("langchain/llms/openai");
 const { MemoryVectorStore } = require("langchain/vectorstores/memory");
 const { OpenAIEmbeddings } =require("langchain/embeddings/openai");
+const {Researcher} = require("./Researcher");
 
 // const { initializeAgentExecutorWithOptions } = require("langchain/agents");
 // const { SerpAPI } = require("langchain/tools");
@@ -38,9 +39,15 @@ class User {
       maxTokens: 3000,
       openAIApiKey: this.openAIKey,
     });
+    this.researcher = new Researcher(content);
   }
 
   run = async () => {
+    console.log("ran");
+    const keywords = await this.researcher.searchTopKeywords();
+    console.log(keywords);
+    const modelURLs = await this.researcher.searchTopBlogs(keywords);
+    console.log(modelURLs);
     if (TESTING_UI) {
       this.testing();
       return;

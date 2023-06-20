@@ -30,6 +30,7 @@ function storeImage(buffer, filename) {
 //.enum(["enhance", "anime", "photographic", "digital-art", "fantasy-art", "low-poly", "pixel-art", "cinematic"]),
 
 const getImages = async (post, openAIKey, imageCount) => {
+  return [];
   console.log('at the get image function')
   console.log(openAIKey)
   if (process.env.MOCK_EVERYTHINGELSE === "true") return ["https://lumiere-a.akamaihd.net/v1/images/darth-vader-main_4560aff7.jpeg?region=0%2C67%2C1280%2C720"]
@@ -153,6 +154,12 @@ const getWordpressImageURLs = async (images, blogID, jwt) => {
 
 const postToWordpress = async (content, title, images, imageNames, blogID, jwt) => {
   if (process.env.MOCK_POST_TO_WORDPRESS === "true") return {title: title, content: content, url: "https://historylover4.wordpress.com/2021/08/16/this-is-a-test-post/",type: "success"};
+  console.log(content);
+  console.log(title);
+  console.log(images);
+  console.log(imageNames);
+  console.log(jwt);
+  console.log(blogID);
   for (let i in images) {
     content = replaceStringInsideStringWithNewString(content, imageNames[i],images[i]);
   }
