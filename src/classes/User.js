@@ -39,7 +39,7 @@ class User {
       maxTokens: 3000,
       openAIApiKey: this.openAIKey,
     });
-    this.researcher = new Researcher(content);
+    this.researcher = new Researcher(content, this.loops);
   }
 
   run = async () => {

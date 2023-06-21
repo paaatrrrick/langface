@@ -1,13 +1,26 @@
+const { ChatOpenAI } = require("langchain/chat_models/openai");
+const { PromptTemplate } = require("langchain/prompts");
+const { CommaSeparatedListOutputParser } = require("langchain/output_parsers");
 const { OpenAI } = require("langchain/llms/openai");
 const { initializeAgentExecutorWithOptions } = require("langchain/agents");
 const { OpenAIEmbeddings } = require("langchain/embeddings/openai");
 const { SerpAPI } = require("langchain/tools");
 const { Calculator } = require("langchain/tools/calculator");
 const { WebBrowser } = require("langchain/tools/webbrowser");
+const { HumanChatMessage } = require("langchain/schema");
+const serpapi = require('google-search-results-nodejs');
+const search = new serpapi.GoogleSearch(process.env.SERPAPI_API_KEY);
 
 class Researcher {
-    constructor(niche) {
+    constructor(niche, blogCount) {
         this.niche = niche;
+        this.blogCount = blogCount;
+        this.model = new ChatOpenAI({
+            modelName: "gpt-3.5-turbo",
+            temperature: 0,
+            maxTokens: 3000,
+            openAIApiKey: process.env.OPENAI_API_KEY,
+          });      
     }
 
     getExecutor = async () => {
@@ -31,15 +44,48 @@ class Researcher {
     }
     
     searchTopKeywords = async () => {
-        console.log("searching keywords");
-        const input = `What are the most common key words searchers use in the space of ${this.niche}? Your output must be a an array of keyword strings.`;
-        const executor = await this.getExecutor();
-        const result = executor.call({ input });
-        console.log(result);
-        return result;
+        let modelBlogs = [];
+        let query = `buy ${this.niche} blog`; // {this.niche};
+        for (let i = 0; i < this.blogCount; i++) { //this.blogCount;
+            const params = {
+                engine: "google",
+                q: query
+            }
+            var data = false;
+            search.json(params, (res) => {
+                data = res;
+            });
+            while (!data) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            console.log(i);
+            console.log(query);    
+            const modelBlog = data["organic_results"][i].link; // i is a HUGE hack.
+            console.log(modelBlog);
+            modelBlogs.push(modelBlog);
+            if (data["related_searches"]){
+                const nextQuery = data["related_searches"][0].query;
+                console.log(nextQuery);
+                query = nextQuery;        
+            }
+            else{
+                const parser = new CommaSeparatedListOutputParser();
+                const formatInstructions = parser.getFormatInstructions(); 
+                const prompt = new PromptTemplate({
+                    template: "List 1 {subject}.\n{format_instructions}",
+                    inputVariables: ["subject"],
+                    partialVariables: { format_instructions: formatInstructions },
+                    });
+                const input = await prompt.format({ subject: `Google search query that is different, but related to ${query}` });
+                const response = await this.model.call([new HumanChatMessage(`${input}`)]);
+                const formattedResponse =  await parser.parse(response.text);
+                query = formattedResponse[0];
+            }
+        }
+        return modelBlogs;
     }
     
-    earchTopBlogs = async(keywords) => {
+    searchTopBlogs = async(keywords) => {
         console.log("searching blogs");
         const input = `What are the URLs of the highest ranking blogs using the keywords ${keywords}?`;
         const result = await this.getExecutor().call({ input });
