@@ -8,6 +8,15 @@ const { StructuredOutputParser,  } = require("langchain/output_parsers");
 const { PromptTemplate } = require("langchain/prompts");
 const { HumanChatMessage, SystemChatMessage } = require("langchain/schema");
 const Photos = require("./Photos");
+const { OpenAI } = require("langchain/llms/openai");
+const { MemoryVectorStore } = require("langchain/vectorstores/memory");
+const { OpenAIEmbeddings } =require("langchain/embeddings/openai");
+const {Researcher} = require("./Researcher");
+
+// const { initializeAgentExecutorWithOptions } = require("langchain/agents");
+// const { SerpAPI } = require("langchain/tools");
+// const { Calculator } = require("langchain/tools/calculator");
+// const { WebBrowser } = require("langchain/tools/webbrowser");
 const { dummyblog, dummyTitle } = require("../constants/dummyData");
 const { blogPost, SystemChatMessageForBlog } = require("../constants/prompts");
 const { getImages, postToWordpress, postToBlogger, getWordpressImageURLs, uploadToCloudinary } = require("../utils/api");
@@ -31,9 +40,15 @@ class Agent {
       maxTokens: 3000,
       openAIApiKey: this.openAIKey,
     });
+    this.researcher = new Researcher(content, this.loops);
   }
 
   run = async () => {
+    console.log("ran");
+    const keywords = await this.researcher.searchTopKeywords();
+    console.log(keywords);
+    const modelURLs = await this.researcher.searchTopBlogs(keywords);
+    console.log(modelURLs);
     if (TESTING_UI) {
       this.testing();
       return;
