@@ -20,7 +20,6 @@ const Home = () => {
   const [data, setData] = useState([]);
   const [hasStarted, setHasStarted] = useState(false);
   const [showPopUp, setShowPopUp] = useState("");
-  const [photo, setPhoto] = useState("");
   const messagesEndRef = useRef(null);
 
   useEffect(() => {

@@ -8,7 +8,7 @@ const socketIo = require("socket.io");
 const cors = require("cors");
 const app = express();
 const bodyParser = require("body-parser");
-const { User } = require("./classes/User");
+const { Agent } = require("./classes/Agent");
 const FormData = require("form-data");
 const fetch = require("node-fetch");
 
@@ -80,7 +80,7 @@ io.on("connection", (socket) => {
       return;
     }
     try {
-      const user = new User(
+      const user = new Agent(
         newData.jwt,
         newData.id,
         newData.content,

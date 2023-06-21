@@ -4,23 +4,16 @@ if (process.env.NODE_ENV !== "production") {
 }
 const { ChatOpenAI } = require("langchain/chat_models/openai");
 const { z } = require("zod");
-const { StructuredOutputParser } = require("langchain/output_parsers");
+const { StructuredOutputParser,  } = require("langchain/output_parsers");
 const { PromptTemplate } = require("langchain/prompts");
 const { HumanChatMessage, SystemChatMessage } = require("langchain/schema");
-const { OpenAI } = require("langchain/llms/openai");
-const { MemoryVectorStore } = require("langchain/vectorstores/memory");
-const { OpenAIEmbeddings } =require("langchain/embeddings/openai");
-
-// const { initializeAgentExecutorWithOptions } = require("langchain/agents");
-// const { SerpAPI } = require("langchain/tools");
-// const { Calculator } = require("langchain/tools/calculator");
-// const { WebBrowser } = require("langchain/tools/webbrowser");
+const Photos = require("./Photos");
 const { dummyblog, dummyTitle } = require("../constants/dummyData");
 const { blogPost, SystemChatMessageForBlog } = require("../constants/prompts");
 const { getImages, postToWordpress, postToBlogger, getWordpressImageURLs, uploadToCloudinary } = require("../utils/api");
 const TESTING_UI = (process.env.TESTING === "true" || process.env.TESTING_UI === "true") ? true : false;
 
-class User {
+class Agent {
   constructor(jwt, blogID, content, loops, openAIKey, version, sendData) {
     this.jwt = jwt;
     this.blogID = blogID;
@@ -52,17 +45,16 @@ class User {
       var errorCount = 0;
       for (let postBluePrint of titlesAndSummaries) {
         try {
-          const post = await this.writePost(postBluePrint.title);
+          const post = await this.writePost(postBluePrint.title, postBluePrint.summary);
           if (this.version === "blogger") {
             const result = await postToBlogger(post, postBluePrint.title, this.blogID, this.jwt);
             this.sendData(result);
           } else {
-            const imagesFiles = await getImages(post, this.openAIKey, this.imageNames.length);
-            const wordpressImageUrls = await getWordpressImageURLs(imagesFiles, this.blogID, this.jwt);
-            const result = await postToWordpress(post, postBluePrint.title, wordpressImageUrls, this.imageNames, this.blogID, this.jwt, postBluePrint.summary, this.summaries);
+            const photosObject = new Photos(post, this.openAIKey, this.blogID, this.jwt, this.imageNames);
+            const imageUrls = await photosObject.run();
+            const result = await postToWordpress(post, postBluePrint.title, imageUrls, this.imageNames, this.blogID, this.jwt, postBluePrint.summary, this.summaries);
             this.summaries.push({summary: postBluePrint.summary, url: result.url});
             result.content = postBluePrint.summary;
-            console.log('we got the result');
             try {
               this.sendData(result);
             } catch(e) {
@@ -96,7 +88,6 @@ class User {
           title: z.string().describe("The seo optimized title of the blog post"),
           summary: z.string().describe("A short summary of what this blog post should be about. Include long tail keywords"),
     })));
-    
     const formatInstructions = parserFromZod.getFormatInstructions()
     const prompt = new PromptTemplate({
       template: `Provide an unordered list of length "{loops}" of niche blog titles and a short summary:\n It's a blog about "{subject}". \n{format_instructions}.`,
@@ -104,9 +95,8 @@ class User {
       partialVariables: { format_instructions: formatInstructions },
     });
     const input = await prompt.format({subject: this.content, loops: this.loops});
-    console.log(input);
     try {
-      const response = await this.model.call([new HumanChatMessage("input")]);
+      const response = await this.model.call([new HumanChatMessage(input)]);
       const parsed = await parserFromZod.parse(response.text)
       return parsed;
     } catch (e) {
@@ -116,13 +106,12 @@ class User {
     }
   };
 
-  writePost = async (title) => {
+  writePost = async (title, summary) => {
     if (process.env.MOCK_WRITING_BLOG === "true") return dummyblog;
-    const messages = [new SystemChatMessage(SystemChatMessageForBlog), new HumanChatMessage(blogPost(title, this.content, this.imageNames))];
+    const messages = [new SystemChatMessage(SystemChatMessageForBlog), new HumanChatMessage(blogPost(title, summary, this.content, this.imageNames, this.summaries))];
     try {
       const response = await this.model.call(messages);
-      const post = await response.text;
-      return post;
+      return response.text;
     } catch (e) {
       console.error(e)
       console.log('writing post error');
@@ -146,5 +135,5 @@ class User {
 }
 
 module.exports = {
-  User,
+  Agent,
 };

@@ -45,4 +45,32 @@ const dummyTitle = [{
     summary: "everything about marvel's spiderman"
 }];
 
-module.exports = { dummyblog, dummyTitle };
+const summarizeImages = [
+    {
+      prompt: 'An image featuring the Marvel logo, representing the iconic brand and its impact on popular culture.',
+      width: 512,
+      height: 512
+    },
+    {
+      prompt: 'An image showcasing a group of Marvel characters, such as Iron Man, Spider-Man, and Wolverine, highlighting their popularity and significance in the Marvel universe.',
+      width: 512,
+      height: 512
+    }
+  ]
+
+const dummyImagePrompts = [
+    {
+      prompt: 'Create an image featuring the Marvel logo, representing the iconic brand and its impact on popular culture.',
+      style: 'digital-art'
+    },
+    {
+      prompt: 'Design an image showcasing a group of Marvel characters, such as Iron Man, Spider-Man, and Wolverine, highlighting their popularity and significance in the Marvel universe.',
+      style: 'cinematic'
+    }
+  ];
+
+const dummyWordpressPhotos = [
+  'https://animameart.files.wordpress.com/2023/06/kh1wpsqpuxhvktwlnhwd.png',
+  'https://animameart.files.wordpress.com/2023/06/b88bfzitqrqdzmfwzo7c.png'
+]
+module.exports = { dummyblog, dummyTitle, summarizeImages, dummyImagePrompts, dummyWordpressPhotos };
