@@ -70,6 +70,7 @@ class Photos {
     }
 
     getImagePrompts = async () => {
+      const styleOptions = ["anime", "cinematic", "digital-art", "low-poly", "photographic", "pixel-art", "enhance"]
         const parserFromZod = StructuredOutputParser.fromZodSchema(
           z.array(
             z.object({
@@ -84,6 +85,11 @@ class Photos {
         const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k",temperature: 0, maxTokens: 1000, openAIApiKey: this.openAIKey});
         const response = await model.call([new HumanChatMessage(input)]);
         const parsed = await parserFromZod.parse(response.text);
+        for (let i in parsed) {
+          if (!styleOptions.includes(parsed[i].style)) {
+            parsed[i].style = "digital-art";
+          }
+        }
         return parsed;
     }
 
