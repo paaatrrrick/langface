@@ -22,7 +22,7 @@ const blogPost = (longTailKeywords, blogStrucutre, tips, headers, similarTitles,
     \n\n This blog website it about ${content}. ${previousArticlesString}\n\n\n 
     Formatting Instructions: Write only HTML. Start and end with an article tag, the content will be added inside the body tags. Give the blog structure with various html headers and lists as needed. 
     Include exactly ${imageNames.length} imgs with the following src's respsectively: ${arrayToString(imageNames)}. 
-    Each img should have inline styles for a width and height, which are between 256px and 1280px. DO NOT STATE THE TITLE. START WITH AN ARTICLE, then a p tag, then the first sentence. Optimize every aspect for SEO ranking.`;
+    Each img should have inline styles for a width and height, which are between 256px and 1280px. The blog should be EXTREMELY LONG with roughly 2500 words. DO NOT STATE THE TITLE. START WITH AN ARTICLE, then a p tag, then the first sentence. Optimize every aspect for SEO ranking.`;
 }
 
 

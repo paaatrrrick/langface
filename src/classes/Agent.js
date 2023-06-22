@@ -32,7 +32,7 @@ class Agent {
     this.imageNames = ["image1.png", "image2.png"];
     this.researcher = new Researcher(content, this.loops, this.openAIKey);
     this.model = new ChatOpenAI({
-      modelName: "gpt-3.5-turbo",
+      modelName: "gpt-3.5-turbo-16k",
       temperature: 0.1,
       maxTokens: 3000,
       openAIApiKey: this.openAIKey,
