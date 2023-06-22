@@ -69,14 +69,18 @@ class Researcher {
                 var tempUrl;
                 var k = 0;
                 while (k < 10) {
-                    tempUrl = data["organic_results"][i + k].link;
-                    const blogResponse = await axios.get(tempUrl);
-                    const $ = cheerio.load(blogResponse.data);
-                    var paragraphText = $('p').text();
-                    if (paragraphText.length > 1000) {
+                    try {
+                        tempUrl = data["organic_results"][Math.min(i, 5) + k].link;
+                        const blogResponse = await axios.get(tempUrl);
+                        const $ = cheerio.load(blogResponse.data);
+                        var paragraphText = $('p').text();
+                        if (paragraphText.length > 1000) {
+                            break;
+                        }
+                        k++;
+                    } catch (e) {
                         break;
                     }
-                    k++;
                 }
                  // i is a HUGE hack.
                 const parsed = await this.parseBlogPost(tempUrl);
