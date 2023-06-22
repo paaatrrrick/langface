@@ -51,11 +51,11 @@ class Researcher {
     getModelURLs = async () => {
         if (process.env.MOCK_RESEARCH === "true") return dummyResearcher;
         let modelBlogs = [];
-        let query = `${this.niche}`; // {this.niche};
+        let query = `buy ${this.niche} blog`; // {this.niche};
         var totalI = 0;
         for (let i = 0; i < this.blogCount; i++) { //this.blogCount;
             totalI++;
-            if (totalI > this.blogCount * 1.5) {
+            if (totalI > Math.max(this.blogCount * 1.5, 10)) {
                 throw new Error("too many iterations");
             }
             try {
