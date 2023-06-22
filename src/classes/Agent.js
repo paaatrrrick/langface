@@ -45,15 +45,12 @@ class Agent {
 
   run = async () => {
     console.log("ran");
-    const keywords = await this.researcher.searchTopKeywords();
-    console.log(keywords);
-    const modelURLs = await this.researcher.searchTopBlogs(keywords);
-    console.log(modelURLs);
     if (TESTING_UI) {
       this.testing();
       return;
     }
     try {
+      // const modelUrls = await this.researcher.getModelURLs();
       const titlesAndSummaries = await this.writeTitles();
       console.log(`Done writing titles...`);
       console.log(titlesAndSummaries);

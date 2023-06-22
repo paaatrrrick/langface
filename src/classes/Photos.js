@@ -5,8 +5,7 @@ if (process.env.NODE_ENV !== "production") {
   const fs = require("fs");
   const path = require("path");
   const { z } = require("zod");
-  const FormData = require("form-data");
-  const { replaceStringInsideStringWithNewString, arrayToString } = require("../utils/helpers");
+  const { arrayToString } = require("../utils/helpers");
   const { text2ImgPrompt } = require("../constants/prompts");
   const { StructuredOutputParser } = require("langchain/output_parsers");
   const { ChatOpenAI } = require("langchain/chat_models/openai");
@@ -59,7 +58,7 @@ class Photos {
         const prompt = new PromptTemplate({template: template, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const input = await prompt.format();
         try {
-          const model = new ChatOpenAI({modelName: "gpt-4",temperature: 0, maxTokens: 4096, openAIApiKey: this.openAIKey});
+          const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k",temperature: 0, maxTokens: 1000, openAIApiKey: this.openAIKey});
           const response = await model.call([new HumanChatMessage(input)]);
           const parsed = await parserFromZod.parse(response.text)            
           return parsed;
@@ -82,7 +81,7 @@ class Photos {
         const formatInstructions = parserFromZod.getFormatInstructions()
         const prompt = new PromptTemplate({template: `${text2ImgPrompt(imageDescriptions)} \n{format_instructions}.`, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const input = await prompt.format();
-        const model = new ChatOpenAI({modelName: "gpt-4",temperature: 0, maxTokens: 4096, openAIApiKey: this.openAIKey});
+        const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k",temperature: 0, maxTokens: 1000, openAIApiKey: this.openAIKey});
         const response = await model.call([new HumanChatMessage(input)]);
         const parsed = await parserFromZod.parse(response.text);
         return parsed;

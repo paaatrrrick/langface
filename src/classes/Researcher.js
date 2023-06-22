@@ -43,7 +43,7 @@ class Researcher {
         return executor;
     }
     
-    searchTopKeywords = async () => {
+    getModelURLs = async () => {
         let modelBlogs = [];
         let query = `buy ${this.niche} blog`; // {this.niche};
         for (let i = 0; i < this.blogCount; i++) { //this.blogCount;
