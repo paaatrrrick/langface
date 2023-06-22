@@ -72,10 +72,10 @@ io.on("connection", (socket) => {
       console.log(dataForClient);
       socket.emit("updateData", dataForClient); // sends data only to the connected socket
     };
-    if (newData.loops > 100) {
+    if (newData.loops > 5) {
       socket.emit("updateData", {
         type: "ending",
-        error: "Please do 10 or less loops",
+        error: "Please do 5 or less loops",
       });
       return;
     }
