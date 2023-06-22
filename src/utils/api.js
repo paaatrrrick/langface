@@ -17,12 +17,6 @@ console.log(cloudinary.config().cloud_name);
 
 const postToWordpress = async (content, title, images, imageNames, blogID, jwt) => {
   if (process.env.MOCK_POST_TO_WORDPRESS === "true") return {title: title, content: content, url: "https://historylover4.wordpress.com/2021/08/16/this-is-a-test-post/",type: "success"};
-  console.log(content);
-  console.log(title);
-  console.log(images);
-  console.log(imageNames);
-  console.log(jwt);
-  console.log(blogID);
   for (let i in images) {
     content = replaceStringInsideStringWithNewString(content, imageNames[i],images[i]);
   }

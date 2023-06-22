@@ -12,11 +12,6 @@ const { OpenAI } = require("langchain/llms/openai");
 const { MemoryVectorStore } = require("langchain/vectorstores/memory");
 const { OpenAIEmbeddings } =require("langchain/embeddings/openai");
 const {Researcher} = require("./Researcher");
-
-// const { initializeAgentExecutorWithOptions } = require("langchain/agents");
-// const { SerpAPI } = require("langchain/tools");
-// const { Calculator } = require("langchain/tools/calculator");
-// const { WebBrowser } = require("langchain/tools/webbrowser");
 const { dummyblog, dummyTitle } = require("../constants/dummyData");
 const { blogPost, SystemChatMessageForBlog } = require("../constants/prompts");
 const { getImages, postToWordpress, postToBlogger, getWordpressImageURLs, uploadToCloudinary } = require("../utils/api");
@@ -32,48 +27,39 @@ class Agent {
     this.summaryVectorStoreLength = 0;
     this.openAIKey = openAIKey ? openAIKey : process.env.OPENAI_API_KEY;
     this.version = version;
+    this.blogOutlines = [];
     this.summaries = [];
     this.imageNames = ["image1.png", "image2.png"];
+    this.researcher = new Researcher(content, this.loops, this.openAIKey);
     this.model = new ChatOpenAI({
       modelName: "gpt-3.5-turbo",
       temperature: 0.1,
       maxTokens: 3000,
       openAIApiKey: this.openAIKey,
     });
-    this.researcher = new Researcher(content, this.loops);
+   
   }
 
   run = async () => {
-    console.log("ran");
     if (TESTING_UI) {
       this.testing();
       return;
     }
     try {
-      // const modelUrls = await this.researcher.getModelURLs();
-      const titlesAndSummaries = await this.writeTitles();
-      console.log(`Done writing titles...`);
-      console.log(titlesAndSummaries);
+      this.blogOutlines = await this.researcher.getModelURLs();
       var errorCount = 0;
-      for (let postBluePrint of titlesAndSummaries) {
+      for (let outline of this.blogOutlines) {
         try {
-          const post = await this.writePost(postBluePrint.title, postBluePrint.summary);
+          const post = await this.writePost(outline);
           if (this.version === "blogger") {
-            const result = await postToBlogger(post, postBluePrint.title, this.blogID, this.jwt);
+            const result = await postToBlogger(post, outline.similarTitles, this.blogID, this.jwt);
             this.sendData(result);
           } else {
             const photosObject = new Photos(post, this.openAIKey, this.blogID, this.jwt, this.imageNames);
             const imageUrls = await photosObject.run();
-            const result = await postToWordpress(post, postBluePrint.title, imageUrls, this.imageNames, this.blogID, this.jwt, postBluePrint.summary, this.summaries);
-            this.summaries.push({summary: postBluePrint.summary, url: result.url});
-            result.content = postBluePrint.summary;
-            try {
-              this.sendData(result);
-            } catch(e) {
-              console.log('error from summarize')
-              console.log(e);
-              this.sendData(result);
-            }
+            const result = await postToWordpress(post, outline.similarTitles, imageUrls, this.imageNames, this.blogID, this.jwt);
+            this.summaries.push({summary: outline.blogStrucutre, url: result.url});
+            this.sendData(result)
           }
         } catch (e) {
           console.log('error from loops')
@@ -92,35 +78,10 @@ class Agent {
     }
   };
 
-  writeTitles = async () => {
-    if (process.env.MOCK_TITLES === "true") return dummyTitle;
-    const parserFromZod = StructuredOutputParser.fromZodSchema(
-      z.array(
-        z.object({
-          title: z.string().describe("The seo optimized title of the blog post"),
-          summary: z.string().describe("A short summary of what this blog post should be about. Include long tail keywords"),
-    })));
-    const formatInstructions = parserFromZod.getFormatInstructions()
-    const prompt = new PromptTemplate({
-      template: `Provide an unordered list of length "{loops}" of niche blog titles and a short summary:\n It's a blog about "{subject}". \n{format_instructions}.`,
-      inputVariables: ["subject", "loops"],
-      partialVariables: { format_instructions: formatInstructions },
-    });
-    const input = await prompt.format({subject: this.content, loops: this.loops});
-    try {
-      const response = await this.model.call([new HumanChatMessage(input)]);
-      const parsed = await parserFromZod.parse(response.text)
-      return parsed;
-    } catch (e) {
-      console.error(e)
-      console.log('writing titles error');
-      throw new Error("Error creating titles for your posts. Please try again.");
-    }
-  };
-
-  writePost = async (title, summary) => {
+  writePost = async (outline) => {
     if (process.env.MOCK_WRITING_BLOG === "true") return dummyblog;
-    const messages = [new SystemChatMessage(SystemChatMessageForBlog), new HumanChatMessage(blogPost(title, summary, this.content, this.imageNames, this.summaries))];
+    const messages = [new SystemChatMessage(SystemChatMessageForBlog), new HumanChatMessage(
+      blogPost(outline.longTailKeywords, outline.blogStrucutre, outline.tips, outline.headers, outline.similarTitles, this.content, this.summaries, this.imageNames))];
     try {
       const response = await this.model.call(messages);
       return response.text;
@@ -146,6 +107,30 @@ class Agent {
   };
 }
 
-module.exports = {
-  Agent,
-};
+module.exports = { Agent };
+
+  // writeTitles = async () => {
+  //   if (process.env.MOCK_TITLES === "true") return dummyTitle;
+  //   const parserFromZod = StructuredOutputParser.fromZodSchema(
+  //     z.array(
+  //       z.object({
+  //         title: z.string().describe("The seo optimized title of the blog post"),
+  //         summary: z.string().describe("A short summary of what this blog post should be about. Include long tail keywords"),
+  //   })));
+  //   const formatInstructions = parserFromZod.getFormatInstructions()
+  //   const prompt = new PromptTemplate({
+  //     template: `Provide an unordered list of length "{loops}" of niche blog titles and a short summary:\n It's a blog about "{subject}". \n{format_instructions}.`,
+  //     inputVariables: ["subject", "loops"],
+  //     partialVariables: { format_instructions: formatInstructions },
+  //   });
+  //   const input = await prompt.format({subject: this.content, loops: this.loops});
+  //   try {
+  //     const response = await this.model.call([new HumanChatMessage(input)]);
+  //     const parsed = await parserFromZod.parse(response.text)
+  //     return parsed;
+  //   } catch (e) {
+  //     console.error(e)
+  //     console.log('writing titles error');
+  //     throw new Error("Error creating titles for your posts. Please try again.");
+  //   }
+  // };

@@ -12,19 +12,17 @@ const nLengthArray = (n, array) => {
     }
 };
 
-
-
-const blogPost = (title, summary, content, imageNames, previousArticles) => {
-  var previousArticlesString = `Feel free to write backlinks to these previous articles: ${arrayToString(nLengthArray(3, previousArticles))}.`;
+const blogPost = (longTailKeywords, blogStrucutre, tips, headers, similarTitles, content, previousArticles, imageNames) => {
+  var previousArticlesString = `Write backlinks to these previous articles as needed: ${arrayToString(nLengthArray(3, previousArticles))}.`;
   if (previousArticles.length === 0) { 
     previousArticlesString = ``;
   }
-    return `Write a blog post in HTML given the title: ${title}. Here is a summary of the blog post: ${summary}. The blog post should be filled with a specific 
-    long tail key word and other relvant LSI keywords as well for SEO. ${previousArticlesString}
-    Here is a description and guidance about the blog as a whole:\n It's a blog about ${content}\n\n\nFormatting Instructions: Write only HTML. 
-    Start and end with an article tag, the content will be added inside the body tags. Give the blog structure with various html headers and lists as needed. 
+    return `Write a blog post in HTML given the title: ${similarTitles}. Frequently use these longtail keyword: ${longTailKeywords}.
+    It should follow the following structure: \n\n${blogStrucutre}.\n\n Take inspiration from using this header strucutre:\n\n ${arrayToString(headers)}. \n\n Here are some tips to help you write the post:\n\n ${tips}.
+    \n\n This blog website it about ${content}. ${previousArticlesString}\n\n\n 
+    Formatting Instructions: Write only HTML. Start and end with an article tag, the content will be added inside the body tags. Give the blog structure with various html headers and lists as needed. 
     Include exactly ${imageNames.length} imgs with the following src's respsectively: ${arrayToString(imageNames)}. 
-    Each img should have inline styles for a width and height. DO NOT STATE THE TITLE. START WITH AN ARTICLE, then a p tag, then the first sentence. Optimize every aspect for SEO ranking. Add whatever is needed`;
+    Each img should have inline styles for a width and height, which are between 256px and 1280px. DO NOT STATE THE TITLE. START WITH AN ARTICLE, then a p tag, then the first sentence. Optimize every aspect for SEO ranking.`;
 }
 
 

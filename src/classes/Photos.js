@@ -50,8 +50,8 @@ class Photos {
           z.array(
             z.object({
               prompt: z.string().describe("A paragraph description of what would make a good image there"),
-              width: z.number().describe("The width of the image. That must be divisible by 64").min(256).max(1280),
-              height: z.number().describe("The height of the image. That must be divisible by 64").min(256).max(1280)
+              width: z.number().describe("The width of the image. That must be divisible by 64"),
+              height: z.number().describe("The height of the image. That must be divisible by 64")
         })));
         const formatInstructions = parserFromZod.getFormatInstructions()
         const template = `For the following ${this.imageNamesUsedInBlog.length} images: ${arrayToString(this.imageNamesUsedInBlog)} which are in the following blog, write a description of them: BLOG:${this.text} \n{format_instructions}.`;
