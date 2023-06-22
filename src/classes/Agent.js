@@ -6,7 +6,7 @@ const { ChatOpenAI } = require("langchain/chat_models/openai");
 const { z } = require("zod");
 const { StructuredOutputParser,  } = require("langchain/output_parsers");
 const { PromptTemplate } = require("langchain/prompts");
-const { HumanChatMessage, SystemChatMessage } = require("langchain/schema");
+const { HumanChatMessage, SystemChatMessage, AIChatMessage } = require("langchain/schema");
 const Photos = require("./Photos");
 const { OpenAI } = require("langchain/llms/openai");
 const { MemoryVectorStore } = require("langchain/vectorstores/memory");
@@ -32,7 +32,7 @@ class Agent {
     this.imageNames = ["image1.png", "image2.png"];
     this.researcher = new Researcher(content, this.loops, this.openAIKey);
     this.model = new ChatOpenAI({
-      modelName: "gpt-3.5-turbo-16k",
+      modelName: "gpt-4",
       temperature: 0.1,
       maxTokens: 3000,
       openAIApiKey: this.openAIKey,
@@ -84,7 +84,8 @@ class Agent {
       blogPost(outline.longTailKeywords, outline.blogStrucutre, outline.tips, outline.headers, outline.similarTitles, this.content, this.summaries, this.imageNames))];
     try {
       const response = await this.model.call(messages);
-      return response.text;
+      const text = response.text;
+      return text;
     } catch (e) {
       console.error(e)
       console.log('writing post error');
