@@ -115,6 +115,7 @@ const Home = () => {
         <div className="title">
           <h3>BloggerGPT</h3>
           <p>Post hundreds of blog posts using an AI agent</p>
+          <p> <a href="https://discord.gg/5FuTkB6X">Join Discord</a> | <a href="https://blog.langface.ai">Check Out Blog</a> </p>
         </div>
         <div className="data">
           {!hasStarted && data.length === 0 && (
