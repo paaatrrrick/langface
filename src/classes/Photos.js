@@ -21,10 +21,6 @@ class Photos {
         this.wordpressBlogId = wordpressBlogId;
         this.wordpressJwtToken = wordpressJwtToken;
         this.imageNamesUsedInBlog = imageNamesUsedInBlog;
-        this.summarizedImages = [];
-        this.imageBuffers = [];
-        this.localImagePaths = [];
-        this.cloudinaryImages = [];
     }
 
     run = async () => {
@@ -33,7 +29,6 @@ class Photos {
             this.summarizedImages = await this.summarizeImages();
             this.imagePrompts = await this.getImagePrompts();
             this.imageBuffers = await this.getImageBuffers();
-            this.localImagePaths = await this.storeImageOnLocalStore();
             this.cloudinaryImages = await this.uploadToCloudinary();
             this.wordpressImageUrls = await this.getWordpressImageURLs();
         } catch (error) {
@@ -41,7 +36,7 @@ class Photos {
             console.log(error);
         }
         await this.deleteCloudinaryImages();
-        this.deleteFileOnLocalStore();
+        // this.deleteFileOnLocalStore();
         return this.wordpressImageUrls;
     }
 
@@ -159,47 +154,14 @@ class Photos {
         return images;
       };
 
-      storeImageOnLocalStore = async () => {
-        const fileNames = [];
-        let count = 0;
-        for (let buffer of this.imageBuffers) {
-            const fileName = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-            const filePath = path.resolve(`src/storage/${fileName}.png`);
-            fs.writeFile(filePath, buffer, function(err) {
-                if(err) {
-                    count++;
-                } else {
-                    count++;
-                    fileNames.push(fileName);
-                }
-            });
-        }
-        while (count < this.imageBuffers.length) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-        return fileNames;
-    }
-
-    deleteFileOnLocalStore () {
-        for (let fileName of this.localImagePaths) {
-            const filePath = path.resolve(`src/storage/${fileName}.png`);
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    console.error(err)
-                    return
-                }
-            })
-        }
-    }
-
       uploadToCloudinary = async () => {
         const cloudinaryImages = [];
-        for (let fileName of this.localImagePaths) {
+        for (let buffer of this.imageBuffers) {
             try {
-                const result = await cloudinary.uploader.upload(
-                  path.resolve(`src/storage/${fileName}.png`),
-                  { resource_type: "image" }
-                );
+                const dataUri = `data:image/png;base64,${buffer.toString('base64')}`;
+                const result = await cloudinary.uploader.upload(dataUri, { resource_type: "image" });
+                console.log('back from cloudinary');
+                console.log(result);
                 cloudinaryImages.push({ url: result.url, public_id: result.public_id });
               } catch (error) {
                 console.log('error');
