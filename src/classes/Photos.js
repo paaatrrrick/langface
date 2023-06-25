@@ -32,8 +32,10 @@ class Photos {
             this.cloudinaryImages = await this.uploadToCloudinary();
             this.wordpressImageUrls = await this.getWordpressImageURLs();
         } catch (error) {
-            console.log('error creating photos');
-            console.log(error);
+          console.log('creating images error');
+          console.log(error);
+          await this.deleteCloudinaryImages();
+          throw new Error("Error creating images");
         }
         await this.deleteCloudinaryImages();
         // this.deleteFileOnLocalStore();
@@ -52,39 +54,23 @@ class Photos {
         const template = `For the following ${this.imageNamesUsedInBlog.length} images: ${arrayToString(this.imageNamesUsedInBlog)} which are in the following blog, write a description of them: BLOG:${this.text} \n{format_instructions}.`;
         const prompt = new PromptTemplate({template: template, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const input = await prompt.format();
-        try {
-          const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k",temperature: 0, maxTokens: 1000, openAIApiKey: this.openAIKey});
-          const response = await model.call([new HumanChatMessage(input)]);
-          const parsed = await parserFromZod.parse(response.text)            
-          return parsed;
-        } catch (e) {
-          console.error(e);
-          console.log('summarize images error');
-          throw new Error("Error summarizing images. Please try again.");
-        }
+        const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k",temperature: 0, maxTokens: 1000, openAIApiKey: this.openAIKey});
+        const response = await model.call([new HumanChatMessage(input)]);
+        const parsed = await parserFromZod.parse(response.text)            
+        return parsed;
     }
 
+    // style: z.string().describe('The style of the image. It must be: "anime", "cinematic", "digital-art", "low-poly", "photographic", "pixel-art", or "enhance"')
     getImagePrompts = async () => {
-      const styleOptions = ["anime", "cinematic", "digital-art", "low-poly", "photographic", "pixel-art", "enhance"]
-        const parserFromZod = StructuredOutputParser.fromZodSchema(
-          z.array(
-            z.object({
-              prompt: z.string().describe("A one or two sentence prompt to generate the image"),
-              style: z.string().describe('The style of the image. It must be: "anime", "cinematic", "digital-art", "low-poly", "photographic", "pixel-art", or "enhance"')
-        })));
-    
+        const parserFromZod = StructuredOutputParser.fromZodSchema(z.array(z.string().describe("A one or two sentence prompt to generate the image")));    
         const imageDescriptions = this.summarizedImages.map((imageInfo) => imageInfo.prompt)
         const formatInstructions = parserFromZod.getFormatInstructions()
         const prompt = new PromptTemplate({template: `${text2ImgPrompt(imageDescriptions)} \n{format_instructions}.`, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const input = await prompt.format();
-        const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k",temperature: 0, maxTokens: 1000, openAIApiKey: this.openAIKey});
+        const modelType = process.env.CHEAP_GPT === 'true' ? "gpt-3.5-turbo-16k" : "gpt-4";
+        const model = new ChatOpenAI({modelName: modelType,temperature: 0, maxTokens: 1000, openAIApiKey: this.openAIKey});
         const response = await model.call([new HumanChatMessage(input)]);
         const parsed = await parserFromZod.parse(response.text);
-        for (let i in parsed) {
-          if (!styleOptions.includes(parsed[i].style)) {
-            parsed[i].style = "digital-art";
-          }
-        }
         return parsed;
     }
 
@@ -119,7 +105,6 @@ class Photos {
     getImageBuffers = async () => {
         const images = [];
         for (let i in this.imagePrompts) {
-          const imageInfo = this.imagePrompts[i];
           const dimension = this.summarizeImages[i] || {};
           var width = this.findNearestMultipleOf64(dimension.width || 512);
           var height = this.findNearestMultipleOf64(dimension.height || 512);
@@ -134,8 +119,7 @@ class Photos {
                 Authorization: `Bearer ${process.env.STABILITY_API_KEY}`,
               },
               body: JSON.stringify({
-                text_prompts: [{text: imageInfo.prompt}],
-                style_preset: imageInfo.style.replace(/['"]+/g, ''),
+                text_prompts: [{text: this.imagePrompts[i]}],
                 width: width,
                 height: height,
               }),
@@ -157,17 +141,11 @@ class Photos {
       uploadToCloudinary = async () => {
         const cloudinaryImages = [];
         for (let buffer of this.imageBuffers) {
-            try {
-                const dataUri = `data:image/png;base64,${buffer.toString('base64')}`;
-                const result = await cloudinary.uploader.upload(dataUri, { resource_type: "image" });
-                console.log('back from cloudinary');
-                console.log(result);
-                cloudinaryImages.push({ url: result.url, public_id: result.public_id });
-              } catch (error) {
-                console.log('error');
-                console.log(error);
-                throw new Error(`Error creating your post: we failed to upload your images to Cloudinary`);
-              }
+          const dataUri = `data:image/png;base64,${buffer.toString('base64')}`;
+          const result = await cloudinary.uploader.upload(dataUri, { resource_type: "image" });
+          console.log('back from cloudinary');
+          console.log(result);
+          cloudinaryImages.push({ url: result.url, public_id: result.public_id });
         }
         return cloudinaryImages;
       };

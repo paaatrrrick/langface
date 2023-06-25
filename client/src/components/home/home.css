@@ -153,10 +153,23 @@
   align-items: flex-start;
   justify-content: flex-start;
 }
+.fullWidthInput{
+  height: 50px;
+  border-radius: 10px;
+  border: 1px solid #fff;
+  padding: 10px;
+  font-size: 16px;
+  resize: none;
+  background-color: #18181b;
+  margin-right: 10px;
+  width: 100%;
+  text-align: flex-start;
+  margin-bottom: 10px;
+}
 
 .inputs textarea {
   width: 100%;
-  height: 100px;
+  height: 115px;
   border-radius: 10px;
   border: 1px solid #fff;
   padding: 15px;
@@ -170,7 +183,10 @@
   outline: none;
 }
 
-.inputs textarea::placeholder {
+textarea::placeholder {
+  color: #a8a8a8;
+}
+input::placeholder {
   color: #a8a8a8;
 }
 

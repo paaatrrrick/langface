@@ -16,6 +16,7 @@ const Home = () => {
   const [loops, setLoops] = useState("");
   const [jwt, setJwt] = useState("");
   const [id, setId] = useState("");
+  const [blogSubject, setBlogSubject] = useState("");
   const [content, setContent] = useState("");
   const [data, setData] = useState([]);
   const [hasStarted, setHasStarted] = useState(false);
@@ -81,26 +82,27 @@ const Home = () => {
     setData([]);
     setHasStarted(true);
     const openAIKey = localStorage.getItem("openAIKey");
-    const newData = {
-      jwt,
-      loops,
-      id,
-      content,
-      openAIKey,
-      version,
-    };
+    const newData = {jwt, loops, id, content, openAIKey, version, blogSubject};
     socket.on("updateData", (incomingData) => {
-      console.log(incomingData);
       if (incomingData.type === "ending") {
         setHasStarted(false);
         socket.off("updateData");
       }
-      setData((prevData) => [...prevData, incomingData]);
+      setData((prevData) => {
+        const tempPrevData = [...prevData];
+        if (tempPrevData.length > 0 && tempPrevData[tempPrevData.length - 1].type === "updating") {
+          tempPrevData.pop();
+        }
+        tempPrevData.push(incomingData);
+        return tempPrevData;
+      });
     });
     socket.emit("addData", newData);
   };
 
-  const canStart = jwt !== "" && id !== "" && content !== "" && loops !== "";
+  const canStart = jwt !== "" && id !== "" && blogSubject !== "" && loops !== "";
+  console.log('rerendering');
+  console.log(data)
   return (
     <div className="Home">
       {showPopUp && (
@@ -114,8 +116,9 @@ const Home = () => {
       <div className="container">
         <div className="title">
           <h3>BloggerGPT</h3>
-          <p>Post hundreds of blog posts using an AI agent</p>
-          <p> <a href="https://discord.gg/5FuTkB6X">Join Discord</a> | <a href="https://blog.langface.ai">Check Out Blog</a> </p>
+          <p>Post hundreds of blog posts using an AI agents: <a 
+          style={{marginLeft: "10px"}}
+          href="https://discord.gg/5FuTkB6X">Join Discord</a> | <a href="https://blog.langface.ai">Check Out Blog</a></p>
         </div>
         <div className="data">
           {!hasStarted && data.length === 0 && (
@@ -147,6 +150,13 @@ const Home = () => {
                   </a>
                 </div>
               )}
+              {item.type === "updating" && (
+                  <div className="success">
+                    <h4>{item.title}</h4>
+                    <p>{item.content}</p>
+                    <div></div>
+                  </div>
+                )}
               {item.type === "error" && (
                 <div className="error">
                   <p>{item.content}</p>
@@ -166,10 +176,17 @@ const Home = () => {
           )}
         </div>
         <div className="inputs">
+        <input
+              className="fullWidthInput"
+              type="text"
+              value={blogSubject}
+              onChange={(e) => setBlogSubject(e.target.value)}
+              placeholder="What is your blog about? Ex: Brazilian Jiu Jitsu, Taking care of Huskies, History of Cheese, etc."
+            />
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="What is your blog post about"
+            placeholder="Optionally, what other additional context do you want to provide? This could be the style of each post, additional context on the product, or even affiliate links to include."
           />
           <div className="inputsCont">
             <input

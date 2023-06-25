@@ -3,22 +3,15 @@ if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 const { ChatOpenAI } = require("langchain/chat_models/openai");
-const { z } = require("zod");
-const { StructuredOutputParser,  } = require("langchain/output_parsers");
-const { PromptTemplate } = require("langchain/prompts");
 const { HumanChatMessage, SystemChatMessage, AIChatMessage } = require("langchain/schema");
 const Photos = require("./Photos");
-const { OpenAI } = require("langchain/llms/openai");
-const { MemoryVectorStore } = require("langchain/vectorstores/memory");
-const { OpenAIEmbeddings } =require("langchain/embeddings/openai");
 const {Researcher} = require("./Researcher");
-const { dummyblog, dummyTitle } = require("../constants/dummyData");
+const { dummyblog } = require("../constants/dummyData");
 const { blogPost, SystemChatMessageForBlog } = require("../constants/prompts");
-const { getImages, postToWordpress, postToBlogger, getWordpressImageURLs, uploadToCloudinary } = require("../utils/api");
-const TESTING_UI = (process.env.TESTING === "true" || process.env.TESTING_UI === "true") ? true : false;
+const { postToWordpress, postToBlogger } = require("../utils/api");
 
 class Agent {
-  constructor(jwt, blogID, content, loops, openAIKey, version, sendData) {
+  constructor(jwt, blogID, content, loops, openAIKey, version, blogSubject, sendData) {
     this.jwt = jwt;
     this.blogID = blogID;
     this.content = content;
@@ -29,32 +22,26 @@ class Agent {
     this.version = version;
     this.blogOutlines = [];
     this.summaries = [];
+    this.blogSubject = blogSubject;
     this.imageNames = ["image1.png", "image2.png"];
-    this.researcher = new Researcher(content, this.loops, this.openAIKey);
-    this.model = new ChatOpenAI({
-      modelName: "gpt-4",
-      temperature: 0.1,
-      maxTokens: 3000,
-      openAIApiKey: this.openAIKey,
-    });
-   
+    this.researcher = new Researcher(blogSubject, this.openAIKey);
+
   }
 
   run = async () => {
-    if (TESTING_UI) {
-      this.testing();
-      return;
-    }
     try {
-      this.blogOutlines = await this.researcher.getModelURLs();
       var errorCount = 0;
-      for (let outline of this.blogOutlines) {
+      for (let i = 0; i < this.loops; i++) {
         try {
+          this.sendData({ type: "updating", content: `Step 1 of 3: Conducting market research`, title: `Loading... Article ${i + 1} / ${this.loops}` });
+          const outline = await this.researcher.getModelURLs();
+          this.sendData({ type: "updating", content: `Step 2 of 3: Writing the article`, title: `Loading... Article ${i + 1} / ${this.loops}` });
           const post = await this.writePost(outline);
           if (this.version === "blogger") {
             const result = await postToBlogger(post, outline.similarTitles, this.blogID, this.jwt);
             this.sendData(result);
           } else {
+            this.sendData({ type: "updating", content: `Step 3 of 3: Generating images`, title: `Loading... Article ${i + 1} / ${this.loops}`});
             const photosObject = new Photos(post, this.openAIKey, this.blogID, this.jwt, this.imageNames);
             const imageUrls = await photosObject.run();
             const result = await postToWordpress(post, outline.similarTitles, imageUrls, this.imageNames, this.blogID, this.jwt);
@@ -83,55 +70,18 @@ class Agent {
     const messages = [new SystemChatMessage(SystemChatMessageForBlog), new HumanChatMessage(
       blogPost(outline.longTailKeywords, outline.blogStrucutre, outline.tips, outline.headers, outline.similarTitles, this.content, this.summaries, this.imageNames))];
     try {
-      const response = await this.model.call(messages);
+      const modelType = process.env.CHEAP_GPT === 'true' ? "gpt-3.5-turbo-16k" : "gpt-4";
+      const model = new ChatOpenAI({ modelName: modelType, temperature: 0, maxTokens: 3000, openAIApiKey: this.openAIKey});
+      const response = await model.call(messages);
       const text = response.text;
+      console.log('writing post success');
       return text;
     } catch (e) {
       console.error(e)
       console.log('writing post error');
-      throw new Error("Error writing a post for '" + title + "'. Please try again.");
+      throw new Error("Error writing a post for '" + title);
     }
-  };
-
-  testing = async () => {
-    for (let i = 0; i < 5; i++) {
-      this.sendData({
-        title: "Welcome to the Purrfect Blog!",
-        content: `${i}:    <div><p>Welcome to the Purrfect Blog!</p><p>As a cat lover, I know how important it is to stay up-to-date on all things feline. That's why I created this blog - to share my love of cats with the world!</p><p>Here, you'll find everything from cute cat videos to informative articles on cat health and behavior. I'll also be sharing my own experiences as a cat owner, so you can get to know me and my furry friends a little better.</p><p>So, whether you're a seasoned cat owner or just a cat enthusiast, I hope you'll find something here that you love. Thanks for stopping by!</p></div>`,
-        url: "https://www.blogger.com/profile/05904937201937380783",
-        type: "success",
-      });
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
-    this.sendData({ type: "error", content: "Test error" });
-    this.sendData({ type: "ending", content: "Process Complete" });
   };
 }
 
 module.exports = { Agent };
-
-  // writeTitles = async () => {
-  //   if (process.env.MOCK_TITLES === "true") return dummyTitle;
-  //   const parserFromZod = StructuredOutputParser.fromZodSchema(
-  //     z.array(
-  //       z.object({
-  //         title: z.string().describe("The seo optimized title of the blog post"),
-  //         summary: z.string().describe("A short summary of what this blog post should be about. Include long tail keywords"),
-  //   })));
-  //   const formatInstructions = parserFromZod.getFormatInstructions()
-  //   const prompt = new PromptTemplate({
-  //     template: `Provide an unordered list of length "{loops}" of niche blog titles and a short summary:\n It's a blog about "{subject}". \n{format_instructions}.`,
-  //     inputVariables: ["subject", "loops"],
-  //     partialVariables: { format_instructions: formatInstructions },
-  //   });
-  //   const input = await prompt.format({subject: this.content, loops: this.loops});
-  //   try {
-  //     const response = await this.model.call([new HumanChatMessage(input)]);
-  //     const parsed = await parserFromZod.parse(response.text)
-  //     return parsed;
-  //   } catch (e) {
-  //     console.error(e)
-  //     console.log('writing titles error');
-  //     throw new Error("Error creating titles for your posts. Please try again.");
-  //   }
-  // };

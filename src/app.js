@@ -67,9 +67,11 @@ io.on("connection", (socket) => {
   console.log("New client connected");
   socket.on("addData", (newData) => {
     const sendData = async (dataForClient) => {
-      SuccesfulPostsCount += 1;
-      console.log(`sending data to client: ${SuccesfulPostsCount}:`);
-      console.log(dataForClient);
+      if (dataForClient.type !== "updating"){
+        SuccesfulPostsCount += 1;
+        console.log(`sending data to client: ${SuccesfulPostsCount}:`);
+        console.log(dataForClient);
+      }
       socket.emit("updateData", dataForClient); // sends data only to the connected socket
     };
     if (newData.loops > 5) {
@@ -87,6 +89,7 @@ io.on("connection", (socket) => {
         newData.loops,
         newData.openAIKey,
         newData.version,
+        newData.blogSubject,
         sendData
       );
       user.run();

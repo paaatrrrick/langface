@@ -40,11 +40,6 @@ Marvel has created a universe that has captured the hearts and imaginations of f
 <img src="image2.png" alt="Marvel Characters">
 </div>`;
 
-const dummyTitle = [{
-    title: "marvel characters",
-    summary: "everything about marvel's spiderman"
-}];
-
 const summarizeImages = [
     {
       prompt: 'An image featuring the Marvel logo, representing the iconic brand and its impact on popular culture.',
@@ -75,7 +70,7 @@ const dummyWordpressPhotos = [
 ]
 
 
-const dummyResearcher  = [{
+const dummyResearcher  = {
   longTailKeywords: 'best trekking poles, trekking poles 2023, top trekking poles, trekking poles for stability, trekking poles for less pain',
   blogStrucutre: 'This blog is a list of the best trekking poles of 2023. It provides detailed information about each pole, including their features, pros, and cons. The blog also includes a trekking pole comparison table and buying advice to help readers make an informed decision. The content is written in a way that highlights the key features and benefits of each pole, which helps boost SEO by targeting relevant keywords and providing valuable information to readers.',
   tips: "To improve the SEO success of this blog, it could benefit from incorporating more long-tail keywords throughout the content. Additionally, optimizing the meta tags, headings, and image alt tags with relevant keywords can further enhance the blog's visibility in search engine results.",
@@ -138,6 +133,6 @@ const dummyResearcher  = [{
     '<h3> Best Baby Carriers for Hiking of 2023 </h3>',
     '<h3> Best Backpacking Sleeping Pads of 2023 </h3>'
   ]
-}];
+};
 
-module.exports = { dummyblog, dummyTitle, summarizeImages, dummyImagePrompts, dummyWordpressPhotos, dummyResearcher };
+module.exports = { dummyblog, summarizeImages, dummyImagePrompts, dummyWordpressPhotos, dummyResearcher };
