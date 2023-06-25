@@ -5,6 +5,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 50px;
 }
 
 .container {
@@ -16,6 +17,12 @@
   align-items: center;
   width: 1200px;
   max-width: 98%;
+}
+
+.container h2 {
+  width: 98%;
+  text-align: flex-start;
+  margin-bottom: -5px;
 }
 
 .title {
@@ -55,9 +62,9 @@
   padding: 20px;
   justify-content: flex-start;
   border: 2px solid white;
-  border-radius: 30px;
+  border-radius: 15px;
   margin-top: 20px;
-  height: 350px;
+  height: 375px;
   padding-bottom: 50px;
   overflow-y: scroll;
 }
@@ -177,6 +184,10 @@
   font-size: 16px;
   resize: none;
   background-color: #18181b;
+}
+
+input:focus {
+  outline: none;
 }
 
 .inputs textarea:focus {

@@ -59,6 +59,7 @@ class Wordpress {
       };
 
       getWordpressImageURLs = async (cloudinaryUrls) => {
+        if (!cloudinaryUrls || cloudinaryUrls.length === 0) return;
         const response = await fetch(
             `https://public-api.wordpress.com/rest/v1.1/sites/${this.blogID}/media/new`,
           {

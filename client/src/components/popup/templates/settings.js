@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { setPopUpMessage, setVersion } from "../../../store";
+import { setBannerMessage, setVersion } from "../../../store";
 import { useDispatch, useSelector } from "react-redux";
 
 const Settings = ({ close }) => {
@@ -16,7 +16,7 @@ const Settings = ({ close }) => {
     console.log(openAIKey);
     localStorage.setItem("openAIKey", openAIKey);
     dispatch(
-      setPopUpMessage({
+      setBannerMessage({
         message: "OpenAI Key successfully Saved",
         type: "success",
         timeout: 3000,

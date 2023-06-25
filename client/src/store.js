@@ -4,26 +4,31 @@ import { configureStore, createSlice } from "@reduxjs/toolkit";
 const slice = createSlice({
   name: "main",
   initialState: {
-    popUpMessage: null,
-    version: localStorage.getItem("bloggerGPT-version")
-      ? localStorage.getItem("bloggerGPT-version")
-      : "wordpress",
+    bannerMessage: null,
+    version: localStorage.getItem("bloggerGPT-version") ? localStorage.getItem("bloggerGPT-version") : "wordpress",
+    popUpTemplate: null,
   },
   reducers: {
-    setPopUpMessage: (state, action) => {
-      state.popUpMessage = action.payload;
+    setBannerMessage: (state, action) => {
+      state.bannerMessage = action.payload;
     },
-    clearPopUpMessage: (state) => {
-      state.popUpMessage = null;
+    clearBannerMessage: (state) => {
+      state.bannerMessage = null;
     },
     setVersion: (state, action) => {
       localStorage.setItem("bloggerGPT-version", action.payload);
       state.version = action.payload;
     },
+    setPopUpTemplate: (state, action) => {
+      state.popUpTemplate = action.payload;
+    },
+    clearPopUpTemplate: (state) => {
+      state.popUpTemplate = null;
+    }
   },
 });
 
 // Now we configure the store
 const store = configureStore({ reducer: { main: slice.reducer } });
 export default store;
-export const { setPopUpMessage, clearPopUpMessage, setVersion } = slice.actions;
+export const { setBannerMessage, clearBannerMessage, setVersion, setPopUpTemplate, clearPopUpTemplate } = slice.actions;

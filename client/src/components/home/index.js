@@ -4,11 +4,9 @@ import "./home.css";
 import constants from "../../constants";
 import Loader from "../loader";
 import { getJwt, wordpressGetJwt } from "../../utils/getJwt";
-import { setPopUpMessage } from "../../store";
+import { setBannerMessage } from "../../store";
 import { useDispatch, useSelector } from "react-redux";
 import { rateLimitBlogger, rateLimitWordpress } from "../../utils/rateLimit";
-
-import PopUp from "../popup";
 let socket;
 
 const Home = () => {
@@ -21,7 +19,6 @@ const Home = () => {
   const [content, setContent] = useState("");
   const [data, setData] = useState([]);
   const [hasStarted, setHasStarted] = useState(false);
-  const [showPopUp, setShowPopUp] = useState("");
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -40,35 +37,33 @@ const Home = () => {
   };
 
   const fetchWordpress = async (code) => {
-    console.log("at fetching wordpresss");
-    console.log(code);
-    const res = await fetch(`${constants.url}/wordpress`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ code }),
-    });
-    if (res.status !== 200) {
+    try {
+      console.log(code);
+      const res = await fetch(`${constants.url}/wordpress`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      setJwt(data.access_token);
+      setId(data.blog_id);
+    } catch (e) {
       dispatch(
-        setPopUpMessage({
-          message: "Error logging in to wordpress",
+        setBannerMessage({
+          message: "Error logging in to Wordpress",
           type: "error",
-          timeout: 3000,
+          timeout: 10000,
         })
       );
-      return;
     }
-    const data = await res.json();
-    console.log(data);
-    setJwt(data.access_token);
-    setId(data.blog_id);
   };
 
   const handleJWT = async () => {
     const errorDispact = (myStr) => {
       dispatch(
-        setPopUpMessage({ message: myStr, type: "error", timeout: 3000 })
+        setBannerMessage({ message: myStr, type: "error", timeout: 3000 })
       );
     };
     if (version === "wordpress") {
@@ -83,7 +78,7 @@ const Home = () => {
     const canContinue = (version === "blogger") ? rateLimitBlogger(loops) : rateLimitWordpress(loops);
     if (typeof canContinue === "string") {
       dispatch(
-        setPopUpMessage({ message: canContinue, type: "error" })
+        setBannerMessage({ message: canContinue, type: "error" })
       );
       return;
     }
@@ -112,40 +107,10 @@ const Home = () => {
   const canStart = jwt !== "" && id !== "" && blogSubject !== "" && loops !== "";
   return (
     <div className="Home">
-      {showPopUp && (
-        <PopUp
-          close={() => {
-            setShowPopUp("");
-          }}
-          template={showPopUp}
-        />
-      )}
       <div className="container">
-        <div className="title">
-          <h3>BloggerGPT</h3>
-          <p>Post hundreds of blog posts using an AI agents: <a 
-          style={{marginLeft: "10px"}}
-          href="https://discord.gg/5FuTkB6X">Join Discord</a> | <a href="https://blog.langface.ai">Check Out Blog</a> | Beta Version</p>
-        </div>
+        {(hasStarted ||  data.length > 0) ? <h2>Progress</h2> : <h2>Post hundreds of articles in the click of a button</h2>}
+        {(hasStarted ||  data.length > 0) && 
         <div className="data">
-          {!hasStarted && data.length === 0 && (
-            <div className="emptyData-messages">
-              <h5
-                onClick={() => {
-                  setShowPopUp("tutorial");
-                }}
-              >
-                How to get started?
-              </h5>
-              <h5
-                onClick={() => {
-                  setShowPopUp("settings");
-                }}
-              >
-                Settings
-              </h5>
-            </div>
-          )}
           {data.map((item, index) => (
             <div key={index} className="mainDiv">
               {item.type === "success" && (
@@ -182,6 +147,7 @@ const Home = () => {
             </div>
           )}
         </div>
+        }
         <div className="inputs">
         <input
               className="fullWidthInput"
@@ -193,7 +159,7 @@ const Home = () => {
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Optionally, what other additional context do you want to provide? This could be the style of each post, additional context on the product, or even affiliate links to include."
+            placeholder="Optionally, what other additional context do you want to provide? This could be the style of each post, additional information on the product, or even affiliate links to include."
           />
           <div className="inputsCont">
             <input
