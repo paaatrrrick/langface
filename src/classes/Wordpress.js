@@ -46,14 +46,13 @@ class Wordpress {
         ];
         try {
           const modelType = process.env.CHEAP_GPT === 'true' ? "gpt-3.5-turbo-16k" : "gpt-4";
-          const model = new ChatOpenAI({ modelName: modelType, temperature: 0, maxTokens: 8000, openAIApiKey: this.openAIKey});
+          const model = new ChatOpenAI({ modelName: modelType, temperature: 0, maxTokens: 6000, openAIApiKey: this.openAIKey});
           const response = await model.call(messages);
           const text = response.text;
           console.log('writing post success');
           return text;
         } catch (e) {
-          const text = response.text;
-          console.log(text)
+          console.log(e)
           console.log('writing post error');
           throw new Error("Error writing a post for '" + this.outline.similarTitles);
         }
