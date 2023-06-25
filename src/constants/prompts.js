@@ -27,6 +27,20 @@ const blogPost = (longTailKeywords, blogStrucutre, tips, headers, similarTitles,
     Each img should have inline styles for a width and height, which are between 256px and 1280px. Add inline styles of margin and padding to headers and paragraphs to add elegant spacing. DO NOT STATE THE TITLE. START WITH AN ARTICLE, then a p tag, then the first sentence. Optimize every HTML aspect for SEO ranking.`;
 }
 
+const blogPostForBlogger = (longTailKeywords, blogStrucutre, tips, headers, similarTitles, content, previousArticles) => {
+    var previousArticlesString = `Write backlinks throughout the blog to these articles as needed: ${arrayToString(nLengthArray(3, previousArticles))}.`;
+    if (previousArticles.length === 0) { 
+      previousArticlesString = ``;
+    }
+    var addReq = (!content && !previousArticlesString) ? `None` : ``;
+      return `Write a blog post in HTML given the title: ${similarTitles}. Frequently use these longtail keyword: ${longTailKeywords}.
+      It should follow the following structure: \n\n${blogStrucutre}.\n\n Take inspiration from using this header strucutre:\n\n ${arrayToString(headers)}. \n\n Here are some tips to help you write the post:\n\n ${tips}.
+      \n\n Additional Blog Requirements: ${content}. ${previousArticlesString} ${addReq}\n\n\n 
+      Formatting Instructions: The blog should be EXTREMELY LONG with roughly 2500 words, if it was raw text, this blog would take over 3 pages of times new roman 12pt font. 
+      Write only HTML. Start and end with an article tag, the content will be added inside the body tags. Give the blog structure with various html headers and lists as needed.
+       Add inline styles of margin and padding to headers and paragraphs to add elegant spacing. DO NOT STATE THE TITLE. START WITH AN ARTICLE, then a p tag, then the first sentence. Optimize every HTML aspect for SEO ranking.`;
+  }
+
 
 const text2ImgPrompt = (imageDescriptions) => {
     return `Attached is list of paragraphs explaining, each explaining a different photos. 
@@ -54,4 +68,4 @@ const SystemChatMessageForBlog = "You are an AI assitant that is a worldclass SE
 
 
 
-module.exports = { blogPost, SystemChatMessageForBlog, text2ImgPrompt };
+module.exports = { blogPost, SystemChatMessageForBlog, text2ImgPrompt, blogPostForBlogger };

@@ -21,6 +21,7 @@ class Photos {
         this.wordpressBlogId = wordpressBlogId;
         this.wordpressJwtToken = wordpressJwtToken;
         this.imageNamesUsedInBlog = imageNamesUsedInBlog;
+        this.cloudinaryImages = [];
     }
 
     run = async () => {
@@ -30,16 +31,13 @@ class Photos {
             this.imagePrompts = await this.getImagePrompts();
             this.imageBuffers = await this.getImageBuffers();
             this.cloudinaryImages = await this.uploadToCloudinary();
-            this.wordpressImageUrls = await this.getWordpressImageURLs();
         } catch (error) {
           console.log('creating images error');
           console.log(error);
           await this.deleteCloudinaryImages();
           throw new Error("Error creating images");
         }
-        await this.deleteCloudinaryImages();
-        // this.deleteFileOnLocalStore();
-        return this.wordpressImageUrls;
+        return this.cloudinaryImages.map((images) => images.url);
     }
 
     summarizeImages = async () => {
@@ -159,36 +157,6 @@ class Photos {
                 console.log(e);
             }
         }}
-    
-    getWordpressImageURLs = async () => {
-        const cloudinaryUrls = this.cloudinaryImages.map((image) => image.url);
-        const response = await fetch(
-            `https://public-api.wordpress.com/rest/v1.1/sites/${this.wordpressBlogId}/media/new`,
-          {
-            method: "POST",
-            body: JSON.stringify({
-                media_urls: cloudinaryUrls,
-            }),
-            headers: {
-              Authorization: `Bearer ${this.wordpressJwtToken}`,
-              "Content-type": "application/json"
-            },
-          }
-        );
-        if (!response.ok) {
-          const data = await response.text();
-          console.log('error getting image urls')
-          console.log(data);
-          throw new Error(`Error creating your post: we to upload your images to Wordpress`);
-        }
-        const data = await response.json();
-        const imageData = data?.media;
-        const imageUrls = [];
-        for (let media of imageData) {
-          imageUrls.push(media.URL);
-        }
-        return imageUrls;
-      };
 }
 
 module.exports = Photos;

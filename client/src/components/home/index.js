@@ -6,6 +6,7 @@ import Loader from "../loader";
 import { getJwt, wordpressGetJwt } from "../../utils/getJwt";
 import { setPopUpMessage } from "../../store";
 import { useDispatch, useSelector } from "react-redux";
+import { rateLimitBlogger, rateLimitWordpress } from "../../utils/rateLimit";
 
 import PopUp from "../popup";
 let socket;
@@ -79,6 +80,13 @@ const Home = () => {
 
   const handleSubmit = async () => {
     if (hasStarted) return;
+    const canContinue = (version === "blogger") ? rateLimitBlogger(loops) : rateLimitWordpress(loops);
+    if (typeof canContinue === "string") {
+      dispatch(
+        setPopUpMessage({ message: canContinue, type: "error" })
+      );
+      return;
+    }
     setData([]);
     setHasStarted(true);
     const openAIKey = localStorage.getItem("openAIKey");
@@ -97,12 +105,11 @@ const Home = () => {
         return tempPrevData;
       });
     });
+
     socket.emit("addData", newData);
   };
 
   const canStart = jwt !== "" && id !== "" && blogSubject !== "" && loops !== "";
-  console.log('rerendering');
-  console.log(data)
   return (
     <div className="Home">
       {showPopUp && (
