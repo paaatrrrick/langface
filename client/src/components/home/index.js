@@ -118,7 +118,7 @@ const Home = () => {
           <h3>BloggerGPT</h3>
           <p>Post hundreds of blog posts using an AI agents: <a 
           style={{marginLeft: "10px"}}
-          href="https://discord.gg/5FuTkB6X">Join Discord</a> | <a href="https://blog.langface.ai">Check Out Blog</a></p>
+          href="https://discord.gg/5FuTkB6X">Join Discord</a> | <a href="https://blog.langface.ai">Check Out Blog</a> | Beta Version</p>
         </div>
         <div className="data">
           {!hasStarted && data.length === 0 && (
