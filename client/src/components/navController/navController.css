@@ -1,0 +1,100 @@
+.navController{
+    width: 224px;
+    height: 100%;
+    padding: 16px 8px;
+    background-color: var(--darkerBackground);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    transition: all 0.3s ease-in-out;
+}
+
+.navController .italic{
+    font-style: italic;
+}
+
+.navController-pageSelectors{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.navController-pill{
+    width: 100%;
+    height: 36px;
+    padding: 6px 12px;
+    background-color: var(--ligherBackground);
+    border-radius: 18px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    background-color: transparent;
+}
+
+.navController-pageSelectors a{
+    text-decoration: none;
+}
+
+.navController-pill *{
+    transition: all 0.3s ease-in-out;
+}
+.navController-pill:hover{
+    background-color: var(--brandOffColor);
+}
+
+.navController-pill:hover h6{
+    color: var(--brandColor);
+}
+
+.navController-pill:hover img{
+    filter: invert(34%) sepia(70%) saturate(3944%) hue-rotate(232deg) brightness(101%) contrast(91%);
+}
+
+
+.navController-pill.selected{
+    background-color: var(--brandOffColor);
+}
+
+.navController-pill.selected h6{
+    color: var(--brandColor);
+}
+
+.navController-pill.selected img{
+    filter: invert(34%) sepia(70%) saturate(3944%) hue-rotate(232deg) brightness(101%) contrast(91%);
+}
+
+.navController-pill img{
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+}
+
+.navController-pill h6{
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.navController hr{
+    width: 100%;
+    height: 2px;
+    background-color: var(--lightDark);
+}
+
+
+
+@media only screen and (max-width: 1000px) {
+    .navController{
+        width: 175px;
+    }
+}
+
+@media only screen and (max-width: 900px) {
+    .navController{
+       display: none;
+    }
+}

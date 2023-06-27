@@ -1,0 +1,98 @@
+.Settings{
+    width: 100%;
+    height: 100%;
+    padding-top: 60px;
+}
+
+.addOpenAIKey{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.addOpenAIKey button{
+    background-color: var(--brandOffColor);
+    border: 1px solid var(--lightDark);
+    border-width: 1px 1px 1px 0px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 20px;
+    width: 90px;
+    justify-content: flex-start;
+    padding: 10px;
+    border-radius: 0px 10px 10px 0px;
+    color: var(--brandColor);
+
+}
+
+.addOpenAIKey input{
+    border: 1px solid var(--lightDark);
+    width: 175px;
+    height: 20px;
+    border-radius: 20px 0px 0px 20px;
+    padding: 10px;
+}
+
+
+input[type="checkbox"] {
+    height: 0;
+    width: 0;
+    visibility: hidden;
+}
+
+.setting-label {
+    cursor: pointer;
+    text-indent: -9999px;
+    width: 40px;
+    height: 20px;
+    background: grey;
+    display: block;
+    border-radius: 20px;
+    position: relative;
+}
+
+.setting-label:after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 18px;
+    transition: 0.3s;
+}
+
+input:checked + .setting-label {
+background: var(--green);
+}
+
+input:checked + .setting-label:after {
+left: calc(100% - 1px);
+transform: translateX(-100%);
+}
+
+.setting-label:active:after {
+width: 26px;
+}
+
+.toggleContent {
+    margin-top: 20px;
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+justify-content: flex-start;
+}
+
+.toggleContentRow {
+display: flex;
+flex-direction: row;
+align-items: center;
+justify-content: space-between;
+width: 250px;
+margin-right: 80px;
+}
+
+

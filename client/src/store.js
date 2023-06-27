@@ -7,6 +7,7 @@ const slice = createSlice({
     bannerMessage: null,
     version: localStorage.getItem("bloggerGPT-version") ? localStorage.getItem("bloggerGPT-version") : "wordpress",
     popUpTemplate: null,
+    currentView: "blogger"
   },
   reducers: {
     setBannerMessage: (state, action) => {
@@ -24,6 +25,10 @@ const slice = createSlice({
     },
     clearPopUpTemplate: (state) => {
       state.popUpTemplate = null;
+    },
+    setCurrentView: (state, action) => {
+      state.bannerMessage = null;
+      state.currentView = action.payload;
     }
   },
 });
@@ -31,4 +36,4 @@ const slice = createSlice({
 // Now we configure the store
 const store = configureStore({ reducer: { main: slice.reducer } });
 export default store;
-export const { setBannerMessage, clearBannerMessage, setVersion, setPopUpTemplate, clearPopUpTemplate } = slice.actions;
+export const { setBannerMessage, clearBannerMessage, setVersion, setPopUpTemplate, clearPopUpTemplate, setCurrentView } = slice.actions;

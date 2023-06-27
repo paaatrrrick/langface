@@ -11,8 +11,25 @@ const bodyParser = require("body-parser");
 const { Agent } = require("./classes/Agent");
 const FormData = require("form-data");
 const fetch = require("node-fetch");
+const mongoose = require("mongoose");
 
 var SuccesfulPostsCount = 0; // counts how many blog posts were succesfully posted
+
+mongoose.set('strictQuery', true);
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
+
+const db = mongoose.connection;
+db.on("error", (message) => {
+    console.log(message)
+    console.error("Error connecting to database");
+});
+db.once("open", () => {
+    console.log("✅ Database connected");
+});
+
 
 app.use(bodyParser.json(), bodyParser.urlencoded({ extended: false }));
 app.use(cors());
@@ -82,6 +99,9 @@ io.on("connection", (socket) => {
       return;
     }
     try {
+      if (newData.version !== "blogger") {
+        newData.version = "wordpress";
+      }
       const user = new Agent(
         newData.jwt,
         newData.id,

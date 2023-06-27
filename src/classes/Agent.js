@@ -5,6 +5,7 @@ if (process.env.NODE_ENV !== "production") {
 const Wordpress = require("./Wordpress");
 const Blogger = require("./Blogger");
 const {Researcher} = require("./Researcher");
+const Blog = require("../mongo/blog");
 
 class Agent {
   constructor(jwt, blogID, content, loops, openAIKey, version, blogSubject, sendData) {
@@ -25,6 +26,11 @@ class Agent {
   run = async () => {
       for (let i = 0; i < this.loops; i++) {
         try {
+          const {remainingPosts, dailyPostCount} = await Blog.checkRemainingPosts(this.blogID, this.version);
+          if (remainingPosts <= 0) {
+            this.sendData({ type: "ending", content: "Ending: You have reached your daily post limit", remainingPosts, dailyPostCount });
+            return;
+          }
           this.sendData({ type: "updating", content: `Step 1 of 3: Conducting market research`, title: `Loading... Article ${i + 1} / ${this.loops}` });
           const outline = await this.researcher.getModelURLs();
 
@@ -34,14 +40,15 @@ class Agent {
 
           var result = await blogSite.run();
           this.summaries.push({summary: outline.blogStrucutre, url: result.url});
-          this.sendData({...result, type: 'success'});
+          const postData = await Blog.addPost(this.blogID, this.version, result.url);
+          this.sendData({...result, ...postData, type: 'success'});
         } catch (e) {
           console.log('error from loops')
           console.log(e);
           this.sendData({ type: "error", content:  e.message });
         }
       }
-      this.sendData({ type: "ending", content: "Process Complete" });
+      this.sendData({ type: "ending", title: "Process Complete" });
   };
 
 

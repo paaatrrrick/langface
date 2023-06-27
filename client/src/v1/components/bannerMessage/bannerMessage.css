@@ -1,28 +1,24 @@
 .banner-message {
-    position: relative;
-    top: 1%;
+    position: absolute;
+    top: 5%;
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    border-radius: 0px 0px 20px 20px;
+    border-radius: 2px;
     padding: 10px 25px;
     max-width: 90%;
     width: 800px;
 }
 
-.banner-message p{
-    color: var(--ligherBackground);
-}
-
 .banner-message.error-message {
-    background-color: var(--red);
+    background-color: #fe3d67;
 }
 
 .banner-message.success-message {
-    background-color: var(--green);
+    background-color: #6cd06c;
 }
 
 .banner-message>button {

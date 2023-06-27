@@ -141,8 +141,6 @@ class Photos {
         for (let buffer of this.imageBuffers) {
           const dataUri = `data:image/png;base64,${buffer.toString('base64')}`;
           const result = await cloudinary.uploader.upload(dataUri, { resource_type: "image" });
-          console.log('back from cloudinary');
-          console.log(result);
           cloudinaryImages.push({ url: result.url, public_id: result.public_id });
         }
         return cloudinaryImages;

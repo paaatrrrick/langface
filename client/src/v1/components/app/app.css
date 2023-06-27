@@ -1,0 +1,14 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+    color: #fff;
+}
+
+.App {
+    min-width: 100vw;
+    min-height: 100vh;
+    padding: 5px;
+    background-color: #282c34;
+}

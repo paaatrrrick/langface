@@ -1,0 +1,268 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,300;0,500;1,600&display=swap");
+
+.Home {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 50px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 90%;
+  margin-top: 10px;
+  margin-bottom: 2%;
+  align-items: center;
+  width: 1200px;
+  max-width: 98%;
+}
+
+.container h2 {
+  width: 98%;
+  text-align: flex-start;
+  margin-bottom: -5px;
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.title > h3 {
+  color: #fff;
+  font-size: 40px;
+  text-align: center;
+}
+
+.title > p {
+  color: #fff;
+  margin-top: 20px;
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.inputs {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.data {
+  width: 98%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  justify-content: flex-start;
+  border: 2px solid white;
+  border-radius: 15px;
+  margin-top: 20px;
+  height: 375px;
+  padding-bottom: 50px;
+  overflow-y: scroll;
+}
+
+.data::-webkit-scrollbar {
+  width: 10px; /* Width of the scrollbar */
+  border-radius: 20px;
+}
+
+.data::-webkit-scrollbar-track {
+  background: transparent; /* Make it transparent */
+}
+
+.data::-webkit-scrollbar-thumb {
+  background: transparent; /* Make it grey (or choose your color) */
+  height: px; /* Make it 90% of the track height */
+}
+
+.data::-webkit-scrollbar-thumb:hover {
+  background: #fff; /* Color when hovering */
+  border-radius: 5px;
+}
+
+.emptyData-messages {
+  display: flex;
+}
+
+.emptyData-messages h5 {
+  color: #fff;
+  font-size: 18px;
+  margin-right: 10px;
+  text-decoration: underline;
+}
+
+.emptyData-messages > h5:hover {
+  cursor: pointer;
+}
+
+.data .mainDiv {
+  width: 100%;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+.success {
+  width: 100%;
+  border: 1px solid #fff;
+  padding: 20px;
+}
+
+.success p {
+  margin-top: 15px;
+  max-height: 50px;
+  overflow-y: scroll;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.error {
+  width: 100%;
+  border: 1px solid #fc6c86;
+  padding: 20px;
+}
+
+.error p {
+  margin-top: 15px;
+  max-height: 50px;
+  font-size: 14px;
+  overflow: hidden;
+  margin-bottom: 15px;
+  color: #ca242c;
+}
+
+.success p::-webkit-scrollbar {
+  width: 5px; /* Width of the scrollbar */
+}
+
+.success p::-webkit-scrollbar-track {
+  background: transparent; /* Make it transparent */
+}
+
+.success p::-webkit-scrollbar-thumb {
+  background: #fff; /* Make it grey (or choose your color) */
+  height: 7px; /* Make it 90% of the track height */
+  border-radius: 5px;
+}
+
+.inputs {
+  margin-top: 20px;
+  width: 98%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.fullWidthInput{
+  height: 50px;
+  border-radius: 10px;
+  border: 1px solid #fff;
+  padding: 10px;
+  font-size: 16px;
+  resize: none;
+  background-color: #18181b;
+  margin-right: 10px;
+  width: 100%;
+  text-align: flex-start;
+  margin-bottom: 10px;
+}
+
+.inputs textarea {
+  width: 100%;
+  height: 115px;
+  border-radius: 10px;
+  border: 1px solid #fff;
+  padding: 15px;
+  margin-bottom: 5px;
+  font-size: 16px;
+  resize: none;
+  background-color: #18181b;
+}
+
+input:focus {
+  outline: none;
+}
+
+.inputs textarea:focus {
+  outline: none;
+}
+
+textarea::placeholder {
+  color: #a8a8a8;
+}
+input::placeholder {
+  color: #a8a8a8;
+}
+
+.inputsCont {
+  display: flex;
+  width: 100%;
+  height: 50px;
+  margin-top: 5px;
+}
+
+.inputsCont input {
+  height: 100%;
+  border-radius: 10px;
+  border: 1px solid #fff;
+  padding: 10px;
+  font-size: 16px;
+  resize: none;
+  background-color: #18181b;
+  margin-right: 10px;
+  width: 325px;
+  text-align: flex-start;
+}
+.inputsCont input:focus {
+  outline: none;
+}
+
+.inputsCont button {
+  height: 100%;
+  border-radius: 10px;
+  border: 1px solid #fff;
+  resize: none;
+  margin-right: 10px;
+}
+
+.google {
+  width: 200px;
+  font-size: 16px;
+  background-color: #18181b;
+}
+
+.google.googleGood {
+  border-color: #91fec4 !important;
+  color: #91fec4 !important;
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+.runButton {
+  background-color: #fff;
+  font-weight: 600;
+  font-size: 18px;
+  flex-grow: 3;
+  color: #18181b;
+}
+
+button:disabled:hover {
+  cursor: not-allowed !important;
+}
+
+.loader-container {
+  margin-top: 20px;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
