@@ -18,20 +18,20 @@ var SuccesfulPostsCount = 0; // counts how many blog posts were succesfully post
 console.log(process.env.MONGO_URI);
 console.log('asdfsdfsfssfdsdffs');
 console.log(process.env);
-// mongoose.set('strictQuery', true);
-// mongoose.connect(process.env.MONGO_URI, {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-// });
+mongoose.set('strictQuery', true);
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
 
-// const db = mongoose.connection;
-// db.on("error", (message) => {
-//     console.log(message)
-//     console.error("Error connecting to database");
-// });
-// db.once("open", () => {
-//     console.log("✅ Database connected");
-// });
+const db = mongoose.connection;
+db.on("error", (message) => {
+    console.log(message)
+    console.error("Error connecting to database");
+});
+db.once("open", () => {
+    console.log("✅ Database connected");
+});
 
 
 app.use(bodyParser.json(), bodyParser.urlencoded({ extended: false }));
