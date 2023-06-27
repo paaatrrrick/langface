@@ -26,10 +26,14 @@ class Agent {
   run = async () => {
       for (let i = 0; i < this.loops; i++) {
         try {
-          const {remainingPosts, dailyPostCount} = await Blog.checkRemainingPosts(this.blogID, this.version);
-          if (remainingPosts <= 0) {
-            this.sendData({ type: "ending", content: "Ending: You have reached your daily post limit", remainingPosts, dailyPostCount });
-            return;
+          try {
+            const {remainingPosts, dailyPostCount} = await Blog.checkRemainingPosts(this.blogID, this.version);
+            if (remainingPosts <= 0) {
+              this.sendData({ type: "ending", content: "Ending: You have reached your daily post limit", remainingPosts, dailyPostCount });
+              return;
+            }
+          } catch (e) {
+            console.log('mongo error');
           }
           this.sendData({ type: "updating", content: `Step 1 of 3: Conducting market research`, title: `Loading... Article ${i + 1} / ${this.loops}` });
           const outline = await this.researcher.getModelURLs();
@@ -40,8 +44,13 @@ class Agent {
 
           var result = await blogSite.run();
           this.summaries.push({summary: outline.blogStrucutre, url: result.url});
-          const postData = await Blog.addPost(this.blogID, this.version, result.url);
-          this.sendData({...result, ...postData, type: 'success'});
+          try {
+            const postData = await Blog.addPost(this.blogID, this.version, result.url);
+            this.sendData({...result, ...postData, type: 'success'});
+          } catch (e) {
+            console.log('mongo error bttm');
+            this.sendData({...result, type: 'success'});
+          }
         } catch (e) {
           console.log('error from loops')
           console.log(e);
