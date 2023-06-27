@@ -23,13 +23,13 @@ const BlogSchema = new Schema({
     postsLeftToday: {
       type: Number,
       default: function() {
-        return this.version === 'wordpress' ? 8 : 50;
+        return this.version === 'wordpress' ? 8 : 25;
       }
     },
     maxNumberOfPosts: {
         type: Number,
         default: function() {
-            return this.version === 'wordpress' ? 8 : 50;
+            return this.version === 'wordpress' ? 8 : 25;
           }
     },
     userID: {

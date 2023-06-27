@@ -54,7 +54,7 @@ class Agent {
         } catch (e) {
           console.log('error from loops')
           console.log(e);
-          this.sendData({ type: "error", content:  e.message });
+          this.sendData({ type: "error", title:  e.message });
         }
       }
       this.sendData({ type: "ending", title: "Process Complete" });

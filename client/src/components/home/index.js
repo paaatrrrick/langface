@@ -33,7 +33,7 @@ const Home = () => {
     const [data, setData] = useState([]);
     const [hasStarted, setHasStarted] = useState(false);
     const [usedBlogPosts, setUsedBlogPosts] = useState(0);
-    const [maxBlogPosts, setMaxBlogPosts] = useState((version === "blogger") ? 50 : 8);
+    const [maxBlogPosts, setMaxBlogPosts] = useState((version === "blogger") ? 25 : 8);
     const messagesEndRef = useRef(null);
 
     const defualtPills = [
