@@ -53,7 +53,7 @@ const Home = () => {
         version: "initializing",
         title: "Content Generation",
         img: StoreFrontSvg,
-        content: `An Search Engine Optimized blog post is written and posted to your ${version === 'blogger' ? 'Blogger' : "Wordpress"} account. It includes specific long tail keywords and an optimal HTML header structure.`,
+        content: `An Search Engine Optimized blog post is written and posted to your ${version === 'blogger' ? 'Blogger' : "Wordpress"} account with specific long tail keywords, an optimal HTML header structuren, and more!`,
       }
     ];
     //if version is blogger, remove the 2 element in the array defualtPills
