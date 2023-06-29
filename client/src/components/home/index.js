@@ -41,19 +41,19 @@ const Home = () => {
         version: "initializing",
         title: "Research",
         img: LibrarySvg,
-        content: "For each blog post, we scrape the web to find top performing articles in your niche to model keywords and structure off of.",
+        content: "For each blog post, we search the web to find top performing articles in your niche to use as a model.",
       },
       {
         version: "initializing",
         title: "Image Generation",
         img: ImageSvg,
-        content: "AI image generators make unique images to compliment the message of your blog. Google ranks pages with unique images higher!",
+        content: "AI image generators make unique images to compliment the message of your blog and improve your search ranking.",
       },
       {
         version: "initializing",
         title: "Content Generation",
         img: StoreFrontSvg,
-        content: `An SEO optimized blog post is written and posted to your ${version === 'blogger' ? 'Blogger' : "Wordpress"} account. It contains specific long tail keywords and an HTML header structure that Google can parse.`,
+        content: `An Search Engine Optimized blog post is written and posted to your ${version === 'blogger' ? 'Blogger' : "Wordpress"} account. It includes specific long tail keywords and an optimal HTML header structure.`,
       }
     ];
     //if version is blogger, remove the 2 element in the array defualtPills
