@@ -14,7 +14,7 @@
 }
 
 .banner-message p{
-    color: var(--ligherBackground);
+    color: var(--lighterBackground);
 }
 
 .banner-message.error-message {
@@ -28,7 +28,7 @@
 .banner-message>button {
     background-color: transparent;
     border: none;
-    color: #fff;
+    color: var(--lighterBackground);
     font-size: 18px;
     cursor: pointer;
 }

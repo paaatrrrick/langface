@@ -60,7 +60,7 @@ input[type="checkbox"] {
     left: 1px;
     width: 18px;
     height: 18px;
-    background: #fff;
+    background: var(--lighterBackground);;
     border-radius: 18px;
     transition: 0.3s;
 }

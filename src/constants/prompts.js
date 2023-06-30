@@ -1,46 +1,39 @@
 const { arrayToString } = require("../utils/helpers");
 
-//nlength array take an array of length k. If k < n, then it returns an array of length n with the same elements as the original array. If k > n, then it returns an array of length n random elements of the array. If k == n, then it returns the original array.
 const nLengthArray = (n, array) => {
     if (array.length <= n) return array;
     if (array.length > n) {
         let newArray = [];
         for (let i = 0; i < n; i++) {
-            newArray.push(array[Math.floor(Math.random() * array.length)]);
+            newArray.push(JSON.stringify(array[Math.floor(Math.random() * array.length)]));
         }
         return newArray;
     }
 };
 
-const blogPost = (longTailKeywords, blogStrucutre, tips, headers, similarTitles, content, previousArticles, imageNames) => {
-  var previousArticlesString = `Write backlinks throughout the blog to these articles as needed: ${arrayToString(nLengthArray(3, previousArticles))}.`;
+
+const blogPost = (longTailKeywords, headers, similarTitles, content, previousArticles, imageNames) => {
+  var previousArticlesString = `-Add a tags throughout the blog to reference these blog articles you previously wrote: ${arrayToString(nLengthArray(3, previousArticles))}.\n`;
   if (previousArticles.length === 0) { 
     previousArticlesString = ``;
   }
-  var addReq = (!content && !previousArticlesString) ? `None` : ``;
-    return `Write a blog post in HTML given the title: ${similarTitles}. Frequently use these longtail keyword: ${longTailKeywords}.
-    It should follow the following structure: \n\n${blogStrucutre}.\n\n Take inspiration from using this header strucutre:\n\n ${arrayToString(headers)}. \n\n Here are some tips to help you write the post:\n\n ${tips}.
-    \n\n Additional Blog Requirements: ${content}. ${previousArticlesString} ${addReq}\n\n\n 
-    Formatting Instructions: The blog should be EXTREMELY LONG with roughly 2500 words, if it was raw text, this blog would take over 3 pages of times new roman 12pt font. 
-    Write only HTML. Start and end with an article tag, the content will be added inside the body tags. Give the blog structure with various html headers and lists as needed. 
-    Include exactly ${imageNames.length} imgs with the following src's respsectively: ${arrayToString(imageNames)}. They should be imbedded throughout the blog.
-    Each img should have inline styles for a width and height, which are between 256px and 1280px. Add inline styles of margin and padding to headers and paragraphs to add elegant spacing. DO NOT STATE THE TITLE. START WITH AN ARTICLE, then a p tag, then the first sentence. Optimize every HTML aspect for SEO ranking.`;
+  return `
+  You are an AI assitant that is a worldclass SEO class writer. Given the following list of instructions write a blog post. \n
+  -Blog title: ${similarTitles}. \n
+  -Take inspiration for the following headers (these were used in a similar blog that did well): ${arrayToString(headers)}. \n
+  -All content in the blog should only be relvant to to blog's goal. Despite what the headers may say, do not reference social media pages (twitter, instagram, youtube, etc) or other things unrelated to the content. \n
+  ${(content) && `-${content}\n`}
+  -Use the following longtail keywords frequently: ${longTailKeywords}. \n
+  -${previousArticlesString}
+  -Have 8 unique headers! EACH header MUST HAVE 3 PARAGRAPHS beneath it! EACH PARAGRAPH MUST HAVE A MINIMUM OF 8 SENTENCES!\n
+  ${(imageNames.length > 0) && `-Include exactly ${imageNames.length} imgs with the following src's respsectively: ${arrayToString(imageNames)}. Imbedded the image throughout the blog. Each img should have inline styles for a width and height, which are between 256px and 1280px.\n`}
+  -Output only valid HTML. Add inline styles of margin and padding to headers and paragraphs to add elegant spacing. DO NOT STATE THE TITLE. Start with an article tag, then a p tag, then the first sentence.
+  `
+};
+
+const blogPostForBlogger = (longTailKeywords, headers, similarTitles, content, previousArticles) => {
+  return blogPost(longTailKeywords, headers, similarTitles, content, previousArticles, []);
 }
-
-const blogPostForBlogger = (longTailKeywords, blogStrucutre, tips, headers, similarTitles, content, previousArticles) => {
-    var previousArticlesString = `Write backlinks throughout the blog to these articles as needed: ${arrayToString(nLengthArray(3, previousArticles))}.`;
-    if (previousArticles.length === 0) { 
-      previousArticlesString = ``;
-    }
-    var addReq = (!content && !previousArticlesString) ? `None` : ``;
-      return `Write a blog post in HTML given the title: ${similarTitles}. Frequently use these longtail keyword: ${longTailKeywords}.
-      It should follow the following structure: \n\n${blogStrucutre}.\n\n Take inspiration from using this header strucutre:\n\n ${arrayToString(headers)}. \n\n Here are some tips to help you write the post:\n\n ${tips}.
-      \n\n Additional Blog Requirements: ${content}. ${previousArticlesString} ${addReq}\n\n\n 
-      Formatting Instructions: The blog should be EXTREMELY LONG with roughly 2500 words, if it was raw text, this blog would take over 3 pages of times new roman 12pt font. 
-      Write only HTML. Start and end with an article tag, the content will be added inside the body tags. Give the blog structure with various html headers and lists as needed.
-       Add inline styles of margin and padding to headers and paragraphs to add elegant spacing. DO NOT STATE THE TITLE. START WITH AN ARTICLE, then a p tag, then the first sentence. Optimize every HTML aspect for SEO ranking.`;
-  }
-
 
 const text2ImgPrompt = (imageDescriptions) => {
     return `Attached is list of paragraphs explaining, each explaining a different photos. 
@@ -64,8 +57,5 @@ const text2ImgPrompt = (imageDescriptions) => {
     6: higly detailed, majestic royal tall ship on a calm sea,realistic painting, by Charles Gregory Artstation and Antonio Jacobsen and Edward Moran, (long shot), clear blue sky, intricated details, 4k\n\n`
 }
 
-const SystemChatMessageForBlog = "You are an AI assitant that is a worldclass SEO class writer. You are given a blog title and a description/guidance about the blog, then you write a blog post. You write all content only in valid HTML that is highligy optimized for SEO."
 
-
-
-module.exports = { blogPost, SystemChatMessageForBlog, text2ImgPrompt, blogPostForBlogger };
+module.exports = { blogPost, text2ImgPrompt, blogPostForBlogger };

@@ -6,6 +6,7 @@ const slice = createSlice({
   initialState: {
     bannerMessage: null,
     version: localStorage.getItem("bloggerGPT-version") ? localStorage.getItem("bloggerGPT-version") : "wordpress",
+    colorScheme: localStorage.getItem("bloggerGPT-colorScheme") ? localStorage.getItem("bloggerGPT-colorScheme") : "dark",
     popUpTemplate: null,
     currentView: "blogger"
   },
@@ -29,6 +30,10 @@ const slice = createSlice({
     setCurrentView: (state, action) => {
       state.bannerMessage = null;
       state.currentView = action.payload;
+    },
+    setColorScheme: (state, action) => {
+      localStorage.setItem("bloggerGPT-colorScheme", action.payload);
+      state.colorScheme = action.payload;
     }
   },
 });
@@ -36,4 +41,4 @@ const slice = createSlice({
 // Now we configure the store
 const store = configureStore({ reducer: { main: slice.reducer } });
 export default store;
-export const { setBannerMessage, clearBannerMessage, setVersion, setPopUpTemplate, clearPopUpTemplate, setCurrentView } = slice.actions;
+export const { setBannerMessage, clearBannerMessage, setVersion, setPopUpTemplate, clearPopUpTemplate, setCurrentView, setColorScheme } = slice.actions;

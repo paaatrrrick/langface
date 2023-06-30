@@ -4,7 +4,7 @@ if (process.env.NODE_ENV !== "production") {
 const fetch = require("node-fetch");
 const { replaceStringInsideStringWithNewString } = require("../utils/helpers");
 const { ChatOpenAI } = require("langchain/chat_models/openai");
-const { HumanChatMessage, SystemChatMessage } = require("langchain/schema");
+const { HumanChatMessage, AIChatMessage, SystemChatMessage } = require("langchain/schema");
 const Photos = require("./Photos");
 const { dummyblog } = require("../constants/dummyData");
 const { blogPost, SystemChatMessageForBlog } = require("../constants/prompts");  
@@ -39,15 +39,13 @@ class Wordpress {
 
     writePost = async () => {
         if (process.env.MOCK_WRITING_BLOG === "true") return dummyblog;
-        const messages = [
-            new SystemChatMessage(SystemChatMessageForBlog), 
-            new HumanChatMessage(
-                blogPost(this.outline.longTailKeywords, this.outline.blogStrucutre, this.outline.tips, this.outline.headers, this.outline.similarTitles, this.content, this.summaries, this.imageNames))
-        ];
         try {
           const modelType = process.env.CHEAP_GPT === 'true' ? "gpt-3.5-turbo-16k" : "gpt-4";
-          const model = new ChatOpenAI({ modelName: modelType, temperature: 0, maxTokens: 6000, openAIApiKey: this.openAIKey});
-          const response = await model.call(messages);
+          const model = new ChatOpenAI({ modelName: modelType, temperature: 0, openAIApiKey: this.openAIKey});
+          const template = blogPost(this.outline.longTailKeywords, this.outline.headers, this.outline.similarTitles, this.content, this.summaries, this.imageNames);
+          console.log(template);
+          const response = await model.call([new HumanChatMessage(template)]);
+          console.log(response);
           const text = response.text;
           console.log('writing post success');
           return text;

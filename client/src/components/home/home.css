@@ -44,7 +44,7 @@
 .runButton h4{
     margin-left: 5px;
     font-weight: 400;
-    color: var(--ligherBackground);
+    color: #fff;
 }
 
 .home-input-top-row{
@@ -123,8 +123,8 @@
     height: 40px;
     width: 275px;
     border-radius: 20px;
-    color: #757575;
-    background-color: var(--ligherBackground);
+    color: var(--gray);
+    background-color: var(--lighterBackground);
     border: 2px solid var(--lightDark);
     padding-left: 7px 15px;
 }

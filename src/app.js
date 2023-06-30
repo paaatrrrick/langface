@@ -15,9 +15,7 @@ const mongoose = require("mongoose");
 
 var SuccesfulPostsCount = 0; // counts how many blog posts were succesfully posted
 
-console.log(process.env.MONGO_URI);
-console.log('asdfsdfsfssfdsdffs');
-console.log(process.env);
+
 mongoose.set('strictQuery', true);
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -94,13 +92,6 @@ io.on("connection", (socket) => {
       }
       socket.emit("updateData", dataForClient); // sends data only to the connected socket
     };
-    if (newData.loops > 50) {
-      socket.emit("updateData", {
-        type: "ending",
-        content: "Ending: Please do 50 or less loops",
-      });
-      return;
-    }
     try {
       if (newData.version !== "blogger") {
         newData.version = "wordpress";

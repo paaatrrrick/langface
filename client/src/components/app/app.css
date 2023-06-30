@@ -5,20 +5,24 @@
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
     color: var(--mainDark);
+    transition: all 0.2s ease;
 }
+
 
 :root {
     --brandColor: #625df4;
-    --brandOffColor: #e0e1f7;
-    --mainDark: #212121;
-    --lightDark: #6c6685;
-    --darkerBackground: #f7f7f8;
-    --ligherBackground: #fff;
+    --brandOffColor: #fff;
+    --mainDark: #fff;
+    --lightDark: #f7f7f8;
+    --darkerBackground: #0e0e0e;
+    --lighterBackground: #212121;
+    --gray: #757575;
     --green: #6cd06c;
     --red: #fe3d67;
   }
 
-  
+
+
 
 .App {
     width: 100vw;
@@ -71,6 +75,32 @@
     justify-content: flex-end;
 }
 
+::-webkit-scrollbar {
+    width: 10px;
+    background-color: var(--lighterBackground);
+}
+
+img {
+    transition: all 0s ease !important;
+    filter: var(--blackFiler);
+}
+
+input {
+    background-color: var(--lighterBackground);
+}
+
+input::placeholder {
+    color: var(--gray);
+}
+
+textarea {
+    background-color: var(--lighterBackground);
+}
+
+textarea::placeholder {
+    color: var(--gray);
+}
+
 input:focus{
     outline: none;
 }
@@ -95,7 +125,7 @@ a:hover{
 }
 
 .App-right-section{
-    background-color: var(--ligherBackground);
+    background-color: var(--lighterBackground);
     flex: 1;
     display: flex;
     flex-direction: row;
@@ -150,7 +180,7 @@ a:hover{
 }
 
 .body a{
-    font-size: 14px;
+        font-size: 14px;
     font-weight: 400;
     color: var(--lightDark);
 }

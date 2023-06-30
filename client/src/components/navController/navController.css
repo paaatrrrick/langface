@@ -24,7 +24,7 @@
     width: 100%;
     height: 36px;
     padding: 6px 12px;
-    background-color: var(--ligherBackground);
+    background-color: var(--lighterBackground);
     border-radius: 18px;
     display: flex;
     flex-direction: row;

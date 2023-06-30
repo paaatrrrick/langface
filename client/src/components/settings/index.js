@@ -1,12 +1,12 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { setBannerMessage, setVersion } from '../../store';
+import { setBannerMessage, setVersion, setColorScheme } from '../../store';
 import { useDispatch, useSelector } from "react-redux";
 import "./settings.css";
 
-const Settings = ({ close }) => {
+const Settings = () => {
   const dispatch = useDispatch();
-  let version = useSelector((state) => state.main.version);
+  let { version, colorScheme }  = useSelector((state) => state.main);
   const [openAIKey, setOpenAIKey] = useState("");
   useEffect(() => {
     if (localStorage.getItem("openAIKey")) {
@@ -38,6 +38,15 @@ const Settings = ({ close }) => {
       dispatch(setVersion("wordpress"));
     }
   };
+
+  const toggleColorScheme = () => {
+    if (colorScheme === "light") {
+      dispatch(setColorScheme("dark"));
+    } else {
+      dispatch(setColorScheme("light"));
+    }
+  };
+
   return (
     <div className="Settings">
       <h1>Settings</h1>
@@ -93,7 +102,24 @@ const Settings = ({ close }) => {
         </div>
         </div>
       </div>
-      <div className="addOpenAIKe"></div>
+      <div className="toggleContent">
+        <div className="row align-center">
+        <div className="toggleContentRow">
+          <p>Using Dark Color Scheme</p>
+          <div className="row align-center justify-center">
+            <input
+              type="checkbox"
+              id="switchCS"
+              checked={colorScheme === "dark"}
+              onChange={toggleColorScheme}
+            />
+            <label htmlFor="switchCS" className="setting-label">
+              Toggle
+            </label>
+          </div>
+        </div>
+        </div>
+      </div>
     </div>
   );
 };
