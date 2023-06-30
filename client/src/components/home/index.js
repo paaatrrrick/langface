@@ -163,7 +163,7 @@ const Home = () => {
           <h4>Start Agent</h4>
         </button>
       </div>
-        <h6>Post hundreds of SEO optimized blog posts to {(version === "blogger") ? "Blogger" : "Wordpress"} </h6>
+        <h6>Post hundreds of Search Engine Optimized blog posts to {(version === "blogger") ? "Blogger" : "Wordpress"} </h6>
         <div className="home-results-container">
         <div className="home-input-top-row">
           Daily Articles Used: {usedBlogPosts} / {maxBlogPosts}
