@@ -24,12 +24,9 @@ class LongTailResearcher {
         const systemPrompt = new PromptTemplate({template: systemMessage, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const systemFormated = await systemPrompt.format();
         const humanMessage = `Blog Subject: "${this.subject}"${(this.content) && `\n\nSpecifications: "${this.content}"`}`
-        console.log(systemFormated);
-        console.log(humanMessage);
         const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0.1, maxTokens: 6000, openAIApiKey: this.openAIKey});
         const response = await model.call([new SystemChatMessage(systemFormated), new HumanChatMessage(humanMessage)]);
         const parsed = await parserFromZod.parse(response.text);
-        console.log(parsed)
         this.LongTailKeywords = parsed;
         return this.LongTailKeywords;
     }
@@ -67,11 +64,9 @@ class LongTailResearcher {
         const template = `You are worldclass SEO expert. You have been hired by a company to write a blog. The company wants to rank for the keyword "${keyword}". The blog is about "${this.subject}"${(this.content) && ` and has the following specifications: "${this.content}"`}. \n{format_instructions}`;
         const prompt = new PromptTemplate({template: template, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const input = await prompt.format();
-        console.log(input);
         const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0.1, maxTokens: 6000, openAIApiKey: this.openAIKey});
         const response = await model.call([new HumanChatMessage(input)]);
         const parsed = await parserFromZod.parse(response.text)   
-        console.log(parsed);
         const { blogTitle, lsiKeywords, headers } = parsed;
         return { blogTitle, lsiKeywords, keyword, headers };
       };
