@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import './app.css'
 import { useDispatch, useSelector } from 'react-redux';
 import constants from '../../constants';
-import { addAgent, clearBannerMessage, clearPopUpTemplate, updateBlogAgentData } from '../../store';
+import { addAgent, clearBannerMessage, clearPopUpTemplate, updateBlogAgentData, setBannerMessage } from '../../store';
 import { setColorScheme } from '../../utils/styles';
 import NavController from '../navController';
 import BannerMessage from '../bannerMessage';
@@ -30,6 +30,29 @@ const App = () => {
         setColorScheme(colorScheme);
     }, [colorScheme])
 
+    const launch = async () => {
+        var userCookie = document.cookie.split(';').find(cookie => cookie.startsWith('user-cookie='));
+        if (!userCookie) {
+            userCookie = document.cookie.split(';').find(cookie => cookie.startsWith(' user-cookie='));
+        }
+        if (userCookie) {
+            const res = await fetch(`${constants.url}/user`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+            if (!res.ok) {
+                dispatch(setBannerMessage({type: 'error', message: 'Error: Could not authenticate user'}));
+            } else {
+                const data = await res.json();
+                dispatch(setBannerMessage({type: 'success', message: 'Logged in'}));
+                console.log(data);
+            }
+        }
+    }
+    useEffect(() => {
+        launch();
+    }, []);
+
     useEffect(() => {
         socket = io(constants.url);
         socket.on("updateData", (incomingData) => {updateBlogAgentData(incomingData);});
@@ -41,7 +64,7 @@ const App = () => {
     const Component = templateMap[currentView] || Home;
     return (
         <div className="App">
-            <NavController />
+            <NavController launch={launch} />
             <div className="App-right-section">
                 <div className="flex-grow-1"/>
                 <div className="body">

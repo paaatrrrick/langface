@@ -5,7 +5,7 @@
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
     color: var(--mainDark);
-    transition: all 0.3s ease;
+    /* transition: all 0.3s ease; */
 }
 
 

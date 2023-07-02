@@ -20,10 +20,10 @@ class LongTailResearcher {
             z.array(z.string().describe(`A list of ${this.loops} Longtail keywords that should be targetted by the client's blog.`)
         ));
         const formatInstructions = parserFromZod.getFormatInstructions()
-        const systemMessage =`You are a world class SEO expert who specializes in long tail keyword detections. You are hired by a company to make a list of ${this.loops} Longtail keywords that would be perfect for their blog to target, meaning they would have high traffic and low competition. Clients give you the subject of their blog and then an very detailed specifications of what their blog, some of which might not be relevant to you. \n{format_instructions}`;
+        const systemMessage =`You are a world class SEO expert who specializes in long tail keyword detections. You are hired by a company to make a list of ${this.loops} Longtail keywords that would be perfect for their blog to target, meaning they would have high traffic and low competition. Clients give you the subject of their blog ${(this.content) &&` and then an very detailed specifications of what their blog, some of which might not be relevant to you`}. \n{format_instructions}`;
         const systemPrompt = new PromptTemplate({template: systemMessage, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const systemFormated = await systemPrompt.format();
-        const humanMessage = `Blog Subject: "${this.subject}"\n\nSpecifications: "${this.content}"`
+        const humanMessage = `Blog Subject: "${this.subject}"${(this.content) && `\n\nSpecifications: "${this.content}"`}`
         const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0.1, maxTokens: 6000, openAIApiKey: this.openAIKey});
         const response = await model.call([new SystemChatMessage(systemFormated), new HumanChatMessage(humanMessage)]);
         const parsed = await parserFromZod.parse(response.text);
@@ -61,7 +61,7 @@ class LongTailResearcher {
                 headers: z.array(z.string().describe("Write a list of ten headers that act as a blueprint for a blog post designed to rank highlighy for this keyword. This should leverage the keywords, content provided, and your knowledge of the subject."))
         }));
         const formatInstructions = parserFromZod.getFormatInstructions()
-        const template = `You are worldclass SEO expert. You have been hired by a company to write a blog. The company wants to rank for the keyword "${keyword}". The blog is about "${this.subject}" and has the following specifications: "${this.content}". \n{format_instructions}`;
+        const template = `You are worldclass SEO expert. You have been hired by a company to write a blog. The company wants to rank for the keyword "${keyword}". The blog is about "${this.subject}"${(this.content) && ` and has the following specifications: "${this.content}"`}. \n{format_instructions}`;
         const prompt = new PromptTemplate({template: template, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const input = await prompt.format();
         const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0.1, maxTokens: 6000, openAIApiKey: this.openAIKey});
