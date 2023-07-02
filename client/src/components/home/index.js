@@ -10,9 +10,6 @@ import { useDispatch } from "react-redux";
 import StatusPill from "../statusPill";
 import SparklesSvg from "../../assets/sparkles-outline.svg";
 import WrenchSvg from "../../assets/build-outline.svg";
-import LibrarySvg from "../../assets/library-outline.svg";
-import ImageSvg from "../../assets/image-outline.svg";
-import StoreFrontSvg from "../../assets/storefront-outline.svg";
 import CaretForward from "../../assets/caret-forward-outline.svg";
 import CheckMark from "../../assets/checkmark-circle.svg";
 import Close from "../../assets/close-circle-sharp.svg";
@@ -34,7 +31,7 @@ const Home = () => {
     const [data, setData] = useState([]);
     const [hasStarted, setHasStarted] = useState(false);
     const [usedBlogPosts, setUsedBlogPosts] = useState(0);
-    const [maxBlogPosts, setMaxBlogPosts] = useState((version === "blogger") ? 25 : 8);
+    const [maxBlogPosts, setMaxBlogPosts] = useState((version === "blogger") ? constants.maxBloggerPosts : constants.maxWordpressPosts);
     const messagesEndRef = useRef(null);
 
     //if version is blogger, remove the 2 element in the array defualtPills

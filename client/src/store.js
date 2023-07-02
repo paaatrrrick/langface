@@ -1,11 +1,11 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit";
-
+import constants from "./constants";
 // Create Redux slice for error state
 const slice = createSlice({
   name: "main",
   initialState: {
     bannerMessage: null,
-    // version: localStorage.getItem("bloggerGPT-version") ? localStorage.getItem("bloggerGPT-version") : "wordpress",
+    currentView: "home",
     colorScheme: localStorage.getItem("bloggerGPT-colorScheme") ? localStorage.getItem("bloggerGPT-colorScheme") : "dark",
     blogAgents: {
       default: {
@@ -17,7 +17,7 @@ const slice = createSlice({
         data: [],
         hasStarted: false,
         usedBlogPosts: 0,
-        maxBlogPosts: 8,
+        maxBlogPosts: constants.maxWordpressPosts,
         version: "wordpress",
       }
     },
@@ -30,8 +30,8 @@ const slice = createSlice({
       state.bannerMessage = null;
     },
     setVersion: (state, action) => {
-      localStorage.setItem("bloggerGPT-version", action.payload);
-      state.version = action.payload;
+      const { blogID, version } = action.payload;
+      state.blogAgents[blogID].version = version;
     },
     setCurrentView: (state, action) => {
       state.bannerMessage = null;

@@ -7,10 +7,12 @@ import SettingsSvg from '../../assets/settings-outline.svg';
 import RocketSvg from '../../assets/rocket-outline.svg';
 import DiscordSvg from '../../assets/logo-discord.svg';
 import BookSvg from '../../assets/book-outline.svg';
+import EarthSvg from '../../assets/earth-outline.svg';
 
 const NavController = () => {
     const dispatch = useDispatch();
-    const { currentView } = useSelector(state => state.main);
+    const { currentView, blogAgents } = useSelector(state => state.main);
+    const blogKeys = Object.keys(blogAgents);
     return (
         <div className="navController">
             <div className='row align-end'>
@@ -22,6 +24,11 @@ const NavController = () => {
                     onClick={() => dispatch(setCurrentView("home"))}>
                     <img src={HomeSvg} />
                     <h6>Home</h6>
+                </div>
+                <div className={`navController-pill ${currentView === "addAgent" ? "selected" : ""}`}
+                    onClick={() => dispatch(setCurrentView("addAgent"))}>
+                    <img src={EarthSvg} />
+                    <h6>Add Agent +</h6>
                 </div>
                 <div 
                 className={`navController-pill ${currentView === "settings" ? "selected" : ""}`}

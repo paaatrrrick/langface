@@ -1,9 +1,15 @@
+import LibrarySvg from "./assets/library-outline.svg";
+import ImageSvg from "./assets/image-outline.svg";
+import StoreFrontSvg from "./assets/storefront-outline.svg";
 const TESTING = (process.env.REACT_APP_RUNNING_LOCAL === "true");
 const constants = {
   url: TESTING ? "http://localhost:8000" : "https://langface.up.railway.app",
   localUrl: TESTING ? "http://localhost:3000" : "https://langface.ai",
   WP_CLIENT_ID: 87563,
+  maxWordpressPosts: 8,
+  maxBloggerPosts: 25,
 };
+
 
 const defualtPills = [
   {
@@ -22,7 +28,7 @@ const defualtPills = [
     version: "initializing",
     title: "Content Generation",
     img: StoreFrontSvg,
-    content: `A Search Engine Optimized blog post is written and posted to your ${version === 'blogger' ? 'Blogger' : "Wordpress"} account with specific long tail keywords, an optimal HTML header structure, and more!`,
+    content: `A Search Engine Optimized blog post is written and posted to your blog account with specific long tail keywords, an optimal HTML header structure, and more!`,
   }
 ];
 
