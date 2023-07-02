@@ -38,7 +38,6 @@ const App = () => {
     const { bannerMessage, currentView, colorScheme }= useSelector(state => state.main);
 
     useEffect(() => {
-        console.log('init')
         setColorScheme(colorScheme);
     }, [colorScheme])
 

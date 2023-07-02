@@ -24,6 +24,7 @@ class Wordpress {
         this.imageNames = ["image1.png", "image2.png"];
     }
 
+    //return { blogTitle, lsiKeywords, keyword };
     run = async () => {
         console.log('running wordpress');
         this.sendData({ type: "updating", content: `Step 2 of 3: Writing the article`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}` });
@@ -42,10 +43,8 @@ class Wordpress {
         try {
           const modelType = process.env.CHEAP_GPT === 'true' ? "gpt-3.5-turbo-16k" : "gpt-4";
           const model = new ChatOpenAI({ modelName: modelType, temperature: 0, openAIApiKey: this.openAIKey});
-          const template = blogPost(this.outline.longTailKeywords, this.outline.headers, this.outline.similarTitles, this.content, this.summaries, this.imageNames);
-          console.log(template);
+          const template = blogPost(this.outline.keyword, this.outline.lsiKeywords, this.outline.blogTitle, this.outline.headers, this.content, this.summaries, this.imageNames);
           const response = await model.call([new HumanChatMessage(template)]);
-          console.log(response);
           const text = response.text;
           console.log('writing post success');
           return text;

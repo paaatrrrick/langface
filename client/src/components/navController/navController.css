@@ -1,6 +1,6 @@
 .navController{
     width: 224px;
-    height: 100%;
+    min-height: 100%;
     padding: 16px 8px;
     background-color: var(--darkerBackground);
     display: flex;

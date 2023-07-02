@@ -5,7 +5,12 @@ if (process.env.NODE_ENV !== "production") {
 const Wordpress = require("./Wordpress");
 const Blogger = require("./Blogger");
 const {Researcher} = require("./Researcher");
+const { LongTailResearcher } = require("./LongTailResearcher");
 const Blog = require("../mongo/blog");
+const { StructuredOutputParser } = require("langchain/output_parsers");
+const { ChatOpenAI } = require("langchain/chat_models/openai");
+const { HumanChatMessage } = require("langchain/schema");
+const { PromptTemplate } = require("langchain/prompts");
 
 class Agent {
   constructor(jwt, blogID, content, loops, openAIKey, version, blogSubject, sendData) {
@@ -20,37 +25,32 @@ class Agent {
     this.blogSubject = blogSubject;
     this.blogOutlines = [];
     this.summaries = [];
-    this.researcher = new Researcher(blogSubject, this.openAIKey);
+    // this.researcher = new Researcher(blogSubject, this.openAIKey);
+    this.researcher = new LongTailResearcher(blogSubject, loops, content, this.openAIKey);
   }
 
   run = async () => {
       for (let i = 0; i < this.loops; i++) {
         try {
-          try {
-            const {remainingPosts, dailyPostCount} = await Blog.checkRemainingPosts(this.blogID, this.version);
-            if (remainingPosts <= 0) {
-              this.sendData({ type: "ending", content: "Ending: You have reached your daily post limit", remainingPosts, dailyPostCount });
-              return;
-            }
-          } catch (e) {
-            console.log('mongo error');
+          const {remainingPosts, dailyPostCount} = await Blog.checkRemainingPosts(this.blogID, this.version);
+          if (remainingPosts <= 0) {
+            this.sendData({ type: "ending", content: "Ending: You have reached your daily post limit", remainingPosts, dailyPostCount });
+            return;
           }
-          this.sendData({ type: "updating", content: `Step 1 of 3: Conducting market research`, title: `Loading... Article ${i + 1} / ${this.loops}` });
-          const outline = await this.researcher.getModelURLs();
-
+          this.sendData({ type: "updating", content: `Step 1 of 3: Finding best longtail keywords`, title: `Loading... Article ${i + 1} / ${this.loops}` });
+          const outline = await this.researcher.getNextBlueprint();
+          if (!outline) {
+            this.sendData({ type: "ending", content: "Ran out of keywords", remainingPosts, dailyPostCount });
+            return;
+          }
           const blogSite = this.version === "blogger" ? 
           new Blogger(this.content, outline, this.jwt, this.blogID, this.sendData, this.openAIKey, this.loops, this.summaries, i) : 
           new Wordpress(this.content, outline, this.jwt, this.blogID, this.sendData, this.openAIKey, this.loops, this.summaries, i);
 
           var result = await blogSite.run();
           this.summaries.push({summary: outline.blogStrucutre, url: result.url});
-          try {
-            const postData = await Blog.addPost(this.blogID, this.version, result.url);
-            this.sendData({...result, ...postData, type: 'success'});
-          } catch (e) {
-            console.log('mongo error bttm');
-            this.sendData({...result, type: 'success'});
-          }
+          const postData = await Blog.addPost(this.blogID, this.version, result.url);
+          this.sendData({...result, ...postData, type: 'success'});
         } catch (e) {
           console.log('error from loops')
           console.log(e);
@@ -59,8 +59,6 @@ class Agent {
       }
       this.sendData({ type: "ending", title: "Process Complete" });
   };
-
-
 }
 
 module.exports = { Agent };

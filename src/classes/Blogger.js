@@ -32,7 +32,7 @@ class Blogger {
     writePost = async () => {
         if (process.env.MOCK_WRITING_BLOG === "true") return dummyblog;
         const messages = [new SystemChatMessage(SystemChatMessageForBlog), new HumanChatMessage(
-          blogPostForBlogger(this.outline.longTailKeywords, this.outline.blogStrucutre, this.outline.tips, this.outline.headers, this.outline.similarTitles, this.content, this.summaries))];
+          blogPostForBlogger(this.outline.keyword, this.outline.lsiKeywords, this.outline.blogTitle, this.outline.headers, this.content, this.summaries))];
         try {
           const model = new ChatOpenAI({ modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openAIKey});
           const response = await model.call(messages);

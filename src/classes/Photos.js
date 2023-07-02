@@ -21,6 +21,7 @@ class Photos {
         this.wordpressBlogId = wordpressBlogId;
         this.wordpressJwtToken = wordpressJwtToken;
         this.imageNamesUsedInBlog = imageNamesUsedInBlog;
+        this.style = ""
         this.cloudinaryImages = [];
     }
 
@@ -42,33 +43,42 @@ class Photos {
 
     summarizeImages = async () => {
         const parserFromZod = StructuredOutputParser.fromZodSchema(
-          z.array(
-            z.object({
-              prompt: z.string().describe("A paragraph description of what would make a good image there"),
-              width: z.number().describe("The width of the image. That must be divisible by 64"),
-              height: z.number().describe("The height of the image. That must be divisible by 64")
-        })));
+          z.object({
+            "imageArray" : z.array(z.object({
+                paragraphDescription: z.string().describe("A description of an image that could go there. A good image in the scenario does not include people or faces"),
+                width: z.number().describe("The width of the image. That must be divisible by 64"),
+                height: z.number().describe("The height of the image. That must be divisible by 64"),
+            })),
+            "style" : z.string().describe("The style of the image. It must be: 'cinematic', 'digital-art', 'low-poly', 'pixel-art', 'fantasy-art', or 'enhance'"),
+           }));
         const formatInstructions = parserFromZod.getFormatInstructions()
         const template = `For the following ${this.imageNamesUsedInBlog.length} images: ${arrayToString(this.imageNamesUsedInBlog)} which are in the following blog, write a description of them: BLOG:${this.text} \n{format_instructions}.`;
         const prompt = new PromptTemplate({template: template, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const input = await prompt.format();
         const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k",temperature: 0, maxTokens: 1000, openAIApiKey: this.openAIKey});
         const response = await model.call([new HumanChatMessage(input)]);
-        const parsed = await parserFromZod.parse(response.text)            
-        return parsed;
+        const parsed = await parserFromZod.parse(response.text)
+        const { style, imageArray } = parsed;
+        const stylesArr = ["cinematic", "digital-art", "low-poly", "pixel-art", "fantasy-art", "enhance"]
+        if (stylesArr.includes(style) === false) {
+          this.style = "digital-art"
+        } else {
+          this.style = style;
+        }
+        return imageArray;
     }
 
     // style: z.string().describe('The style of the image. It must be: "anime", "cinematic", "digital-art", "low-poly", "photographic", "pixel-art", or "enhance"')
     getImagePrompts = async () => {
         const parserFromZod = StructuredOutputParser.fromZodSchema(z.array(z.string().describe("A one or two sentence prompt to generate the image")));    
-        const imageDescriptions = this.summarizedImages.map((imageInfo) => imageInfo.prompt)
+        const imageDescriptions = this.summarizedImages.map((imageInfo) => imageInfo.paragraphDescription)
         const formatInstructions = parserFromZod.getFormatInstructions()
-        const prompt = new PromptTemplate({template: `${text2ImgPrompt(imageDescriptions)} \n{format_instructions}.`, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
+        const prompt = new PromptTemplate({template: `${text2ImgPrompt(imageDescriptions, this.style)} \n{format_instructions}.`, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const input = await prompt.format();
         const modelType = process.env.CHEAP_GPT === 'true' ? "gpt-3.5-turbo-16k" : "gpt-4";
-        const model = new ChatOpenAI({modelName: modelType,temperature: 0, maxTokens: 1000, openAIApiKey: this.openAIKey});
+        const model = new ChatOpenAI({modelName: modelType,temperature: 0.1, maxTokens: 1000, openAIApiKey: this.openAIKey});
         const response = await model.call([new HumanChatMessage(input)]);
-        const parsed = await parserFromZod.parse(response.text);
+        const parsed = await parserFromZod.parse(response.text) ;
         return parsed;
     }
 
@@ -120,6 +130,7 @@ class Photos {
                 text_prompts: [{text: this.imagePrompts[i]}],
                 width: width,
                 height: height,
+                style: this.style,
               }),
             }
           );

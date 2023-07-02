@@ -99,7 +99,6 @@ const Home = () => {
         setJwt(data.access_token);
         setId(data.blog_id);
       } catch (e) {
-        console.log('trying to login to wordpress error');
         dispatch(
           setBannerMessage({
             message: "Error logging in to Wordpress",
@@ -108,6 +107,12 @@ const Home = () => {
           })
         );
       }
+    };
+
+    const samplePrompt = async () => {
+      setLoops(3)
+      setBlogSubject("Adventures of Huckleberry Finn Book");
+      setContent("Have a fun and playful tone. Express the benefits of how reading this book is beneficial to the reader. Link to the book on Amazon: https://www.amazon.com/Adventures-Huckleberry-SeaWolf-Illustrated-Classic. Write everything for SEO standards. Refer to other similar books and compare them.")
     };
 
     const handleJWT = async () => {
@@ -153,15 +158,11 @@ const Home = () => {
     const canStart = jwt !== "" && id !== "" && blogSubject !== "" && loops !== "";
   return (
     <div className="Home">
-      <div className="row align-center justify-start">
-        <h1>BloggerGPT</h1>
-        <button 
-        onClick={handleSubmit}
-        disabled={!(!hasStarted && canStart)}
-        className="runButton">
-          <img src={CaretForward} alt="run button" />
-          <h4>Start Agent</h4>
-        </button>
+      <div className="row align-center justify-start wrap">
+        <h1
+        style={{marginRight: "15px"}}
+        >BloggerGPT</h1>
+        <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Sample prompt</button>
       </div>
         <h6>Post hundreds of Search Engine Optimized blog posts to {(version === "blogger") ? "Blogger" : "Wordpress"} </h6>
         <div className="home-results-container">
@@ -169,7 +170,7 @@ const Home = () => {
           Daily Articles Used: {usedBlogPosts} / {maxBlogPosts}
         </div>
         <div className="home-data-body" ref={messagesEndRef}>
-          {(!hasStarted && data.length === 0) && 
+          {(!hasStarted && data.length === 0) &&
            defualtPills.map((pill, index) => (
             <StatusPill
               key={index}
@@ -198,7 +199,7 @@ const Home = () => {
         </div>
         </div>
         <div className="home-input-container">
-          <div className="row" style={{marginBottom: "15px"}}>
+          <div className="home-firstInputRow">
             <div className="home-sectioned-input">
               <div className="left">
                 <img src={SparklesSvg} alt="sparkles" />
@@ -210,6 +211,7 @@ const Home = () => {
               className="input" type="text" placeholder="History of Jiu Jitsu"/>
             </div>
 
+            <div className="home-tinyInputs">
             <input 
             value={loops}
             onChange={(e) => setLoops(e.target.value)}
@@ -231,6 +233,7 @@ const Home = () => {
             >
               {(jwt !== "") ? "Logged In" : `${(version === "blogger") ? "Blogger" : "Wordpress"} Login`}
             </button>
+            </div>
           </div>
           <div className="home-sectioned-input" style={{height: '80px'}}>
               <div className="left">
@@ -243,6 +246,13 @@ const Home = () => {
               className="input" placeholder="Optionally, what other additional context do you want to provide? This could be the style of each post, additional information on the product, or even affiliate links to include."/>
             </div>
         </div>
+        <button 
+        onClick={handleSubmit}
+        disabled={!(!hasStarted && canStart)}
+        className="runButton">
+          <img src={CaretForward} alt="run button" />
+          <h4>Start Agent</h4>
+        </button>
     </div>
   );
 };

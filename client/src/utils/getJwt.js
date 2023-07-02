@@ -30,12 +30,10 @@ const getJwt = async (setToken, setError) => {
             newWinURI.indexOf("&token_type")
           );
           newWin.close();
-          console.log(token);
           setToken(token);
           return;
         }
       } catch (e) {
-        console.log("we got an error");
         setError("Failed to login with Google. Please try again.");
         return null;
       }
@@ -48,11 +46,9 @@ export default getJwt;
 const wordpressGetJwt = async (setError, fetchWordpress) => {
   const client_id = constants.WP_CLIENT_ID;
   const redirect_url = constants.localUrl;
-  console.log(redirect_url);
   const url = `https://public-api.wordpress.com/oauth2/authorize?client_id=${client_id}&redirect_uri=${redirect_url}&response_type=code`;
   const newWin = window.open(url, "_blank");
   const tokenCheckInterval = setInterval(() => {
-    console.log("checking");
     try {
       const url = newWin.location.href;
       try {

@@ -3,14 +3,18 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
-    padding-top: 40px;
+    padding-top: 20px;
     width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    container-type: inline-size;
+    container-name: sidebar;
 }
 
 .home-results-container{
     margin-top: 15px;
     width: 100%;
-    height: 450px;
+    height: 425px;
     border-radius: 20px;
     border: 2px solid var(--lightDark);
 }
@@ -21,19 +25,35 @@
     display: flex;
     flex-direction: column;
     margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.runButton2{
+    height: 26px;
+    background-color: var(--brandColor);
+    border-radius: 18px;
+    display: flex;
+    flex-direction: row;
+    padding: 2px 18px;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 15px;
+    font-size: 14px;
+    font-weight: 400;
+    color: #fff;
 }
 
 .runButton{
     width: 170px;
-    height: 30px;
+    height: 36px;
     background-color: var(--brandColor);
     border-radius: 18px;
-    margin-left: 15px;
     display: flex;
     flex-direction: row;
     padding: 0px 15px;
     align-items: center;
     justify-content: flex-start;
+    margin-bottom: 15px;
 }
 
 .runButton img{
@@ -68,7 +88,7 @@
     justify-content: flex-start;
     width: 100%;
     height: 40px;
-}
+} 
 
 .home-sectioned-input .left{
     background-color: var(--brandOffColor);
@@ -87,6 +107,42 @@
 .home-sectioned-input .left img{
     height: 20px;
     filter: invert(34%) sepia(70%) saturate(3944%) hue-rotate(232deg) brightness(101%) contrast(91%);
+}
+
+.home-firstInputRow{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 15px;
+}
+
+.home-tinyInputs{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+@container sidebar (max-width: 850px){
+    .home-firstInputRow{
+        width: 100%;
+        display: flex;
+        flex-direction: column-reverse;
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+    .home-tinyInputs{
+        margin-top: -15px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+
+    .home-tinyInputs *{
+        margin: 15px 15px 0px 0px !important;
+    }
+    
 }
 
 .home-sectioned-input .left h4{
@@ -112,7 +168,7 @@
 
 .home-input-container .article-count{
     height: 40px;
-    width: 200px;
+    width: 150px;
     border-radius: 20px;
     margin: 0px 15px;
     border: 2px solid var(--lightDark);
@@ -121,7 +177,7 @@
 
 .home-input-container button{
     height: 40px;
-    width: 275px;
+    width: 150px;
     border-radius: 20px;
     color: var(--gray);
     background-color: var(--lighterBackground);
@@ -149,8 +205,7 @@
 }
 
 .home-data-body::-webkit-scrollbar {
-  width: 10px; /* Width of the scrollbar */
-  border-radius: 20px;
+  width: 0px; /* Width of the scrollbar */
 }
 
 .home-data-body::-webkit-scrollbar-track {

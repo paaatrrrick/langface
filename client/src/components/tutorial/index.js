@@ -10,7 +10,6 @@ const Template = () => {
         'wordpresss': Wordpress
     }
     const version = useSelector(state => state.main.version);
-    console.log(version);
     const Component = templateMap[version] || Wordpress;
     return <Component/>
 }
