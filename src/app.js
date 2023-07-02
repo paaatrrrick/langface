@@ -10,8 +10,12 @@ const app = express();
 const bodyParser = require("body-parser");
 const { Agent } = require("./classes/Agent");
 const FormData = require("form-data");
+const User = require("./mongo/user");
 const fetch = require("node-fetch");
 const mongoose = require("mongoose");
+const {OAuth2Client} = require('google-auth-library');
+const cookie = require("cookie");
+
 
 var SuccesfulPostsCount = 0; // counts how many blog posts were succesfully posted
 
@@ -33,10 +37,11 @@ db.once("open", () => {
 
 
 app.use(bodyParser.json(), bodyParser.urlencoded({ extended: false }));
-app.use(cors());
+app.use(cors({credentials: true, origin: ["http://localhost:3000", "https://langface.netlify.app", "https://langface.ai"]}));
 
 const server = http.createServer(app);
 const io = socketIo(server, {
+  cookie: true,
   cors: {
     origin: [
       "http://localhost:3000",
@@ -51,6 +56,27 @@ const io = socketIo(server, {
 app.get("/data", (req, res) => {
   res.send("data");
 });
+
+app.post("/google", async (req, res) => {
+  console.log('bod');
+  console.log(req.body);
+  const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+  async function verify() {
+    const ticket = await client.verifyIdToken({
+        idToken: req.body.credentialResponse.credential,
+        audience: process.env.GOOGLE_CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
+        // Or, if multiple clients access the backend:
+        //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+    });
+    const payload = ticket.getPayload();
+    const userid = payload['sub'];
+    if (!userid){
+      throw new Error("Could not verify Google token");
+    }
+    User.createNewUser(userid);
+    res.cookie('user-cookie', req.body.credentialResponse.credential);
+  }verify().catch(console.error);
+})
 
 // get full WP API token using temporary code
 app.post("/wordpress", async (req, res) => {
@@ -84,6 +110,8 @@ app.post("/wordpress", async (req, res) => {
 io.on("connection", (socket) => {
   console.log("New client connected");
   socket.on("addData", (newData) => {
+    // const cookies = cookie.parse(socket.handshake.headers.cookie);
+    console.log(socket.handshake.headers);
     const sendData = async (dataForClient) => {
       if (dataForClient.type !== "updating"){
         SuccesfulPostsCount += 1;
@@ -96,7 +124,7 @@ io.on("connection", (socket) => {
       if (newData.version !== "blogger") {
         newData.version = "wordpress";
       }
-      const user = new Agent(
+      const agent = new Agent(
         newData.jwt,
         newData.id,
         newData.content,
@@ -106,13 +134,16 @@ io.on("connection", (socket) => {
         newData.blogSubject,
         sendData
       );
-      user.run();
+      agent.run();
     } catch (e) {
       sendData({
         type: "ending",
         content: e.message,
       });
     }
+  });
+  socket.on("addUser", (userID) => {
+    const res = User.createNewUser(userID);
   });
   socket.on("disconnect", () => {
     console.log("Client disconnected");

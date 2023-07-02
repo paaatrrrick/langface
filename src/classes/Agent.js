@@ -7,6 +7,7 @@ const Blogger = require("./Blogger");
 const {Researcher} = require("./Researcher");
 const { LongTailResearcher } = require("./LongTailResearcher");
 const Blog = require("../mongo/blog");
+const User = require("../mongo/user");
 const { StructuredOutputParser } = require("langchain/output_parsers");
 const { ChatOpenAI } = require("langchain/chat_models/openai");
 const { HumanChatMessage } = require("langchain/schema");
@@ -14,6 +15,7 @@ const { PromptTemplate } = require("langchain/prompts");
 
 class Agent {
   constructor(jwt, blogID, content, loops, openAIKey, version, blogSubject, sendData) {
+    this.userID = '123456';
     this.jwt = jwt;
     this.blogID = blogID;
     this.content = content;
@@ -30,6 +32,7 @@ class Agent {
   }
 
   run = async () => {
+      User.addBlog(this.userID, this.blogID);
       for (let i = 0; i < this.loops; i++) {
         try {
           const {remainingPosts, dailyPostCount} = await Blog.checkRemainingPosts(this.blogID, this.version);
@@ -50,6 +53,15 @@ class Agent {
           var result = await blogSite.run();
           this.summaries.push({summary: outline.blogStrucutre, url: result.url});
           const postData = await Blog.addPost(this.blogID, this.version, result.url);
+          
+          // const blog = await Blog.getBlog(this.blogID, this.version);
+          // let addedBlog = await User.addBlog('12345', blog);
+          // console.log(addedBlog);
+          // addedBlog = await User.addBlog('12345', blog);
+          // console.log(addedBlog);
+          // const blogs = await User.getBlogs('12345');
+          // console.log(blogs);
+
           this.sendData({...result, ...postData, type: 'success'});
         } catch (e) {
           console.log('error from loops')

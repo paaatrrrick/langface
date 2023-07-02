@@ -54,7 +54,6 @@ const App = () => {
                     <Component/>
                 </div>
                 <div className="flex-grow-1">
-
                 </div>
             </div>
         </div>

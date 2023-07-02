@@ -7,10 +7,23 @@ import SettingsSvg from '../../assets/settings-outline.svg';
 import RocketSvg from '../../assets/rocket-outline.svg';
 import DiscordSvg from '../../assets/logo-discord.svg';
 import BookSvg from '../../assets/book-outline.svg';
+import { GoogleLogin } from '@react-oauth/google';
+import constants from "../../constants";
 
 const NavController = () => {
     const dispatch = useDispatch();
     const { currentView } = useSelector(state => state.main);
+
+    const handleLogin = async (credentialResponse) => {
+        const res = await fetch(`${constants.url}/google`, {
+            credentials: "include",
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ credentialResponse }),
+        });
+    }
     return (
         <div className="navController">
             <div className='row align-end'>
@@ -53,6 +66,15 @@ const NavController = () => {
                     <img src={BookSvg} />
                     <h6>Our Blog</h6>
                 </a>
+                <GoogleLogin
+                    onSuccess={credentialResponse => {
+                        console.log(credentialResponse);
+                        handleLogin(credentialResponse);
+                    }}
+                    onError={() => {
+                        console.log('Login Failed');
+                    }}
+                />
             </div>
         </div>
     )
