@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
 import "./home.css";
 import { useSelector } from "react-redux";
-import constants from "../../constants";
+import constants, { defualtPills, sampleBlog } from "../../constants";
 import { getJwt, wordpressGetJwt } from "../../utils/getJwt";
+import { scrollToBottom } from "../../utils/styles";
 import { setBannerMessage } from "../../store";
 import { useDispatch } from "react-redux";
 import StatusPill from "../statusPill";
@@ -36,26 +37,6 @@ const Home = () => {
     const [maxBlogPosts, setMaxBlogPosts] = useState((version === "blogger") ? 25 : 8);
     const messagesEndRef = useRef(null);
 
-    const defualtPills = [
-      {
-        version: "initializing",
-        title: "Research",
-        img: LibrarySvg,
-        content: "For each blog post, we search the web to find top performing articles in your niche to use as a model.",
-      },
-      {
-        version: "initializing",
-        title: "Image Generation",
-        img: ImageSvg,
-        content: "AI image generators make unique images to compliment the message of your blog and improve your search ranking.",
-      },
-      {
-        version: "initializing",
-        title: "Content Generation",
-        img: StoreFrontSvg,
-        content: `A Search Engine Optimized blog post is written and posted to your ${version === 'blogger' ? 'Blogger' : "Wordpress"} account with specific long tail keywords, an optimal HTML header structure, and more!`,
-      }
-    ];
     //if version is blogger, remove the 2 element in the array defualtPills
     if (version === "blogger") {
       defualtPills.splice(1, 1);
@@ -68,22 +49,8 @@ const Home = () => {
     }, []);
 
     useEffect(() => {
-      scrollToBottom();
+      scrollToBottom(messagesEndRef.current);
     }, [data]);
-
-    const scrollToBottom = () => {
-      const element = messagesEndRef.current;
-      const totalHeight = element.scrollHeight;
-      const stepTime = Math.abs(Math.floor(8000 / totalHeight));
-      let currentPos = element.scrollTop;
-      const scrollInterval = setInterval(() => {
-        currentPos += 5;
-        element.scrollTop = currentPos;
-        if (currentPos >= totalHeight){
-          clearInterval(scrollInterval);
-        }
-      }, stepTime);
-    };
 
     const fetchWordpress = async (code) => {
       try {
@@ -110,9 +77,9 @@ const Home = () => {
     };
 
     const samplePrompt = async () => {
-      setLoops(3)
-      setBlogSubject("Adventures of Huckleberry Finn Book");
-      setContent("Have a fun and playful tone. Express the benefits of how reading this book is beneficial to the reader. Link to the book on Amazon: https://www.amazon.com/Adventures-Huckleberry-SeaWolf-Illustrated-Classic. Write everything for SEO standards. Refer to other similar books and compare them.")
+      setLoops(sampleBlog.loops)
+      setBlogSubject(sampleBlog.subject);
+      setContent(sampleBlog.content);
     };
 
     const handleJWT = async () => {

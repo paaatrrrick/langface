@@ -5,10 +5,22 @@ const slice = createSlice({
   name: "main",
   initialState: {
     bannerMessage: null,
-    version: localStorage.getItem("bloggerGPT-version") ? localStorage.getItem("bloggerGPT-version") : "wordpress",
+    // version: localStorage.getItem("bloggerGPT-version") ? localStorage.getItem("bloggerGPT-version") : "wordpress",
     colorScheme: localStorage.getItem("bloggerGPT-colorScheme") ? localStorage.getItem("bloggerGPT-colorScheme") : "dark",
-    popUpTemplate: null,
-    currentView: "blogger"
+    blogAgents: {
+      default: {
+        loops: "",
+        jwt: "",
+        id: "",
+        blogSubject: "",
+        content: "",
+        data: [],
+        hasStarted: false,
+        usedBlogPosts: 0,
+        maxBlogPosts: 8,
+        version: "wordpress",
+      }
+    },
   },
   reducers: {
     setBannerMessage: (state, action) => {
@@ -21,12 +33,6 @@ const slice = createSlice({
       localStorage.setItem("bloggerGPT-version", action.payload);
       state.version = action.payload;
     },
-    setPopUpTemplate: (state, action) => {
-      state.popUpTemplate = action.payload;
-    },
-    clearPopUpTemplate: (state) => {
-      state.popUpTemplate = null;
-    },
     setCurrentView: (state, action) => {
       state.bannerMessage = null;
       state.currentView = action.payload;
@@ -34,11 +40,38 @@ const slice = createSlice({
     setColorScheme: (state, action) => {
       localStorage.setItem("bloggerGPT-colorScheme", action.payload);
       state.colorScheme = action.payload;
-    }
+    },
+    updateBlogAgentData: (state, action) => {
+      const { blogID, data, usedBlogPosts, maxBlogPosts } = action.payload;
+      if (data.type === "ending") {
+        state.blogAgents[blogID].hasStarted = false;
+      }
+      const oldData = [...state.blogAgents[blogID].data];
+      if (oldData.length > 0 && oldData[oldData.length - 1].type === "updating") {
+        oldData.pop();
+      }
+      oldData.push(data);
+      state.blogAgents[blogID].data = oldData;
+      if (usedBlogPosts && maxBlogPosts) {
+        state.blogAgents[blogID].usedBlogPosts = usedBlogPosts;
+        state.blogAgents[blogID].maxBlogPosts = maxBlogPosts;
+      }
+    },
+    runAgent: (state, action) => {
+      const { blogID } = action.payload;
+      state.blogAgents[blogID].hasStarted = true;
+      state.blogAgents[blogID].data = [];
+    },
+    addAgent: (state, action) => {
+      state.blogAgents[action.payload.blogID] = action.payload
+    },
   },
 });
 
 // Now we configure the store
 const store = configureStore({ reducer: { main: slice.reducer } });
 export default store;
-export const { setBannerMessage, clearBannerMessage, setVersion, setPopUpTemplate, clearPopUpTemplate, setCurrentView, setColorScheme } = slice.actions;
+export const { setBannerMessage, clearBannerMessage, setVersion, setCurrentView, setColorScheme, updateBlogAgentData, runAgent, addAgent } = slice.actions;
+// export const actions = { ...slice.actions};
+
+
