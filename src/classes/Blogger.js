@@ -59,7 +59,7 @@ class Blogger {
               blog: {
                 id: this.blogID,
               },
-              title: this.outline.similarTitles,
+              title: this.outline.blogTitle,
               content: content,
             }),
           }
@@ -73,7 +73,7 @@ class Blogger {
           const result = await response.json();
           console.log(result.url);
           return {
-            title: this.outline.similarTitles,
+            title: this.outline.blogTitle,
             content: content,
             url: result.url,
           };

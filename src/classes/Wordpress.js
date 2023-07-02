@@ -26,7 +26,6 @@ class Wordpress {
 
     //return { blogTitle, lsiKeywords, keyword };
     run = async () => {
-        console.log('running wordpress');
         this.sendData({ type: "updating", content: `Step 2 of 3: Writing the article`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}` });
         const post = await this.writePost();
         this.sendData({ type: "updating", content: `Step 3 of 3: Generating images`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}`});
@@ -51,7 +50,7 @@ class Wordpress {
         } catch (e) {
           console.log(e)
           console.log('writing post error');
-          throw new Error("Error writing a post for '" + this.outline.similarTitles);
+          throw new Error("Error writing a post for '" + this.outline.blogTitle);
         }
       };
 
@@ -86,7 +85,7 @@ class Wordpress {
       };
 
     postToWordpress = async (post, imageUrls) => {
-        if (process.env.MOCK_POST_TO_WORDPRESS === "true") return {title: this.outline.similarTitles, content: post, url: "https://historylover4.wordpress.com/2021/08/16/this-is-a-test-post/"};
+        if (process.env.MOCK_POST_TO_WORDPRESS === "true") return {title: this.outline.blogTitle, content: post, url: "https://historylover4.wordpress.com/2021/08/16/this-is-a-test-post/"};
         for (let i in imageUrls) {
             post = replaceStringInsideStringWithNewString(post, this.imageNames[i], imageUrls[i]);
         }
@@ -98,7 +97,7 @@ class Wordpress {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              title: this.outline.similarTitles,
+              title: this.outline.blogTitle,
               content: post,
             }),
           }
@@ -111,7 +110,7 @@ class Wordpress {
         } else {
           const result = await response.json();
           console.log('successfully posted to wordpress at this url ' + result.URL);
-          return {title: this.outline.similarTitles, content: post, url: result.URL};
+          return {title: this.outline.blogTitle, content: post, url: result.URL};
         }
       };
 
