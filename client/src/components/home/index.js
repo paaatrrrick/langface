@@ -2,16 +2,15 @@ import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
 import "./home.css";
 import { useSelector } from "react-redux";
-import constants from "../../constants";
+import constants, { defualtPills, sampleBlog } from "../../constants";
 import { getJwt, wordpressGetJwt } from "../../utils/getJwt";
+import { scrollToBottom } from "../../utils/styles";
 import { setBannerMessage } from "../../store";
 import { useDispatch } from "react-redux";
 import StatusPill from "../statusPill";
+import Dropdown from "../uxcore/dropdown";
 import SparklesSvg from "../../assets/sparkles-outline.svg";
 import WrenchSvg from "../../assets/build-outline.svg";
-import LibrarySvg from "../../assets/library-outline.svg";
-import ImageSvg from "../../assets/image-outline.svg";
-import StoreFrontSvg from "../../assets/storefront-outline.svg";
 import CaretForward from "../../assets/caret-forward-outline.svg";
 import CheckMark from "../../assets/checkmark-circle.svg";
 import Close from "../../assets/close-circle-sharp.svg";
@@ -21,6 +20,21 @@ const typeToImageMap = {
   error: Close,
   success: CheckMark,
 };
+
+const dummyData = [
+  {
+    id: 1,
+    text: "Blog Post 1",
+  },
+  {
+    id: 2,
+    text: "Blog Post 2",
+  },
+  {
+    id: 3,
+    text: "Blog Post 3",
+  },
+]
 
 const Home = () => {
     const version = useSelector((state) => state.main.version);
@@ -33,29 +47,9 @@ const Home = () => {
     const [data, setData] = useState([]);
     const [hasStarted, setHasStarted] = useState(false);
     const [usedBlogPosts, setUsedBlogPosts] = useState(0);
-    const [maxBlogPosts, setMaxBlogPosts] = useState((version === "blogger") ? 25 : 8);
+    const [maxBlogPosts, setMaxBlogPosts] = useState((version === "blogger") ? constants.maxBloggerPosts : constants.maxWordpressPosts);
     const messagesEndRef = useRef(null);
 
-    const defualtPills = [
-      {
-        version: "initializing",
-        title: "Research",
-        img: LibrarySvg,
-        content: "For each blog post, we search the web to find top performing articles in your niche to use as a model.",
-      },
-      {
-        version: "initializing",
-        title: "Image Generation",
-        img: ImageSvg,
-        content: "AI image generators make unique images to compliment the message of your blog and improve your search ranking.",
-      },
-      {
-        version: "initializing",
-        title: "Content Generation",
-        img: StoreFrontSvg,
-        content: `A Search Engine Optimized blog post is written and posted to your ${version === 'blogger' ? 'Blogger' : "Wordpress"} account with specific long tail keywords, an optimal HTML header structure, and more!`,
-      }
-    ];
     //if version is blogger, remove the 2 element in the array defualtPills
     if (version === "blogger") {
       defualtPills.splice(1, 1);
@@ -68,22 +62,8 @@ const Home = () => {
     }, []);
 
     useEffect(() => {
-      scrollToBottom();
+      scrollToBottom(messagesEndRef.current);
     }, [data]);
-
-    const scrollToBottom = () => {
-      const element = messagesEndRef.current;
-      const totalHeight = element.scrollHeight;
-      const stepTime = Math.abs(Math.floor(8000 / totalHeight));
-      let currentPos = element.scrollTop;
-      const scrollInterval = setInterval(() => {
-        currentPos += 5;
-        element.scrollTop = currentPos;
-        if (currentPos >= totalHeight){
-          clearInterval(scrollInterval);
-        }
-      }, stepTime);
-    };
 
     const fetchWordpress = async (code) => {
       try {
@@ -96,6 +76,7 @@ const Home = () => {
           body: JSON.stringify({ code }),
         });
         const data = await res.json();
+        console.log(data);
         setJwt(data.access_token);
         setId(data.blog_id);
       } catch (e) {
@@ -110,9 +91,9 @@ const Home = () => {
     };
 
     const samplePrompt = async () => {
-      setLoops(3)
-      setBlogSubject("Adventures of Huckleberry Finn Book");
-      setContent("Have a fun and playful tone. Express the benefits of how reading this book is beneficial to the reader. Link to the book on Amazon: https://www.amazon.com/Adventures-Huckleberry-SeaWolf-Illustrated-Classic. Write everything for SEO standards. Refer to other similar books and compare them.")
+      setLoops(sampleBlog.loops)
+      setBlogSubject(sampleBlog.subject);
+      setContent(sampleBlog.content);
     };
 
     const handleJWT = async () => {
@@ -158,6 +139,7 @@ const Home = () => {
     const canStart = jwt !== "" && id !== "" && blogSubject !== "" && loops !== "";
   return (
     <div className="Home">
+      <Dropdown options={dummyData} selected={1} onSelectedChange={() => {}}/>
       <div className="row align-center justify-start wrap">
         <h1
         style={{marginRight: "15px"}}

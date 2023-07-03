@@ -5,7 +5,7 @@
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
     color: var(--mainDark);
-    transition: all 0.3s ease;
+    /* transition: all 0.3s ease; */
 }
 
 
@@ -19,6 +19,7 @@
     --gray: #757575;
     --green: #6cd06c;
     --red: #fe3d67;
+    --paddingTopForScreens: 60px;
   }
 
 

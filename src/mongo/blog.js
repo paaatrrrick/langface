@@ -56,7 +56,16 @@ BlogSchema.statics.createNewBlog = async function(blogID, version) {
     });
     return await blog.save();
   };
+
+BlogSchema.statics.getByMongoID = async function(id) {
+    return await this.findById(id);
+};
+
   
+BlogSchema.statics.getBlog = async function(blogID, version) {
+  return await this.findOne({blogID, version})
+}
+
   // Method to check remaining posts
   BlogSchema.statics.checkRemainingPosts = async function(blogID, version) {
     const today = new Date().setHours(0, 0, 0, 0);
