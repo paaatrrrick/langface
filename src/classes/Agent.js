@@ -30,6 +30,7 @@ class Agent {
   }
 
   run = async () => {
+      var errors = 0;
       for (let i = 0; i < this.loops; i++) {
         try {
           const {remainingPosts, dailyPostCount} = await Blog.checkRemainingPosts(this.blogID, this.version);
@@ -52,6 +53,11 @@ class Agent {
           const postData = await Blog.addPost(this.blogID, this.version, result.url);
           this.sendData({...result, ...postData, type: 'success'});
         } catch (e) {
+          errors++;
+          if (errors >= 5) {
+            this.sendData({ type: "ending", title: "Too many errors, stopping process" });
+            return;
+          }
           console.log('error from loops')
           console.log(e);
           this.sendData({ type: "error", title:  e.message });
