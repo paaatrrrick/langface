@@ -9,7 +9,6 @@ import BannerMessage from '../bannerMessage';
 import Home from '../home';
 import Settings from '../settings';
 import Tutorial from '../tutorial';
-import AddAgent from '../addAgent';
 import io from "socket.io-client";
 let socket;
 
@@ -19,7 +18,6 @@ const templateMap = {
     blogger: Home,
     settings: Settings,
     tutorial: Tutorial,
-    addAgent: AddAgent
 }
 
 const App = () => {

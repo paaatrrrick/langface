@@ -7,13 +7,14 @@ import SettingsSvg from '../../assets/settings-outline.svg';
 import RocketSvg from '../../assets/rocket-outline.svg';
 import DiscordSvg from '../../assets/logo-discord.svg';
 import BookSvg from '../../assets/book-outline.svg';
+import Auth from "../auth"
 import { GoogleLogin } from '@react-oauth/google';
 import constants from "../../constants";
 import EarthSvg from '../../assets/earth-outline.svg';
 
 const NavController = ({launch}) => {
     const dispatch = useDispatch();
-    const { currentView, blogAgents } = useSelector(state => state.main);
+    const { currentView, blogAgents, isLoggedIn } = useSelector(state => state.main);
     const [parentRefWidth, setParentRefWidth] = useState(0);
     const parentRef = useRef(null);
     const blogKeys = Object.keys(blogAgents);
@@ -58,11 +59,6 @@ const NavController = ({launch}) => {
                     <img src={HomeSvg} />
                     <h6>Home</h6>
                 </div>
-                <div className={`navController-pill ${currentView === "addAgent" ? "selected" : ""}`}
-                    onClick={() => dispatch(setCurrentView("addAgent"))}>
-                    <img src={EarthSvg} />
-                    <h6>Add Agent +</h6>
-                </div>
                 <div 
                 className={`navController-pill ${currentView === "settings" ? "selected" : ""}`}
                 onClick={() => dispatch(setCurrentView("settings"))}
@@ -93,21 +89,7 @@ const NavController = ({launch}) => {
                     <img src={BookSvg} />
                     <h6>Our Blog</h6>
                 </a>
-                <GoogleLogin
-                    onSuccess={credentialResponse => {
-                        console.log(credentialResponse);
-                        handleLogin(credentialResponse);
-                    }}
-                    width={`${parentRefWidth}px`}
-                    auto_select={true}
-                    // ux_mode='popup'
-                    size={(parentRefWidth < 200) ? 'small' : 'large'}
-                    onError={() => {
-                        dispatch(
-                            setBannerMessage({ message: "Error Logging in with Google", type: "error", timeout: 10000 })
-                        );
-                    }}
-                />
+                <Auth />
             </div>
         </div>
     )

@@ -6,9 +6,15 @@ const slice = createSlice({
   initialState: {
     bannerMessage: null,
     currentView: "home",
+    isLoggedIn: false,
+    activeBlogAgent: "default",
     colorScheme: localStorage.getItem("bloggerGPT-colorScheme") ? localStorage.getItem("bloggerGPT-colorScheme") : "dark",
     blogAgents: {
       default: {
+        content: "",
+        numPosts: 0,
+        numDays: 1,
+        subject: "",
         loops: "",
         jwt: "",
         id: "",
@@ -23,6 +29,9 @@ const slice = createSlice({
     },
   },
   reducers: {
+    login: (state, action) => {
+      return {...state, isLoggedIn: true, blogAgents: action.payload.blogs}
+    },
     setBannerMessage: (state, action) => {
       state.bannerMessage = action.payload;
     },

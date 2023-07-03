@@ -1,61 +1,39 @@
 const mongoose = require('mongoose');
+const { use } = require('../endpoints/basicRoutes');
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-    userID: {
-        type: String,
-        required: true,
-        unique: true  
-    },
     blogs: {
         type: [],
         default: function() {
             return []
         }
-    }
+    },
+    email: {
+        type: String,
+    },
+    profilePicture: {
+        type: String,
+    },
 });
 
 
-
-userSchema.statics.createNewUser = async function(userID) {
-    let user = await this.findOne({ userID })
-    if (user){
+userSchema.statics.login = async function (id, params) {
+    const user = await this.findById(id);
+    if (user) {
+        const { email, profilePicture } = user;
+        const updateParams = {email, profilePicture, ...params};
+        user.set(updateParams);
+        await user.save();
         return user;
     }
-    user = new this({
-        userID
-    });
-    return await user.save();
+    const newUser = new this({ _id: id, ...params });
+    await newUser.save();
+    return newUser;
 }
 
 
-userSchema.statics.addBlog = async function(userID, blogID) {
-    let user = await this.findOne({ userID });
-    if (!user){
-        user = await this.createNewUser(userID);
-    }
 
-    let agentExists = this.findOne({ blogID });
-    if (agentExists) {
-        return false;
-    }
-
-    user.blogs.push(blogID);
-    await user.save();
-
-    return user;
-}
-
-userSchema.statics.getBlogs = async function(userID) {
-    let user = await this.findOne({ userID });
-    if (!user){
-        user = await this.createNewUser(userID);
-    }
-
-    const blogs = user.blogs;
-    return blogs;
-}
-  
 // Create and export User Model
 const User = mongoose.model('User', userSchema);
 module.exports = User;

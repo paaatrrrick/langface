@@ -8,6 +8,7 @@ import { scrollToBottom } from "../../utils/styles";
 import { setBannerMessage } from "../../store";
 import { useDispatch } from "react-redux";
 import StatusPill from "../statusPill";
+import Dropdown from "../uxcore/dropdown";
 import SparklesSvg from "../../assets/sparkles-outline.svg";
 import WrenchSvg from "../../assets/build-outline.svg";
 import CaretForward from "../../assets/caret-forward-outline.svg";
@@ -19,6 +20,21 @@ const typeToImageMap = {
   error: Close,
   success: CheckMark,
 };
+
+const dummyData = [
+  {
+    id: 1,
+    text: "Blog Post 1",
+  },
+  {
+    id: 2,
+    text: "Blog Post 2",
+  },
+  {
+    id: 3,
+    text: "Blog Post 3",
+  },
+]
 
 const Home = () => {
     const version = useSelector((state) => state.main.version);
@@ -60,6 +76,7 @@ const Home = () => {
           body: JSON.stringify({ code }),
         });
         const data = await res.json();
+        console.log(data);
         setJwt(data.access_token);
         setId(data.blog_id);
       } catch (e) {
@@ -122,6 +139,7 @@ const Home = () => {
     const canStart = jwt !== "" && id !== "" && blogSubject !== "" && loops !== "";
   return (
     <div className="Home">
+      <Dropdown options={dummyData} selected={1} onSelectedChange={() => {}}/>
       <div className="row align-center justify-start wrap">
         <h1
         style={{marginRight: "15px"}}
