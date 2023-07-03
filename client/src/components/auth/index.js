@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import CONSTANTS from '../../constants/api';
-import AUTH_CONSTANTS from '../../constants/auth';
-import '../../styles/Auth.css'
+import './auth.css'
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 import { useDispatch, useSelector } from 'react-redux';
 import { setBannerMessage } from "../../store";
-import { constants } from 'fs/promises';
+import constants from "../../constants";
 
 
 const firebaseConfig = {
@@ -20,32 +18,27 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 const Auth = () => {
     const version = useSelector((state) => state.main.version);
     const dispatch = useDispatch();
 
-
-    const successfulLogin = (token) => {
-        window.localStorage.setItem(AUTH_CONSTANTS.token, token);
-        setChromeJWT(token);
-        setRedirect(true);
-        setError('');
-    }
-
     const handleGoogle = async () => {
+        console.log('clicked');
         const result = await signInWithPopup(auth, provider)
         console.log(result);
         const res = await fetch(`${constants.url}/auth/google`, {
             method: 'POST',
-            body: JSON.stringify({ idToken: result.user.uid, email: result.user.email }),
+            body: JSON.stringify({ idToken: result.user.uid, email: result.user.email, photoURL: result.user.photoURL, name: result.user.displayName }),
             headers: { 'Content-Type': 'application/json' }
         })
         const data = await res.json();
-        console.log(data.token);
+        console.log(data);
+        console.log(document.cookie);
     };
+    //log all cookies in the document        
 
     return (
         <div className="Auth">

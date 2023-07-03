@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { use } = require('../endpoints/basicRoutes');
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
@@ -12,27 +11,38 @@ const userSchema = new Schema({
     email: {
         type: String,
     },
-    profilePicture: {
+    photoURL: {
         type: String,
     },
+    name: {
+        type: String,
+    },    
 });
 
 
 userSchema.statics.login = async function (id, params) {
     const user = await this.findById(id);
     if (user) {
-        const { email, profilePicture } = user;
-        const updateParams = {email, profilePicture, ...params};
+        if (Object.keys(params).length === 0) {
+         return user; 
+        }
+        const { email, photoURL, name } = user;
+        const updateParams = {email, photoURL, name, ...params};
         user.set(updateParams);
         await user.save();
         return user;
     }
+    console.log({ _id: id, ...params })
     const newUser = new this({ _id: id, ...params });
-    await newUser.save();
-    return newUser;
+    console.log(newUser)
+    return await newUser.save();
+
+    // const blog = new this({
+    //     blogID,
+    //     version
+    //   });
+    //   return await blog.save();
 }
-
-
 
 // Create and export User Model
 const User = mongoose.model('User', userSchema);

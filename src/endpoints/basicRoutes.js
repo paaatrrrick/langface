@@ -26,16 +26,16 @@ basicRoutes.get("/data", (req, res) => {
 
 basicRoutes.post('/auth/google', async (req, res) => {
     console.log('we have been hit');
-    const { idToken, email } = req.body;
+    const { idToken, email, photoURL, name } = req.body;
+    console.log(req.body);
     const uid = randomStringToHash24Bits(idToken);
-    const user = await User.login(uid);
-    if (!user) {
-        const newUser = new User.login({ _id: uid, params: { email: email }})
-        await newUser.save();
-    }
+    console.log(uid);
+    const user = await User.login(uid, { email, photoURL, name })
+    console.log(user);
     const token = jwt.sign({ _id: uid, }, process.env.JWT_PRIVATE_KEY, { expiresIn: "1000d" });
-    res.cookie("bloggerGPT-user", token)
-    res.status(200).send({ message: 'Login successful' });
+    console.log(token);
+    res.cookie("langface-token", token)
+    res.json({ message: 'Login successful' });
 });
 
 // //make a route that gets a user from an ID stored in a cookie
