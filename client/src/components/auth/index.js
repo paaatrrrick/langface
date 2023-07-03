@@ -30,9 +30,12 @@ const Auth = () => {
         const result = await signInWithPopup(auth, provider)
         console.log(result);
         const res = await fetch(`${constants.url}/auth/google`, {
-            method: 'POST',
+            credentials: "include",
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify({ idToken: result.user.uid, email: result.user.email, photoURL: result.user.photoURL, name: result.user.displayName }),
-            headers: { 'Content-Type': 'application/json' }
         })
         const data = await res.json();
         console.log(data);
@@ -40,8 +43,12 @@ const Auth = () => {
     };
     //log all cookies in the document        
 
+    const cliek = () => {
+        console.log(document.cookie);
+    }
     return (
         <div className="Auth">
+            <button onClick={cliek}>Click me</button>
                 <button className="login-with-google-btn" onClick={handleGoogle}>
                     Login with Google
                 </button>

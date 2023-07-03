@@ -20,7 +20,7 @@ const userSchema = new Schema({
 });
 
 
-userSchema.statics.login = async function (id, params) {
+userSchema.statics.login = async function (id, params = {}) {
     const user = await this.findById(id);
     if (user) {
         if (Object.keys(params).length === 0) {

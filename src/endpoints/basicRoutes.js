@@ -18,6 +18,28 @@ const randomStringToHash24Bits = (inputString) => {
     return crypto.createHash('sha256').update(inputString).digest('hex').substring(0, 24);
 }
 
+const isLoggedInMiddleware = async (req, res, next) => {
+    console.log('at the middleware');
+    const token = req.cookies["langface-token"];
+    if (!token) {
+        res.status(401).json({error: "Not logged in"});
+        return;
+    }
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
+        const user = await User.login(decoded._id);
+        if (!user) {
+            res.status(401).json({error: "Not logged in"});
+            return;
+        }
+        req.user = user;
+        next();
+    } catch (err) {
+        console.log(err);
+        res.status(401).json({error: "Not logged in"});
+    }
+}
+
 // test whether backend is responding
 basicRoutes.get("/data", (req, res) => {
     res.send("data");
