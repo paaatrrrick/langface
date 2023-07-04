@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const BlogDB = require('./blog');
 
 const userSchema = new Schema({
     blogs: {
@@ -44,9 +45,13 @@ userSchema.statics.login = async function (id, params = {}) {
     //   return await blog.save();
 }
 
-userSchema.statics.addBlog = async function (id, blog) {
+userSchema.statics.addBlog = async function (id, blogID) {
     const user = await this.findById(id);
-    user.blogs.push(blog);
+    if (BlogDB.getOwner(blogID)){
+        // if user is running multiple agents on the same blog, we don't need to push the blogID to the array multiple times
+        return user;
+    }
+    user.blogs.push(blogID);
     await user.save();
     return user;
 }

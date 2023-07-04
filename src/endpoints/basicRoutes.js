@@ -5,10 +5,11 @@ const express = require("express");
 const FormData = require("form-data");
 const User = require("../mongo/user");
 const fetch = require("node-fetch");
-const Blog = require("../mongo/blog");
+const BlogDB = require("../mongo/blog");
 const {OAuth2Client} = require('google-auth-library');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const { Agent } = require("http");
 
 
 const basicRoutes = express.Router();
@@ -68,7 +69,7 @@ basicRoutes.get("/user", isLoggedInMiddleware, async (req, res) => {
     const blogIDs = req.user.blogs;
     const blogs = []
     for (let id of blogIDs) {
-        const blog = await Blog.getByMongoID(id);
+        const blog = await BlogDB.getByMongoID(id);
         if (blog){
             blogs.push(blog);
         }
@@ -135,10 +136,24 @@ basicRoutes.post("/wordpress", async (req, res) => {
 });
 
 basicRoutes.post("/dailyrun", async (req, res) => {
-    const activeBlogs = await Blog.getActive();
-    activeBlogs.foreach(blog => {
-        agent = blog.agent;
-    });
+    if (req.body === 'dailyrunpassword') {
+        const activeBlog = await BlogDB.getActive();
+        activeBlog.foreach(blog => {
+            agent = new Agent(
+                blog.uid,
+                blog.openAIKey,
+                socket,
+                blog.jwt,
+                blog.blogID,
+                blog.subject,
+                blog.config,
+                blog.version,
+                blog.loops,
+                blog.daysLeft - 1
+            );
+            agent.run();
+        });
+    }
 });
 
 module.exports = basicRoutes;
