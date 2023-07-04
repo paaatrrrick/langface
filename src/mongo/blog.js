@@ -105,11 +105,6 @@ BlogSchema.statics.getByMongoID = async function(id) {
     return await this.findById({ blogID: id });
 };
 
-
-
-
-
-
   
 BlogSchema.statics.getBlog = async function(blogID, version) {
   return await this.findOne({blogID, version})
@@ -117,9 +112,11 @@ BlogSchema.statics.getBlog = async function(blogID, version) {
 
 // Method to check remaining posts
 BlogSchema.statics.checkRemainingPosts = async function(blogID, version) {
+  console.log('at check remaining posts');
+  console.log(blogID, version);
   const today = new Date().setHours(0, 0, 0, 0);
   let blog = await this.findOne({ blogID, version });
-
+  console.log(blog)
   if (!blog) {
       blog = await this.createNewBlog(blogID, version);
   }

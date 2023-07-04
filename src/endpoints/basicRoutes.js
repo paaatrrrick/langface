@@ -9,8 +9,7 @@ const BlogDB = require("../mongo/blog");
 const {OAuth2Client} = require('google-auth-library');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const { Agent } = require("http");
-
+const Agent = require("../classes/Agent");
 
 const basicRoutes = express.Router();
 
@@ -139,7 +138,7 @@ basicRoutes.post("/dailyrun", async (req, res) => {
     if (req.body === 'dailyrunpassword') {
         const activeBlog = await BlogDB.getActive();
         activeBlog.foreach(blog => {
-            agent = new Agent(
+            const agent = new Agent(
                 blog.uid,
                 blog.openAIKey,
                 socket,

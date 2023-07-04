@@ -139,7 +139,14 @@ const Home = () => {
       setData([]);
       setHasStarted(true);
       const openAIKey = localStorage.getItem("openAIKey");
-      const newData = {jwt, loops, id, content, openAIKey, version, subject, daysToRun};
+      var userAuthToken = document.cookie.split(';').find(cookie => cookie.startsWith(`${constants.authCookieName}=`));
+      if (!userAuthToken) {
+        userAuthToken = document.cookie.split(';').find(cookie => cookie.startsWith(` ${constants.authCookieName}=`));
+      }
+      if (userAuthToken) {
+        userAuthToken = userAuthToken.split('=')[1];
+    }
+      const newData = {jwt, loops, blogID: id, content, openAIKey, version, subject, daysToRun, userAuthToken};
       socket.on("updateData", (incomingData) => {
         if (incomingData.type === "ending") {
           setHasStarted(false);

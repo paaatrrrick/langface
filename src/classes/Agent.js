@@ -14,11 +14,11 @@ const { HumanChatMessage } = require("langchain/schema");
 const { PromptTemplate } = require("langchain/prompts");
 
 class Agent {
-  constructor(uid = undefined, openAIKey, socket, jwt, blogID, subject, config, version, loops, daysLeft) {
+  constructor(openAIKey, sendData, jwt, blogID, subject, config, version, loops, daysLeft, uid = null) {
     // AGENT
     this.uid = uid;
     this.openAIKey = openAIKey ? openAIKey : process.env.OPENAI_API_KEY;
-    this.socket = socket;
+    this.sendData = sendData;
 
     // BLOG
     this.jwt = jwt;
@@ -33,19 +33,29 @@ class Agent {
     
     // TOOLS
     // this.researcher = new Researcher(blogSubject, this.openAIKey);
-    this.researcher = new LongTailResearcher(blogSubject, loops, content, this.openAIKey);
+    this.researcher = new LongTailResearcher(subject, loops, config, this.openAIKey);
+  }
+
+  getBlogState() {
+    return {
+      uid: this.uid || "",
+      jwt: this.jwt,
+      blogID: this.blogID,
+      subject: this.subject,
+      config: this.config,
+      version: this.version,
+      loops: this.loops,
+      daysLeft: this.daysLeft,
+      summaries: this.summaries,
+      blogOutlines: this.blogOutlines,
+    }
   }
 
   run = async () => {
-      // this.summaries = blog.summaries;
-      // this.blogOutlines = blog.blogOutlines;
-      // this.blogSubject = blog.blogSubject;
-      // this.jwt = blog.jwt;
-      // this.blogID = blog.blogID;
-
       var errors = 0;
       for (let i = 0; i < this.loops; i++) {
         try {
+          console.log('trying to run here');
           const {remainingPosts, dailyPostCount} = await BlogDB.checkRemainingPosts(this.blogID, this.version);
           if (remainingPosts <= 0) {
             this.sendData({ type: "ending", content: "Ending: You have reached your daily post limit", remainingPosts, dailyPostCount });
@@ -58,8 +68,8 @@ class Agent {
             return;
           }
           const blogSite = this.version === "blogger" ? 
-          new Blogger(this.content, outline, this.jwt, this.blogID, this.sendData, this.openAIKey, this.loops, this.summaries, i) : 
-          new Wordpress(this.content, outline, this.jwt, this.blogID, this.sendData, this.openAIKey, this.loops, this.summaries, i);
+          new Blogger(this.config, outline, this.jwt, this.blogID, this.sendData, this.openAIKey, this.loops, this.summaries, i) : 
+          new Wordpress(this.config, outline, this.jwt, this.blogID, this.sendData, this.openAIKey, this.loops, this.summaries, i);
 
           var result = await blogSite.run();
           this.summaries.push({summary: outline.blogStrucutre, url: result.url});
@@ -92,20 +102,11 @@ class Agent {
         this.sendData({ type: "ending", title: "Process Complete." });
       }
       // store blog so we can do: rate limits, daily runs, long term looking UI 
-      const blog = await BlogDB.createNewBlog(this);
+      // const blog = await BlogDB.createNewBlog(this.getBlogState());
       // attach blog to user, so we can tell the frontend what to display
       if (this.uid){
-        await User.addBlog(this.uid, blog.blogID);
+        await User.addBlog(this.uid, this.blogID);
       }
-  };
-
-  sendData = async (dataForClient) => {
-    if (dataForClient.type !== "updating"){
-      SuccesfulPostsCount += 1;
-      console.log(`sending data to client: ${SuccesfulPostsCount}:`);
-      console.log(dataForClient);
-    }
-    this.socket.emit("updateData", dataForClient); // sends data only to the connected socket
   };
 }
 

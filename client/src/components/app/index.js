@@ -35,6 +35,9 @@ const App = () => {
         if (!userCookie) {
             userCookie = document.cookie.split(';').find(cookie => cookie.startsWith(` ${constants.authCookieName}=`));
         }
+        if (userCookie) {
+            userCookie = userCookie.split('=')[1];
+        }
         console.log(userCookie);
         if (userCookie) {
             const res = await fetch(`${constants.url}/user`, {

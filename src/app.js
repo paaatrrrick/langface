@@ -55,8 +55,8 @@ const io = socketIo(server, {
   },
 });
 
-// establish socket connection
-io.on("connection", webSocket);
+webSocket(io);
+
 
 let PORT = process.env.PORT;
 if (PORT == null || PORT == "") {
@@ -66,3 +66,4 @@ if (PORT == null || PORT == "") {
 server.listen(PORT, () => {
   return console.log(`✅ We're live: ${PORT}`);
 });
+
