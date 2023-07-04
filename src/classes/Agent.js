@@ -14,29 +14,46 @@ const { HumanChatMessage } = require("langchain/schema");
 const { PromptTemplate } = require("langchain/prompts");
 
 class Agent {
-  constructor(jwt = undefined, blogID, content, loops, openAIKey, version, blogSubject, sendData) {
+  // constructor(uid = undefined, jwt, blogID, content, loops, openAIKey, version, blogSubject, sendData) {
+  constructor(uid = undefined, openAIKey, sendData) {
+    //constructor
+    this.sendData = sendData;
+    this.openAIKey = openAIKey ? openAIKey : process.env.OPENAI_API_KEY;
+    this.uid = uid;
+
+
+
+    //DB
+    this.summaries = [];    
+    this.blogOutlines = [];
+    this.blogSubject = blogSubject;
     this.jwt = jwt;
     this.blogID = blogID;
     this.content = content;
-    this.loops = loops;
-    this.sendData = sendData;
-    this.summaryVectorStoreLength = 0;
-    this.openAIKey = openAIKey ? openAIKey : process.env.OPENAI_API_KEY;
     this.version = version;
-    this.blogSubject = blogSubject;
-    this.blogOutlines = [];
-    this.summaries = [];
+    this.loops = loops;
+
+
+    
+    
     // this.researcher = new Researcher(blogSubject, this.openAIKey);
     this.researcher = new LongTailResearcher(blogSubject, loops, content, this.openAIKey);
   }
 
   run = async () => {
+      const blog2 = await blog.getByID(this.uid)
+      // this.summaries = blog.summaries;
+      // this.blogOutlines = blog.blogOutlines;
+      // this.blogSubject = blog.blogSubject;
+      // this.jwt = blog.jwt;
+      // this.blogID = blog.blogID;
+
       var errors = 0;
       // store blog
       const blog = await Blog.createNewBlog(this.blogID, this.version, this);
       // update user if the user is logged in, otherwise, just run the agent
-      if (this.jwt){
-        const user = await User.addBlog(this.jwt, blog);
+      if (this.uid){
+        const user = await User.addBlog(this.uid, blog);
       }
       for (let i = 0; i < this.loops; i++) {
         try {

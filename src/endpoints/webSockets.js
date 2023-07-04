@@ -4,6 +4,7 @@ if (process.env.NODE_ENV !== "production") {
   const { Agent } = require("../classes/Agent");
   const User = require("../mongo/user");
   const cookie = require("cookie");
+  const jwt = require('jsonwebtoken');
 
 
 
@@ -24,7 +25,10 @@ if (process.env.NODE_ENV !== "production") {
         if (newData.version !== "blogger") {
           newData.version = "wordpress";
         }
+        const decoded = jwt.verify(newData.userAuthToken, process.env.JWT_PRIVATE_KEY);
+        const uid = decoded._id;
         const agent = new Agent(
+          uid,
           newData.jwt,
           newData.id,
           newData.content,
@@ -41,9 +45,6 @@ if (process.env.NODE_ENV !== "production") {
           content: e.message,
         });
       }
-    });
-    socket.on("addUser", (userID) => {
-      const res = User.createNewUser(userID);
     });
     socket.on("disconnect", () => {
       console.log("Client disconnected");
