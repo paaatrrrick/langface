@@ -2,7 +2,7 @@ const { ChatOpenAI } = require("langchain/chat_models/openai");
 const { PromptTemplate } = require("langchain/prompts");
 const { HumanChatMessage, SystemChatMessage } = require("langchain/schema");
 const { z } = require("zod");
-const { StructuredOutputParser } = require("langchain/output_parsers");
+const { StructuredOutputParser, CustomListOutputParser } = require("langchain/output_parsers");
 const { parse } = require("path");
 
 class LongTailResearcher {
@@ -14,30 +14,52 @@ class LongTailResearcher {
         this.hasInitialized = false;
         this.LongTailKeywords = [];
     }
-    initialize = async () => {
-        
-        //I want to do a loop that run the research in batches of 10. Perform batches of 10 for the number of loops. The last batch should be the remainder of the loops.
-        const parserFromZod = StructuredOutputParser.fromZodSchema(
-            z.array(z.string().describe(`List ${this.loops} Longtail keywords for my blog.`)
-        ));
-        const formatInstructions = parserFromZod.getFormatInstructions()
-        const systemMessage =`You are a world class SEO expert who specializes in long tail keyword detections. You are hired by a company to make a list of ${this.loops} Longtail keywords that you would expect to have low competitior and high volume, making them perfect for their blog to target, meaning they would have high traffic and low competition. Clients give you the subject of their blog ${(this.content) &&` and then an very detailed specifications of what their blog, some of which might not be relevant to you.`}. Then you find the give them a list of keywords which follows the format instructions.`;
-        const humanMessage = `Blog Subject: "${this.subject}"${(this.content) && `\n\nBLOG SPECIFICATIONS:\n\n "${this.content}" \n\n{format_instructions}`}`
-        const humanPrompt = new PromptTemplate({template: humanMessage, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
-        const humanInput = await humanPrompt.format();
-        const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openAIKey});
-        const response = await model.call([new SystemChatMessage(systemMessage), new HumanChatMessage(humanInput)]);
-        const parsed = await parserFromZod.parse(response.text);
-        this.LongTailKeywords = parsed;
+
+    writeTitles = async () => {
+        console.log("Writing titles...");
+        const parser = new CustomListOutputParser({
+          length: this.loops,
+          separator: "\n",
+        });
+        const formatInstructions = parser.getFormatInstructions();
+        const prompt = new PromptTemplate({
+          template: `Provide an unordered list of length "{loops}" of Longtail keywords that you would expect to have few competitors and high volume traffic for a blog about "{subject}". \n{format_instructions}`,
+          inputVariables: ["subject", "loops"],
+          partialVariables: { format_instructions: formatInstructions },
+        });
+        const input = await prompt.format({
+          subject: this.subject,
+          loops: this.loops,
+        });
+        console.log(input);
+        const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 3000, openAIApiKey: this.openAIKey});
+        const response = await model.call([new HumanChatMessage(input)]);
+        this.LongTailKeywords  = response.text.split("\n");
         return this.LongTailKeywords;
-    }
+      };
+    // initialize = async () => {
+    //     //I want to do a loop that run the research in batches of 10. Perform batches of 10 for the number of loops. The last batch should be the remainder of the loops.
+    //     const parserFromZod = StructuredOutputParser.fromZodSchema(
+    //         z.array(z.string().describe(`List ${this.loops} Longtail keywords for my blog.`)
+    //     ));
+    //     const formatInstructions = parserFromZod.getFormatInstructions()
+    //     const systemMessage =`You are a world class SEO expert who specializes in long tail keyword detections. You are hired by a company to make a list of ${this.loops} Longtail keywords that you would expect to have low competitior and high volume, making them perfect for their blog to target, meaning they would have high traffic and low competition. Clients give you the subject of their blog ${(this.content) &&` and then an very detailed specifications of what their blog, some of which might not be relevant to you.`}. Then you find the give them a list of keywords which follows the format instructions.`;
+    //     const humanMessage = `Blog Subject: "${this.subject}"${(this.content) && `\n\nBLOG SPECIFICATIONS:\n\n "${this.content}" \n\n{format_instructions}`}`
+    //     const humanPrompt = new PromptTemplate({template: humanMessage, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
+    //     const humanInput = await humanPrompt.format();
+    //     const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openAIKey});
+    //     const response = await model.call([new SystemChatMessage(systemMessage), new HumanChatMessage(humanInput)]);
+    //     const parsed = await parserFromZod.parse(response.text);
+    //     this.LongTailKeywords = parsed;
+    //     return this.LongTailKeywords;
+    // }
 
     getNextBlueprint = async () => {
         try {
             console.log('getting next blue print');
             console.log(this.LongTailKeywords)
             if (!this.hasInitialized) {
-                await this.initialize();
+                await this.writeTitles();
                 this.hasInitialized = true;
             }
             if (this.LongTailKeywords.length === 0) {
@@ -72,6 +94,7 @@ class LongTailResearcher {
         const response = await model.call([new HumanChatMessage(input)]);
         const parsed = await parserFromZod.parse(response.text)   
         const { blogTitle, lsiKeywords, headers } = parsed;
+        console.log(parsed);
         return { blogTitle, lsiKeywords, keyword, headers };
       };
 }
