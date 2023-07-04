@@ -20,13 +20,13 @@ const blogPost = (keyword, lsiKeyword, title, headers, content, previousArticles
   return `
   You are an AI assitant that is a worldclass SEO class writer. Given the following list of instructions write a blog post. \n
   -Blog title: ${title}. \n
-  -Use the following headers in for the blog with each being an h2: ${arrayToString(headers)}. \n
+  -Use the following headers in for the blog with each being an h2: ${headers}. \n
   -EACH header MUST HAVE 3 PARAGRAPHS beneath it! EACH PARAGRAPH MUST HAVE A MINIMUM OF 8 SENTENCES!\n
   ${previousArticlesString}
   -All content in the blog should only be relvant to to articles's goal. Do not reference social media pages (twitter, instagram, youtube, etc) or other things unrelated to the content. Do not talk about about our team members or authors. \n
   -Use the following longtail keyword EXTREMELY frequently "${keyword}" as well as these other relvant keywords: "${lsiKeyword}". \n
   ${(content) && `-${content}\n`}
-  ${(imageNames.length > 0) && `-Include exactly ${imageNames.length} imgs with the following src's respsectively: ${arrayToString(imageNames)}. Add each img throughout the blog to compliment the writing. There should be one at the beginning and one in the middle/end. Each img should have inline styles for a width and height, which are between 256px and 1280px.\n`}
+  ${(imageNames.length > 0) && `-Include exactly ${imageNames.length} img tag in the blog. They should have the following src's respsectively: ${arrayToString(imageNames)}. Each img should have inline styles for a width and height, which are between 256px and 1280px.\n`}
   -Output only valid HTML. Add inline styles of margin and padding to headers and paragraphs to add elegant spacing. DO NOT STATE THE TITLE. Start with an article tag and then an h2 tag.
   `
 };

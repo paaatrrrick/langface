@@ -14,8 +14,7 @@ const { HumanChatMessage } = require("langchain/schema");
 const { PromptTemplate } = require("langchain/prompts");
 
 class Agent {
-  constructor(jwt, blogID, content, loops, openAIKey, version, blogSubject, sendData) {
-    this.userID = '123456';
+  constructor(jwt = undefined, blogID, content, loops, openAIKey, version, blogSubject, sendData) {
     this.jwt = jwt;
     this.blogID = blogID;
     this.content = content;
@@ -32,7 +31,13 @@ class Agent {
   }
 
   run = async () => {
-      User.addBlog(this.userID, this.blogID);
+      var errors = 0;
+      // store blog
+      const blog = await Blog.createNewBlog(this.blogID, this.version, this);
+      // update user if the user is logged in, otherwise, just run the agent
+      if (this.jwt){
+        const user = await User.addBlog(this.jwt, blog);
+      }
       for (let i = 0; i < this.loops; i++) {
         try {
           const {remainingPosts, dailyPostCount} = await Blog.checkRemainingPosts(this.blogID, this.version);
@@ -64,6 +69,11 @@ class Agent {
 
           this.sendData({...result, ...postData, type: 'success'});
         } catch (e) {
+          errors++;
+          if (errors >= 5) {
+            this.sendData({ type: "ending", title: "Too many errors, stopping process" });
+            return;
+          }
           console.log('error from loops')
           console.log(e);
           this.sendData({ type: "error", title:  e.message });

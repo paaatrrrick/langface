@@ -44,6 +44,13 @@ userSchema.statics.login = async function (id, params = {}) {
     //   return await blog.save();
 }
 
+userSchema.statics.addBlog = async function (id, blog) {
+    const user = await this.findById(id);
+    user.blogs.push(blog);
+    await user.save();
+    return user;
+}
+
 // Create and export User Model
 const User = mongoose.model('User', userSchema);
 module.exports = User;
