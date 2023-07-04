@@ -3,6 +3,7 @@ if (process.env.NODE_ENV !== "production") {
   }
   const { Agent } = require("../classes/Agent");
   const User = require("../mongo/user");
+  const BlogDB = require("../mongo/blog");
   const cookie = require("cookie");
   const jwt = require('jsonwebtoken');
 
@@ -11,36 +12,34 @@ if (process.env.NODE_ENV !== "production") {
   const webSocket = (socket) => {
     console.log("New client connected");
     socket.on("addData", (newData) => {
+
       // const cookies = cookie.parse(socket.handshake.headers.cookie);
-      console.log(socket.handshake.headers);
-      const sendData = async (dataForClient) => {
-        if (dataForClient.type !== "updating"){
-          SuccesfulPostsCount += 1;
-          console.log(`sending data to client: ${SuccesfulPostsCount}:`);
-          console.log(dataForClient);
-        }
-        socket.emit("updateData", dataForClient); // sends data only to the connected socket
-      };
+      // console.log(socket.handshake.headers);
       try {
         if (newData.version !== "blogger") {
           newData.version = "wordpress";
         }
-        const decoded = jwt.verify(newData.userAuthToken, process.env.JWT_PRIVATE_KEY);
-        const uid = decoded._id;
-        const agent = new Agent(
+
+        if (newData.userAuthToken) {
+          const decoded = jwt.verify(newData.userAuthToken, process.env.JWT_PRIVATE_KEY);
+          var uid = decoded._id;
+        }
+
+        var agent = new Agent(
           uid,
+          newData.openAIKey,
+          socket,
           newData.jwt,
           newData.id,
-          newData.content,
-          newData.loops,
-          newData.openAIKey,
-          newData.version,
           newData.blogSubject,
-          sendData
+          newData.content,
+          newData.version,
+          newData.loops,
+          newData.daysLeft
         );
         agent.run();
       } catch (e) {
-        sendData({
+        agent.sendData({
           type: "ending",
           content: e.message,
         });
