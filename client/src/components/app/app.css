@@ -5,7 +5,7 @@
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
     color: var(--mainDark);
-    /* transition: all 0.3s ease; */
+    transition: all 0.3s ease;
 }
 
 
@@ -16,6 +16,7 @@
     --lightDark: #f7f7f8;
     --darkerBackground: #0e0e0e;
     --lighterBackground: #212121;
+    --blackFiler: invert(100%) sepia(100%) saturate(0%) hue-rotate(83deg) brightness(108%) contrast(101%);
     --gray: #757575;
     --green: #6cd06c;
     --red: #fe3d67;

@@ -32,21 +32,6 @@ const NavController = ({launch}) => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    const handleLogin = async (credentialResponse) => {
-        const res = await fetch(`${constants.url}/google`, {
-            credentials: "include",
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ credentialResponse }),
-        });
-        if (!res.ok) {
-            dispatch(setBannerMessage({ message: "Error logging in", type: "error" }));
-        } else {
-            launch();
-        }
-    }
     return (
         <div className="navController" ref={parentRef}>
             <div className='row align-end'>
@@ -89,7 +74,7 @@ const NavController = ({launch}) => {
                     <img src={BookSvg} />
                     <h6>Our Blog</h6>
                 </a>
-                <Auth />
+                <Auth launch={launch}/>
             </div>
         </div>
     )

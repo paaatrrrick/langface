@@ -29,9 +29,10 @@ const App = () => {
     }, [colorScheme])
 
     const launch = async () => {
-        var userCookie = document.cookie.split(';').find(cookie => cookie.startsWith('user-cookie='));
+        console.log('at launch')
+        var userCookie = document.cookie.split(';').find(cookie => cookie.startsWith(`${constants.authCookieName}=`));
         if (!userCookie) {
-            userCookie = document.cookie.split(';').find(cookie => cookie.startsWith(' user-cookie='));
+            userCookie = document.cookie.split(';').find(cookie => cookie.startsWith(`${constants.authCookieName} user-cookie=`));
         }
         if (userCookie) {
             const res = await fetch(`${constants.url}/user`, {

@@ -1,5 +1,26 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit";
+import { deleteCookie } from "./utils/getJwt";
 import constants from "./constants";
+
+const defaultBlogAgent = {
+  default: {
+    content: "",
+    numPosts: 0,
+    numDays: 1,
+    subject: "",
+    loops: "",
+    jwt: "",
+    id: "",
+    blogSubject: "",
+    content: "",
+    data: [],
+    hasStarted: false,
+    usedBlogPosts: 0,
+    maxBlogPosts: constants.maxWordpressPosts,
+    version: "wordpress",
+  }
+}
+
 // Create Redux slice for error state
 const slice = createSlice({
   name: "main",
@@ -7,30 +28,18 @@ const slice = createSlice({
     bannerMessage: null,
     currentView: "home",
     isLoggedIn: false,
+    user: {},
     activeBlogAgent: "default",
     colorScheme: localStorage.getItem("bloggerGPT-colorScheme") ? localStorage.getItem("bloggerGPT-colorScheme") : "dark",
-    blogAgents: {
-      default: {
-        content: "",
-        numPosts: 0,
-        numDays: 1,
-        subject: "",
-        loops: "",
-        jwt: "",
-        id: "",
-        blogSubject: "",
-        content: "",
-        data: [],
-        hasStarted: false,
-        usedBlogPosts: 0,
-        maxBlogPosts: constants.maxWordpressPosts,
-        version: "wordpress",
-      }
-    },
+    blogAgents: defaultBlogAgent
   },
   reducers: {
     login: (state, action) => {
-      return {...state, isLoggedIn: true, blogAgents: action.payload.blogs}
+      return {...state, isLoggedIn: true, blogAgents: action.payload.blogs, user: {}}
+    },
+    signOut: (state) => {
+      deleteCookie(constants.authCookieName);
+      return {...state, isLoggedIn: false, user: {}, blogAgents: defaultBlogAgent, activeBlogAgent: "default"}
     },
     setBannerMessage: (state, action) => {
       state.bannerMessage = action.payload;
@@ -80,7 +89,7 @@ const slice = createSlice({
 // Now we configure the store
 const store = configureStore({ reducer: { main: slice.reducer } });
 export default store;
-export const { setBannerMessage, clearBannerMessage, setVersion, setCurrentView, setColorScheme, updateBlogAgentData, runAgent, addAgent } = slice.actions;
+export const { setBannerMessage, clearBannerMessage, setVersion, setCurrentView, setColorScheme, updateBlogAgentData, runAgent, addAgent, signOut } = slice.actions;
 // export const actions = { ...slice.actions};
 
 

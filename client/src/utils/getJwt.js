@@ -69,4 +69,9 @@ const wordpressGetJwt = async (setError, fetchWordpress) => {
   }, 500);
 };
 
-export { getJwt, wordpressGetJwt };
+function deleteCookie(cookieName) {
+  // Setting the cookie's expiry date to a time in the past will effectively delete it
+  document.cookie = cookieName + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+export { getJwt, wordpressGetJwt, deleteCookie };

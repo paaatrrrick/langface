@@ -29,6 +29,7 @@ const isLoggedInMiddleware = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
         const user = await User.login(decoded._id);
         if (!user) {
+            res.clearCookie("langface-token");
             res.status(401).json({error: "Not logged in"});
             return;
         }
@@ -36,6 +37,7 @@ const isLoggedInMiddleware = async (req, res, next) => {
         next();
     } catch (err) {
         console.log(err);
+        res.clearCookie("langface-token");
         res.status(401).json({error: "Not logged in"});
     }
 }
@@ -60,23 +62,17 @@ basicRoutes.post('/auth/google', async (req, res) => {
     res.json({ message: 'Login successful' });
 });
 
-// //make a route that gets a user from an ID stored in a cookie
-// basicRoutes.get("/user", async (req, res) => {
-//     const user = await User.createNewUser(req.cookies["user-cookie"]);
-//     if (!user) {
-//         res.clearCookie("user-cookie");
-//         res.status(401).json({error: "User not found"});
-//     }
-//     const blogIDs = user.blogs;
-//     const blogs = []
-//     for (let id of blogIDs) {
-//         const blog = await Blog.getByMongoID(id);
-//         if (blog){
-//             blogs.push(blog);
-//         }
-//     }
-//     res.json({blogs: blogs});
-// });
+basicRoutes.get("/user", isLoggedInMiddleware, async (req, res) => {
+    const blogIDs = req.user.blogs;
+    const blogs = []
+    for (let id of blogIDs) {
+        const blog = await Blog.getByMongoID(id);
+        if (blog){
+            blogs.push(blog);
+        }
+    }
+    res.json({blogs: blogs});
+});
   
 // basicRoutes.post("/google", async (req, res) => {
 //     console.log('bod');
