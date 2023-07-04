@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './auth.css'
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+// import constants from '../../constants';
 import { initializeApp } from "firebase/app";
 import { useDispatch, useSelector } from 'react-redux';
 import { setBannerMessage, signOut } from "../../store";
@@ -23,6 +24,9 @@ const provider = new GoogleAuthProvider();
 
 const Auth = ({ launch }) => {
     const { isLoggedIn, user, } = useSelector((state) => state.main);
+    console.log('at auth');
+    console.log(isLoggedIn);
+    console.log(user);
     const dispatch = useDispatch();
 
     const handleGoogle = async () => {
@@ -50,15 +54,19 @@ const Auth = ({ launch }) => {
         launch();
     };
 
-    const signOut = async () => {
+    const signOutClicked = async () => {
+        console.log('clicked sign out');
+        // document.cookie = constants.authCookieName + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
         dispatch(signOut());
     };
 
     if (isLoggedIn) {
-        <div className="Auth-loggedIn" onClick={signOut} >
-            {(user.photoURL) && <img src={user?.photoURL} alt="profile" />}
-            Sign out
-        </div>
+        return (
+            <div className="Auth-loggedIn" onClick={signOutClicked} >
+                {(user.photoURL) && <img src={user?.photoURL} alt="profile" />}
+                Sign out
+            </div>
+        );
     }
     return (
         <div className="Auth">

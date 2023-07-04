@@ -12,7 +12,7 @@ const trimStringTo15Chars = (str) => {
 
 
 const Dropdown = ({ options, selected, onSelectedChange }) => {
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
     const active = options.find((option) => option.id === selected);
     return (
     <div className="Dropdown">
@@ -26,7 +26,9 @@ const Dropdown = ({ options, selected, onSelectedChange }) => {
                 return (
                     <>
                         {(option.id !== selected) && (
-                            <div className="Dropdown-row" onClick={() => {
+                            <div className="Dropdown-row"
+                             key={index}
+                             onClick={() => {
                                 onSelectedChange(options[index].id);
                                 setOpen(false);
                             }}>

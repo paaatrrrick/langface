@@ -9,8 +9,8 @@
     position: relative; */
     width: 175px;
     border: 2px solid var(--mainDark);
-    border-radius: 10px;
-    padding: 0px 5px;
+    border-radius: 20px;
+    padding: 0px 8px;
     background-color: var(--lighterBackground);
     z-index: 1000;
 }
@@ -29,10 +29,6 @@
     background-color: var(--mainDark);
 }
 
-.Dropdown-row:hover *{
-    background-color: var(--mainDark);
-}
-
 
 .Dropdown-row:hover *{
     color: var(--brandColor);
@@ -48,9 +44,9 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    border-radius: 5px;
+    border-radius: 0px;
     padding: 3px 8px;
-    margin: 5px 0px;
+    margin: 3px 0px;
 }
 
 .Dropdown-row:not(:last-child) {

@@ -6,7 +6,7 @@ const defaultBlogAgent = {
   default: {
     content: "",
     numPosts: 0,
-    numDays: 1,
+    daysToRun: 1,
     subject: "",
     loops: "",
     jwt: "",
@@ -34,8 +34,25 @@ const slice = createSlice({
     blogAgents: defaultBlogAgent
   },
   reducers: {
+    newBlogAgent: (state) => {
+      state.blogAgents = {...state.blogAgents, 'New Agent': defaultBlogAgent.default}
+      state.activeBlogAgent = 'New Agent';
+    },
+    standardizeBlogAgent: (state, action) => {
+      console.log('at standardizeBlogAgent');
+      console.log(action.payload);
+      state.blogAgents[action.payload.activeBlogAgent] = {...state.blogAgents[action.payload.activeBlogAgent], ...action.payload.data}
+    },
+    setActiveBlogAgent: (state, action) => {
+      state.activeBlogAgent = action.payload;
+    },
     login: (state, action) => {
-      return {...state, isLoggedIn: true, blogAgents: action.payload.blogs, user: {}}
+      console.log(action.payload)
+      var { blogs, user } = action.payload.blogs;
+      if (!blogs || blogs.length === 0) {
+        return {...state, isLoggedIn: true, user: action.payload.user}
+      }
+      return {...state, isLoggedIn: true, blogAgents: blogs, user: user}
     },
     signOut: (state) => {
       deleteCookie(constants.authCookieName);
@@ -89,7 +106,7 @@ const slice = createSlice({
 // Now we configure the store
 const store = configureStore({ reducer: { main: slice.reducer } });
 export default store;
-export const { setBannerMessage, clearBannerMessage, setVersion, setCurrentView, setColorScheme, updateBlogAgentData, runAgent, addAgent, signOut } = slice.actions;
+export const { setBannerMessage, clearBannerMessage, setVersion, setCurrentView, setColorScheme, updateBlogAgentData, runAgent, addAgent, login, signOut, newBlogAgent, setActiveBlogAgent, standardizeBlogAgent } = slice.actions;
 // export const actions = { ...slice.actions};
 
 

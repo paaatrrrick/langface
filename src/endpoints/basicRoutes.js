@@ -4,6 +4,7 @@ if (process.env.NODE_ENV !== "production") {
 const express = require("express");
 const FormData = require("form-data");
 const User = require("../mongo/user");
+const fetch = require("node-fetch");
 const Blog = require("../mongo/blog");
 const {OAuth2Client} = require('google-auth-library');
 const crypto = require('crypto');
@@ -22,6 +23,7 @@ const isLoggedInMiddleware = async (req, res, next) => {
     console.log('at the middleware');
     const token = req.cookies["langface-token"];
     if (!token) {
+        console.log('1');
         res.status(401).json({error: "Not logged in"});
         return;
     }
@@ -29,6 +31,7 @@ const isLoggedInMiddleware = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
         const user = await User.login(decoded._id);
         if (!user) {
+            console.log('2');
             res.clearCookie("langface-token");
             res.status(401).json({error: "Not logged in"});
             return;
@@ -36,6 +39,7 @@ const isLoggedInMiddleware = async (req, res, next) => {
         req.user = user;
         next();
     } catch (err) {
+        console.log('3')
         console.log(err);
         res.clearCookie("langface-token");
         res.status(401).json({error: "Not logged in"});
@@ -51,18 +55,16 @@ basicRoutes.get("/data", (req, res) => {
 basicRoutes.post('/auth/google', async (req, res) => {
     console.log('we have been hit');
     const { idToken, email, photoURL, name } = req.body;
-    console.log(req.body);
     const uid = randomStringToHash24Bits(idToken);
-    console.log(uid);
     const user = await User.login(uid, { email, photoURL, name })
-    console.log(user);
     const token = jwt.sign({ _id: uid, }, process.env.JWT_PRIVATE_KEY, { expiresIn: "1000d" });
-    console.log(token);
     res.cookie("langface-token", token)
     res.json({ message: 'Login successful' });
 });
 
 basicRoutes.get("/user", isLoggedInMiddleware, async (req, res) => {
+    console.log('at user');
+    console.log(req.user);
     const blogIDs = req.user.blogs;
     const blogs = []
     for (let id of blogIDs) {
@@ -71,7 +73,7 @@ basicRoutes.get("/user", isLoggedInMiddleware, async (req, res) => {
             blogs.push(blog);
         }
     }
-    res.json({blogs: blogs});
+    res.json({blogs: blogs, user: {photoURL: req.user.photoURL}});
 });
   
 // basicRoutes.post("/google", async (req, res) => {
@@ -103,8 +105,11 @@ basicRoutes.get("/user", isLoggedInMiddleware, async (req, res) => {
 
 // get full WP API token using temporary code
 basicRoutes.post("/wordpress", async (req, res) => {
+    console.log('at wordpress')
     const { code } = req.body;
+    console.log(code)
     var formdata = new FormData();
+    console.log(process.env.WORDPRESS_CLIENT_ID);
     formdata.append("client_id", process.env.WORDPRESS_CLIENT_ID);
     formdata.append("redirect_uri", process.env.WORDPRESS_REDIRECT_URI);
     formdata.append("client_secret", process.env.WORDPRESS_CLIENT_SECRET);
@@ -133,7 +138,6 @@ basicRoutes.post("/dailyrun", async (req, res) => {
     const activeBlogs = await Blog.getActive();
     activeBlogs.foreach(blog => {
         agent = blog.agent;
-        await agent.run();
     });
 });
 

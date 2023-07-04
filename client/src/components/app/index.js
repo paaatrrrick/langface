@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import './app.css'
 import { useDispatch, useSelector } from 'react-redux';
 import constants from '../../constants';
-import { addAgent, clearBannerMessage, clearPopUpTemplate, updateBlogAgentData, setBannerMessage } from '../../store';
+import { addAgent, clearBannerMessage, clearPopUpTemplate, updateBlogAgentData, setBannerMessage, login } from '../../store';
 import { setColorScheme } from '../../utils/styles';
 import NavController from '../navController';
 import BannerMessage from '../bannerMessage';
@@ -30,10 +30,12 @@ const App = () => {
 
     const launch = async () => {
         console.log('at launch')
+        console.log(document.cookie);
         var userCookie = document.cookie.split(';').find(cookie => cookie.startsWith(`${constants.authCookieName}=`));
         if (!userCookie) {
-            userCookie = document.cookie.split(';').find(cookie => cookie.startsWith(`${constants.authCookieName} user-cookie=`));
+            userCookie = document.cookie.split(';').find(cookie => cookie.startsWith(` ${constants.authCookieName}=`));
         }
+        console.log(userCookie);
         if (userCookie) {
             const res = await fetch(`${constants.url}/user`, {
                 method: 'GET',
@@ -43,8 +45,7 @@ const App = () => {
                 dispatch(setBannerMessage({type: 'error', message: 'Error: Could not authenticate user'}));
             } else {
                 const data = await res.json();
-                dispatch(setBannerMessage({type: 'success', message: 'Logged in'}));
-                console.log(data);
+                dispatch(login({blogs: data.blogs, user: data.user}));
             }
         }
     }
@@ -59,7 +60,6 @@ const App = () => {
           socket.disconnect();
         };
     }, []);
-
     const Component = templateMap[currentView] || Home;
     return (
         <div className="App">

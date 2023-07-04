@@ -6,6 +6,7 @@ if (process.env.NODE_ENV !== "production") {
   const cookie = require("cookie");
   const jwt = require('jsonwebtoken');
 
+  var SuccesfulPostsCount = 0;
 
 
   const webSocket = (socket) => {
@@ -25,20 +26,29 @@ if (process.env.NODE_ENV !== "production") {
         if (newData.version !== "blogger") {
           newData.version = "wordpress";
         }
-        const decoded = jwt.verify(newData.userAuthToken, process.env.JWT_PRIVATE_KEY);
-        const uid = decoded._id;
-        const agent = new Agent(
-          uid,
-          newData.jwt,
-          newData.id,
-          newData.content,
-          newData.loops,
-          newData.openAIKey,
-          newData.version,
-          newData.blogSubject,
-          sendData
-        );
-        agent.run();
+        // const decoded = jwt.verify(newData.userAuthToken, process.env.JWT_PRIVATE_KEY);
+        // const uid = decoded._id;
+        //loop with five timeout functions
+        for (let i = 0; i < 5; i++) {
+          setTimeout(() => {
+            sendData({
+              type: "success",
+              content: `loop ${i + 1}`,
+            });
+          }, i * 1000);
+        }
+        // const agent = new Agent(
+        //   uid,
+        //   newData.jwt,
+        //   newData.id,
+        //   newData.content,
+        //   newData.loops,
+        //   newData.openAIKey,
+        //   newData.version,
+        //   newData.blogSubject,
+        //   sendData
+        // );
+        // agent.run();
       } catch (e) {
         sendData({
           type: "ending",

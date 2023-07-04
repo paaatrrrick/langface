@@ -67,6 +67,11 @@ BlogSchema.statics.getByMongoID = async function(id) {
     return await this.findById(id);
 };
 
+
+
+
+
+
   
 BlogSchema.statics.getBlog = async function(blogID, version) {
   return await this.findOne({blogID, version})
