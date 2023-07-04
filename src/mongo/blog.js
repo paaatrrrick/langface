@@ -1,3 +1,4 @@
+const { truncate } = require('fs');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -35,6 +36,10 @@ const BlogSchema = new Schema({
     userID: {
       type: String,
       default: ''
+    },
+    agent: {
+      type: Object,
+      required: true
     }
   });
 
@@ -49,10 +54,11 @@ BlogSchema.statics.setMaxNumberOfPosts = async function(blogID, version, maxNumb
     return blog;
 }
 
-BlogSchema.statics.createNewBlog = async function(blogID, version) {
+BlogSchema.statics.createNewBlog = async function(blogID, version, agent) {
     const blog = new this({
       blogID,
-      version
+      version,
+      agent: agent
     });
     return await blog.save();
   };
@@ -106,6 +112,11 @@ BlogSchema.statics.getBlog = async function(blogID, version) {
     return {remainingPosts: blog.postsLeftToday, dailyPostCount: blog.maxNumberOfPosts};
   };
   
+  BlogSchema.statics.setMaxNumberOfPosts = async () => {
+    const activeBlogs = await this.find({ postsLeftToday: { $gt: 0 } });
+    return activeBlogs; 
+  }
+
   // Create and export Blog Model
   const Blog = mongoose.model('Blog', BlogSchema);
   module.exports = Blog;

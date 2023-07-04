@@ -14,8 +14,7 @@ const { HumanChatMessage } = require("langchain/schema");
 const { PromptTemplate } = require("langchain/prompts");
 
 class Agent {
-  constructor(jwt, blogID, content, loops, openAIKey, version, blogSubject, sendData) {
-    this.userID = '123456';
+  constructor(jwt = undefined, blogID, content, loops, openAIKey, version, blogSubject, sendData) {
     this.jwt = jwt;
     this.blogID = blogID;
     this.content = content;
@@ -33,7 +32,12 @@ class Agent {
 
   run = async () => {
       var errors = 0;
-      User.addBlog(this.userID, this.blogID);
+      // store blog
+      const blog = await Blog.createNewBlog(this.blogID, this.version, this);
+      // update user if the user is logged in, otherwise, just run the agent
+      if (this.jwt){
+        const user = await User.addBlog(this.jwt, blog);
+      }
       for (let i = 0; i < this.loops; i++) {
         try {
           const {remainingPosts, dailyPostCount} = await Blog.checkRemainingPosts(this.blogID, this.version);

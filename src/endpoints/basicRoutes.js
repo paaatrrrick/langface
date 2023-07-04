@@ -133,4 +133,12 @@ basicRoutes.post("/wordpress", async (req, res) => {
     }
 });
 
+basicRoutes.post("/dailyrun", async (req, res) => {
+    const activeBlogs = await Blog.getActive();
+    activeBlogs.foreach(blog => {
+        agent = blog.agent;
+        await agent.run();
+    });
+});
+
 module.exports = basicRoutes;
