@@ -34,6 +34,7 @@ const NavController = ({launch}) => {
 
     return (
         <div className="navController" ref={parentRef}>
+            <div className='column align-start' style={{width: '100%'}}>
             <div className='row align-end'>
                 <h3 className="italic" style={{marginLeft: '15px'}}>BloggerGPT</h3>
                 <p style={{marginLeft: '5px'}}>beta</p>
@@ -74,8 +75,10 @@ const NavController = ({launch}) => {
                     <img src={BookSvg} />
                     <h6>Our Blog</h6>
                 </a>
-                <Auth launch={launch}/>
+                </div>
             </div>
+
+            <Auth launch={launch}/>
         </div>
     )
 }

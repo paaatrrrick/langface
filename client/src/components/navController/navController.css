@@ -1,12 +1,12 @@
 .navController{
     width: 224px;
     min-height: 100%;
-    padding: 16px 8px;
+    padding: 16px 8px 4dvh 8px;
     background-color: var(--darkerBackground);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    justify-content: flex-start;
+    justify-content: space-between;
     transition: all 0.3s ease-in-out;
 }
 

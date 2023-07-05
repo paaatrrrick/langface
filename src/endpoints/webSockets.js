@@ -44,12 +44,11 @@ const webSocket = (io) => {
       socket.on("addData", async (newData) => {
         try {
           var {openAIKey, blogID, subject, config, version, loops, daysLeft, userAuthToken} = newData;
-          console.log(newData);
           socket.join(blogID);
           if (version !== "blogger") {
             version = "wordpress";
           }
-          var user = null;
+          const blog = await BlogDB.getBlogByBlogID(blogID, version);
           var uid = null;
           if (userAuthToken) {
             const decoded = jwt.verify(userAuthToken, process.env.JWT_PRIVATE_KEY);

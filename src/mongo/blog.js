@@ -102,25 +102,32 @@ BlogSchema.statics.createNewBlog = async function(agent) {
 };
 
 BlogSchema.statics.getByMongoID = async function(id) {
-    return await this.findById({ blogID: id });
+  return await this.findById(id);
 };
 
   
-BlogSchema.statics.getBlog = async function(blogID, version) {
-  return await this.findOne({blogID, version})
+BlogSchema.statics.getBlog = async function(id) {
+  return await this.findById(id);
+}
+
+//createBlog
+BlogSchema.statics.createBlog = async function(params) {
+  const blog = new this({...params});
+  return await blog.save();
+}
+
+BlogSchema.statics.getBlogByBlogID = async function(blogID, version) {
+  let blog = await this.findOne({ blogID, version });
+  const id = blog._id;
+  return await this.findById(id);
 }
 
 // Method to check remaining posts
-BlogSchema.statics.checkRemainingPosts = async function(blogID, version) {
+BlogSchema.statics.checkRemainingPosts = async function(id) {
   console.log('at check remaining posts');
   console.log(blogID, version);
   const today = new Date().setHours(0, 0, 0, 0);
-  let blog = await this.findOne({ blogID, version });
-  console.log(blog)
-  if (!blog) {
-      blog = await this.createNewBlog(blogID, version);
-  }
-
+  let blog = await this.findById(id);
   if (blog.dateRecentlyPosted.setHours(0, 0, 0, 0) < today) {
     blog.postsLeftToday = blog.maxNumberOfPosts;
     await blog.save();
@@ -129,14 +136,9 @@ BlogSchema.statics.checkRemainingPosts = async function(blogID, version) {
 };
 
 // Method to add post
-BlogSchema.statics.addPost = async function(blogID, version, postURL) {
+BlogSchema.statics.addPost = async function(id, postURL) {
   const today = new Date().setHours(0, 0, 0, 0);
-  let blog = await this.findOne({ blogID, version });
-
-  if (!blog) {
-    blog = await this.createNewBlog(blogID, version);
-  }
-
+  let blog = await this.findById(id);
   if (blog.dateRecentlyPosted.setHours(0, 0, 0, 0) < today) {
     blog.postsLeftToday = blog.maxNumberOfPosts;
   }
@@ -157,8 +159,8 @@ BlogSchema.statics.getActive = async () => {
   return activeBlogs; 
 }
 
-BlogSchema.statics.getOwner = async (blogID) => {
-  const blog = await this.find({ blogID: blogID });
+BlogSchema.statics.getOwner = async (id) => {
+  const blog = await this.findById(id);
   return blog.userID;
 }
 

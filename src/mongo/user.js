@@ -45,6 +45,12 @@ userSchema.statics.login = async function (id, params = {}) {
     //   return await blog.save();
 }
 
+//getUserByID
+userSchema.statics.getUserByID = async function (id) {
+    const user = await this.findById(id);
+    return user;
+}
+
 userSchema.statics.addBlog = async function (id, blogID) {
     const user = await this.findById(id);
     if (BlogDB.getOwner(blogID)){
