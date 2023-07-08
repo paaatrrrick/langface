@@ -164,7 +164,7 @@ const Home = () => {
         >BloggerGPT</h1>
         {(!hasStarted) && <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Demo</button>}
       </div>
-        <h6>Hire an AI agent to autonomously grow your blog</h6>
+        <h6>Hire an AI agent that works autonomously to grow your blog</h6>
         <div className="home-results-container">
         <div className="home-input-top-row">
           Demo Articles Used: {usedBlogPosts} / {maxBlogPosts}
@@ -244,7 +244,7 @@ const Home = () => {
               className={`${jwt !== "" && "logged-in"}`}
               disabled={jwt !== ""}
             >
-              {(jwt !== "") ? "Logged In" : `${(version === "blogger") ? "Blogger" : "Wordpress"} Login`}
+              {(jwt !== "") ? "Logged In" : `${(version === "blogger") ? "Blogger" : "Wordpress"} Site`}
             </button>
             </div>
           </div>
