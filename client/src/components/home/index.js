@@ -162,12 +162,12 @@ const Home = () => {
         <h1
         style={{marginRight: "15px"}}
         >BloggerGPT</h1>
-        {(!hasStarted) && <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Sample prompt</button>}
+        {(!hasStarted) && <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Demo</button>}
       </div>
-        <h6>Post hundreds of Search Engine Optimized blog posts to {(version === "blogger") ? "Blogger" : "Wordpress"} </h6>
+        <h6>Hire an AI agent to autonomously grow your blog</h6>
         <div className="home-results-container">
         <div className="home-input-top-row">
-          Daily Articles Used: {usedBlogPosts} / {maxBlogPosts}
+          Demo Articles Used: {usedBlogPosts} / {maxBlogPosts}
         </div>
         <div className="home-data-body" ref={messagesEndRef}>
           {(!hasStarted && data.length === 0) &&

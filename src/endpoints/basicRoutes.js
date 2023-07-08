@@ -10,6 +10,10 @@ const crypto = require('crypto');
 const { Agent } = require("../classes/Agent");
 const jwt = require('jsonwebtoken');
 const { sendDataToClient, blogIdToSocket } = require("./webSockets");
+const stripe = require('stripe')('sk_test_51NRJ0JBA5cR4seZqut5sOds81PKF0TLvnCCcBcuV9AdTwDVxtPaqsdctYdNX9vQalRshkaMlcBMjdMA1IIGXw53m00IpIuF1hP');
+const bodyParser = require('body-parser');
+const endpointSecret = 'whsec_1d8104297244891d4410191284d52f9f430c66d55a6e7f4a9d065fc0035f1609';
+
 
 const basicRoutes = express.Router();
 
@@ -151,6 +155,42 @@ basicRoutes.post("/dailyrun", async (req, res) => {
             agent.run();
         });
     }
+});
+
+basicRoutes.post('/create-checkout-session', async (req, res) => {
+    const session = await stripe.checkout.sessions.create({
+      line_items: [
+        {
+          // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
+          price: 'price_1NRNozBA5cR4seZqGGQRAxcc',
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      success_url: `http://localhost:3000/?success=true`,
+      cancel_url: `http://localhost:3000/?canceled=true`,
+    });
+    res.redirect(303, session.url);
+});
+
+basicRoutes.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, response) => {
+    const payload = request.body;
+    const sig = request.headers['stripe-signature'];
+    let event;
+    console.log('hitting');
+    try {
+      event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
+    } catch (err) {
+        console.log(err.message);
+        return response.status(400).send(`Webhook Error: ${err.message}`);
+    }
+    if (event.type === 'customer.subscription.created') {
+        console.log(event.data.object.id); // subscription ID -- used to query and manage subscriptions on stripe
+        // if authenticated, add subscription ID to user in mongodb and say the user has an active subscription.
+        // and we can check before each agent run if it is still active
+    }
+
+    response.status(200).end();
 });
 
 module.exports = basicRoutes;

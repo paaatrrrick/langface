@@ -18,19 +18,19 @@ const defualtPills = [
     version: "initializing",
     title: "Research",
     img: LibrarySvg,
-    content: "For each blog post, we search the web to find top performing articles in your niche to use as a model.",
+    content: "For each blog post, our AI agent searches the web to find top performing articles in your niche to use as a model.",
   },
   {
     version: "initializing",
     title: "Image Generation",
     img: ImageSvg,
-    content: "AI image generators make unique images to compliment the message of your blog and improve your search ranking.",
+    content: "Our agent generates unique images to compliment the message of your blog and improve your search ranking.",
   },
   {
     version: "initializing",
-    title: "Content Generation",
+    title: "Text Generation",
     img: StoreFrontSvg,
-    content: `A Search Engine Optimized blog post is written and posted to your blog account with specific long tail keywords, an optimal HTML header structure, and more!`,
+    content: `A Search Engine Optimized article is posted to your blog with specific long tail keywords & an optimal HTML header structure.`,
   }
 ];
 

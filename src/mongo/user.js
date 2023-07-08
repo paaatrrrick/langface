@@ -22,9 +22,10 @@ const userSchema = new Schema({
 });
 
 
-userSchema.statics.login = async function (id, params = {}) {
-    id = convertToObjectId(id);
+userSchema.statics.login = async function (uid, params = {}) {
+    let id = convertToObjectId(uid);
     const user = await this.findById(id);
+    console.log(user);
     if (user) {
         if (Object.keys(params).length === 0) {
          return user; 
