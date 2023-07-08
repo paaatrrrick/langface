@@ -4,20 +4,20 @@ import constants from "./constants";
 
 const defaultBlogAgent = {
   default: {
-    content: "",
-    maxNumberOfPosts: 0,
-    daysToRun: 1,
+    config: "",
+    postsLeftToday: constants.maxPosts,
+    daysLeft: 1,
     loops: "",
     jwt: "",
     id: "",
     blogSubject: "",
-    content: "",
+    config: "",
     data: [],
     hasStarted: false,
-    usedBlogPosts: 0,
-    maxBlogPosts: constants.maxWordpressPosts,
+    maxNumberOfPosts: constants.maxPosts,
     version: "wordpress",
     dropDownTitle: "New Agent",
+    demo: true,
   }
 }
 
@@ -29,12 +29,18 @@ const slice = createSlice({
     bannerMessage: null,
     currentView: "home",
     isLoggedIn: false,
+    blogIds: [],
     user: {},
     activeBlogAgent: "default",
     colorScheme: localStorage.getItem("bloggerGPT-colorScheme") ? localStorage.getItem("bloggerGPT-colorScheme") : "dark",
     blogAgents: defaultBlogAgent
   },
   reducers: {
+    setBlogIds (state, action) {
+      const res = [...state.blogIds, ...action.payload];
+      //remove duplicates
+      state.blogIds = [...new Set(res)];
+    },
     newBlogAgent: (state) => {
       state.blogAgents = {...state.blogAgents, 'New Agent': defaultBlogAgent.default}
       state.activeBlogAgent = 'New Agent';
@@ -52,17 +58,18 @@ const slice = createSlice({
       };
       const blogMap = {};
       for (let blog of blogs) {
+        const { config, version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, subject, blogPosts } = blog;
         const tempBlog = {
-          content: blog.config || "",
-          version: blog.version || "wordpress",
-          maxBlogPosts: blog.maxNumberOfPosts || 0,
-          usedBlogPosts: blog.postsLeftToday || 0,
-          daysToRun: blog.daysLeft || 0,
-          loops: blog.loops || "",
-          jwt: blog.jwt || "",
-          id: blog.blogID || "",
-          blogSubject: blog.subject || `New Agent: #${Object.keys(blogMap).length + 1}`,
-          data: blog.blogPosts || [],
+          config: config || "",
+          version: version || "wordpress",
+          maxNumberOfPosts: maxNumberOfPosts || 0,
+          postsLeftToday: postsLeftToday || 0,
+          daysLeft: daysLeft || 0,
+          loops: loops || "",
+          jwt: jwt || "",
+          id: blogID || "",
+          blogSubject: subject || `New Agent: #${Object.keys(blogMap).length + 1}`,
+          data: blogPosts || [],
           hasStarted: false,
         }
         blogMap[blog._id] = tempBlog;
@@ -92,11 +99,10 @@ const slice = createSlice({
       state.colorScheme = action.payload;
     },
     updateBlogAgentData: (state, action) => {
-      console.log(action.payload);
-      const { blogId, type, title, url, content, usedBlogPosts, maxBlogPosts } = action.payload;
+      console.log('updating blog agent data')
+      const { blogId, type, title, url, config, postsLeftToday, maxNumberOfPosts } = action.payload;
       console.log(blogId);
-      const data = { type, title, url, content };
-      console.log(data);
+      const data = { type, title, url, config };
     
       if (data.type === "ending") {
         state.blogAgents[blogId].hasStarted = false;
@@ -105,20 +111,23 @@ const slice = createSlice({
         state.blogAgents[blogId].data.pop();
       }
       state.blogAgents[blogId].data.push(data);      
-      if (usedBlogPosts && maxBlogPosts) {
-        state.blogAgents[blogId].usedBlogPosts = usedBlogPosts;
-        state.blogAgents[blogId].maxBlogPosts = maxBlogPosts;
+      if (postsLeftToday !== null && maxNumberOfPosts !== null) {
+        console.log('setting it here')
+        state.blogAgents[blogId].postsLeftToday = postsLeftToday;
+        state.blogAgents[blogId].maxNumberOfPosts = maxNumberOfPosts;
       }
     },
 
-    
-    runAgent: (state, action) => {
-      const { blogID } = action.payload;
-      state.blogAgents[blogID].hasStarted = true;
-      state.blogAgents[blogID].data = [];
-    },
-    addAgent: (state, action) => {
-      state.blogAgents[action.payload.blogID] = action.payload
+    initializeBlogAgent: (state, action) => {
+      const { subject, config, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, id, version, dropDownTitle, demo, _id } = action.payload;
+      console.log(action.payload);
+      console.log(state.activeBlogAgent)
+      const mapActualsTooInputs = {config, maxNumberOfPosts, daysLeft, loops, jwt, id, blogSubject: subject, version, dropDownTitle, demo, data: [], hasStarted: true, postsLeftToday};
+      if (!state.blogAgents[_id]) {
+        delete state.blogAgents[state.activeBlogAgent];
+        state.activeBlogAgent = _id;
+      }
+      state.blogAgents[_id] = mapActualsTooInputs;
     },
   },
 });
@@ -126,7 +135,7 @@ const slice = createSlice({
 // Now we configure the store
 const store = configureStore({ reducer: { main: slice.reducer } });
 export default store;
-export const { setBannerMessage, clearBannerMessage, setVersion, setCurrentView, setColorScheme, updateBlogAgentData, runAgent, addAgent, login, signOut, newBlogAgent, setActiveBlogAgent, standardizeBlogAgent } = slice.actions;
+export const { setBannerMessage, setBlogIds, clearBannerMessage, setVersion, setCurrentView, setColorScheme, updateBlogAgentData, login, signOut, newBlogAgent, setActiveBlogAgent, initializeBlogAgent, runAgent } = slice.actions;
 // export const actions = { ...slice.actions};
 
 

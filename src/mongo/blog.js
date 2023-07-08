@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 const postSchema = Schema({
     title: String,
-    content: String,
+    config: String,
     url: String,
     type: String,
 }, { _id: false });
@@ -130,16 +130,17 @@ BlogSchema.statics.getBlog = async function(id) {
 
 //createBlog
 BlogSchema.statics.createBlog = async function(params) {
-  const { blogID, version, userID, openAIKey, blogJwt, subject, config, loops, daysToRun } = params;
+  const { blogID, version, userID, openAIKey, blogJwt, subject, config, loops, daysLeft } = params;
   var blog = await this.findOne({ blogID, version });
   if (blog) {
     blog.set({
       openaiKey: openAIKey,
       jwt: blogJwt,
+      userID: userID,
       subject: subject,
       config: config,
       loops: loops,
-      daysLeft: daysToRun
+      daysLeft: daysLeft
     })
     return await blog.save();
   }
@@ -152,7 +153,7 @@ BlogSchema.statics.createBlog = async function(params) {
     subject: subject,
     config: config,
     loops: loops,
-    daysLeft: daysToRun
+    daysLeft: daysLeft
   });
   return await blog.save();
 }
@@ -172,7 +173,7 @@ BlogSchema.statics.checkRemainingPosts = async function(id) {
     blog.postsLeftToday = blog.maxNumberOfPosts;
     await blog.save();
   }
-  return {remainingPosts: blog.postsLeftToday, dailyPostCount: blog.maxNumberOfPosts};
+  return {postsLeftToday: blog.postsLeftToday, maxNumberOfPosts: blog.maxNumberOfPosts};
 };
 
 // Method to add post
@@ -183,24 +184,14 @@ BlogSchema.statics.addPost = async function(id, postContent) {
   if (blog.dateRecentlyPosted.setHours(0, 0, 0, 0) < today) {
     blog.postsLeftToday = blog.maxNumberOfPosts;
   }
-
-  if (blog.postsLeftToday > 0) {
-    blog.blogPosts.push(postContent);
+  blog.blogPosts.push(postContent);
+  if (postContent.type === 'success' && blog.postsLeftToday > 0) {
     blog.postsLeftToday--;
-    blog.dateRecentlyPosted = Date.now();
-    await blog.save();
-  } else {
-    return false;
   }
-  return {remainingPosts: blog.postsLeftToday, dailyPostCount: blog.maxNumberOfPosts};
+  blog.dateRecentlyPosted = Date.now();
+  await blog.save();
+  return {postsLeftToday: blog.postsLeftToday, maxNumberOfPosts: blog.maxNumberOfPosts};
 };
-
-//get postslefttoday and maxnumberofposts
-BlogSchema.statics.getPostsLeftToday = async function(id) {
-  id = convertToObjectId(id);
-  let blog = await this.findById(id);
-  return {remainingPosts: blog.postsLeftToday, dailyPostCount: blog.maxNumberOfPosts};
-}
 
 BlogSchema.statics.getActive = async () => {
   const activeBlogs = await this.find({ daysLeft: { $gt: 0 } });

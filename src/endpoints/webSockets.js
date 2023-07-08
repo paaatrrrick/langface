@@ -74,7 +74,7 @@ const webSocket = () => {
             socket.emit("updateData", { 
               blogId: newData.blogID,
               type: "ending",
-              content: e.message
+              config: e.message
             });
           }
         }
