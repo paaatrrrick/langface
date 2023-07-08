@@ -1,6 +1,9 @@
 import LibrarySvg from "./assets/library-outline.svg";
 import ImageSvg from "./assets/image-outline.svg";
 import StoreFrontSvg from "./assets/storefront-outline.svg";
+import DocumentSvg from "./assets/document.svg";
+import MagnifyingSvg from "./assets/magnifying-glass.svg";
+
 const TESTING = (process.env.REACT_APP_RUNNING_LOCAL === "true");
 const constants = {
   url: TESTING ? "http://localhost:8000" : "https://langface.up.railway.app",
@@ -17,7 +20,7 @@ const defualtPills = [
   {
     version: "initializing",
     title: "Research",
-    img: LibrarySvg,
+    img: MagnifyingSvg,
     content: "For each blog post, our AI agent studies top performing articles in your niche to use as a model & identify gaps.",
   },
   {
@@ -29,7 +32,7 @@ const defualtPills = [
   {
     version: "initializing",
     title: "Text Generation",
-    img: StoreFrontSvg,
+    img: DocumentSvg,
     content: `A Search Engine Optimized article is posted to your blog with specific long tail keywords & an optimal HTML header structure.`,
   }
 ];
