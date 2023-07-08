@@ -30,7 +30,7 @@ db.once("open", () => {
     console.log("✅ Database connected");
 });
 
-
+app.use('/webhook', bodyParser.raw({type: "*/*"}));
 app.use(bodyParser.json(), bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors({credentials: true, origin: ["http://localhost:3000", "https://langface.netlify.app", "https://langface.ai"]}));

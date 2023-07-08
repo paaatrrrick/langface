@@ -11,6 +11,7 @@ import Auth from "../auth"
 import { GoogleLogin } from '@react-oauth/google';
 import constants from "../../constants";
 import EarthSvg from '../../assets/earth-outline.svg';
+import RobotSvg from '../../assets/robot-outline.svg'
 
 const NavController = ({launch}) => {
     const dispatch = useDispatch();
@@ -75,6 +76,18 @@ const NavController = ({launch}) => {
                     <img src={BookSvg} />
                     <h6>Our Blog</h6>
                 </a>
+                <form action="http://localhost:8000/create-checkout-session" method="POST" target="_blank">
+                    <button className={`navController-pill`} type="submit">
+                        <img src={RobotSvg} />
+                        <h6>Hire Agent</h6>
+                    </button>
+                </form>
+                {isLoggedIn && 
+                        <a className={`navController-pill`} href="https://billing.stripe.com/p/login/28obKwfrLb5L6WIaEE" target="_blank">
+                            <img src={RobotSvg} />
+                            <h6>Fire Agent</h6>
+                        </a>
+                }
                 </div>
             </div>
 

@@ -149,9 +149,9 @@ const Home = ({joinRoom}) => {
         <h1
         style={{marginRight: "15px"}}
         >BloggerGPT</h1>
-        {(!hasStarted) && <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Sample prompt</button>}
+        {(!hasStarted) && <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Demo</button>}
       </div>
-        <h6>Post hundreds of Search Engine Optimized blog posts to {(version === "blogger") ? "Blogger" : "Wordpress"} </h6>
+        <h6>Hire an AI agent that works autonomously to grow your blog</h6>
         <div className="home-results-container">
         <div className="home-input-top-row">
           Daily Articles Used: {maxNumberOfPosts - postsLeftToday} / {maxNumberOfPosts}
@@ -190,12 +190,12 @@ const Home = ({joinRoom}) => {
             <div className="home-sectioned-input">
               <div className="left">
                 <img src={SparklesSvg} alt="sparkles" />
-                <h4>Subject</h4>
+                <h4>Niche</h4>
               </div>
               <input 
               onChange={(e) => setSubject(e.target.value)}
               value={subject}
-              className="input" type="text" placeholder="History of Jiu Jitsu"/>
+              className="input" type="text" placeholder="Rock climbing for beginners"/>
             </div>
 
             <div className="home-tinyInputs">
@@ -231,7 +231,7 @@ const Home = ({joinRoom}) => {
               className={`${jwt !== "" && "logged-in"}`}
               disabled={jwt !== ""}
             >
-              {(jwt !== "") ? "Logged In" : `${(version === "blogger") ? "Blogger" : "Wordpress"} Login`}
+              {(jwt !== "") ? "Logged In" : `${(version === "blogger") ? "Blogger" : "Wordpress"} Site`}
             </button>
             </div>
           </div>
@@ -243,7 +243,7 @@ const Home = ({joinRoom}) => {
               <textarea 
               value={config}
               onChange={(e) => setContent(e.target.value)}
-              className="input" placeholder="Optionally, what other additional context do you want to provide? This could be the style of each post, additional information on the product, or even affiliate links to include."/>
+              className="input" placeholder="Optinally, is there anything in particular you want the posts to have? For example, if you'd like to market a product, include it here: Sal's climbing, affordable rock climbing equipment at www.salsclimbing.com "/>
             </div>
         </div>
         {(!hasStarted) && 
