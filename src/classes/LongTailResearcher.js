@@ -9,10 +9,10 @@ const { dummyBlueprint } = require("../constants/dummyData");
 
 
 class LongTailResearcher {
-    constructor(subject, loops, content, openAIApiKey) {
+    constructor(subject, loops, config, openAIApiKey) {
         this.subject = subject;
         this.loops = loops;
-        this.content = content;
+        this.config = config;
         this.openAIApiKey = openAIApiKey;
         this.hasInitialized = false;
         this.LongTailKeywords = [];
@@ -24,8 +24,8 @@ class LongTailResearcher {
             z.array(z.string().describe(`List ${this.loops} Longtail keywords for my blog.`)
         ));
         const formatInstructions = parserFromZod.getFormatInstructions()
-        const systemMessage =`You are a world class SEO expert who specializes in long tail keyword detections. You are hired by a company to make a list of ${this.loops} Longtail keywords that you would expect to have low competitior and high volume, making them perfect for their blog to target, meaning they would have high traffic and low competition. Clients give you the subject of their blog ${(this.content) &&` and then an very detailed specifications of what their blog, some of which might not be relevant to you.`}. Then you find the give them a list of keywords which follows the format instructions.`;
-        const humanMessage = `Blog Subject: "${this.subject}"${(this.content) && `\n\nBLOG SPECIFICATIONS:\n\n "${this.content}" \n\n{format_instructions}`}`
+        const systemMessage =`You are a world class SEO expert who specializes in long tail keyword detections. You are hired by a company to make a list of ${this.loops} Longtail keywords that you would expect to have low competitior and high volume, making them perfect for their blog to target, meaning they would have high traffic and low competition. Clients give you the subject of their blog ${(this.config) &&` and then an very detailed specifications of what their blog, some of which might not be relevant to you.`}. Then you find the give them a list of keywords which follows the format instructions.`;
+        const humanMessage = `Blog Subject: "${this.subject}"${(this.config) && `\n\nBLOG SPECIFICATIONS:\n\n "${this.config}" \n\n{format_instructions}`}`
         const humanPrompt = new PromptTemplate({template: humanMessage, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const humanInput = await humanPrompt.format();
         const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openAIKey});
@@ -58,18 +58,18 @@ class LongTailResearcher {
 
     validate = async (keyword) => {
         // const parserFromZod = StructuredOutputParser.fromZodSchema(z.object({
-        //       usableKeyword: z.string().describe("A boolean, true if the keyword could be used in a title of a blog post for the content provided. Otherwise false"),
-        //       blogTitle: z.number().describe("If usableKeyword is false, write NA. Otherwise, write an SEO optimized title for a blog post which contains the keyword and is relevant to the content provided"),
+        //       usableKeyword: z.string().describe("A boolean, true if the keyword could be used in a title of a blog post for the config provided. Otherwise false"),
+        //       blogTitle: z.number().describe("If usableKeyword is false, write NA. Otherwise, write an SEO optimized title for a blog post which contains the keyword and is relevant to the config provided"),
         //       lsiKeywords: z.number().describe("If usableKeyword is false, write NA. Otherwise, what are 5 other comma separated keywords that are semantically relevant to the keyword provided. For example, the keyword 'credit cards' should return: money, credit score, credit limit, loans, interest rate."),
-        //       headers: z.array(z.string().describe("If usableKeyword is false, write NA. Write a list of ten headers that act as a blueprint for a blog post designed to rank highlighy for this keyword. This should leverage the keywords, content provided, and your knowledge of the subject."))
+        //       headers: z.array(z.string().describe("If usableKeyword is false, write NA. Write a list of ten headers that act as a blueprint for a blog post designed to rank highlighy for this keyword. This should leverage the keywords, config provided, and your knowledge of the subject."))
         // }));
         const parserFromZod = StructuredOutputParser.fromZodSchema(z.object({
-                blogTitle: z.string().describe("Write an SEO optimized title for a blog post which contains the keyword and is relevant to the content provided"),
+                blogTitle: z.string().describe("Write an SEO optimized title for a blog post which contains the keyword and is relevant to the config provided"),
                 lsiKeywords: z.string().describe("What are 5 other comma separated keywords that are semantically relevant to the keyword provided. For example, the keyword 'credit cards' should return: money, credit score, credit limit, loans, interest rate."),
-                headers: z.string().describe("What are ten comma seperated headers that act as a blueprint for a blog post designed to rank highlighy for this keyword. This should leverage the keywords, content provided, and your knowledge of the subject.")
+                headers: z.string().describe("What are ten comma seperated headers that act as a blueprint for a blog post designed to rank highlighy for this keyword. This should leverage the keywords, config provided, and your knowledge of the subject.")
         }));
         const formatInstructions = parserFromZod.getFormatInstructions()
-        const template = `You are worldclass SEO expert. You have been hired by a company to write a blog. The company wants to rank for the keyword "${keyword}". The blog is about "${this.subject}"${(this.content) && ` and has the following specifications: "${this.content}"`}. \n\n{format_instructions}`;
+        const template = `You are worldclass SEO expert. You have been hired by a company to write a blog. The company wants to rank for the keyword "${keyword}". The blog is about "${this.subject}"${(this.config) && ` and has the following specifications: "${this.config}"`}. \n\n{format_instructions}`;
         const prompt = new PromptTemplate({template: template, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const input = await prompt.format();
         const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openAIKey});

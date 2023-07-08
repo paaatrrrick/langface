@@ -8,8 +8,8 @@ const { dummyblog } = require("../constants/dummyData");
 const { blogPostForBlogger, SystemChatMessageForBlog } = require("../constants/prompts");
 
 class Blogger {
-  constructor(content, outline, jwt, blogID, sendData, openAIKey, loops, summaries, currentIteration) {
-        this.content = content;
+  constructor(config, outline, jwt, blogID, sendData, openAIKey, loops, summaries, currentIteration) {
+        this.config = config;
         this.outline = outline;
         this.jwt = jwt;
         this.blogID = blogID;
@@ -22,9 +22,9 @@ class Blogger {
     }
 
     run = async () => {
-        this.sendData({ type: "updating", content: `Step 2 of 3: Writing the article`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}` });
+        this.sendData({ type: "updating", config: `Step 2 of 3: Writing the article`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}` });
         const post = await this.writePost();
-        this.sendData({ type: "updating", content: `Step 3 of 3: Posting the article`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}`});
+        this.sendData({ type: "updating", config: `Step 3 of 3: Posting the article`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}`});
         const result = await this.postToBlogger(post);
         return result;
     }
@@ -32,7 +32,7 @@ class Blogger {
     writePost = async () => {
         if (process.env.MOCK_WRITING_BLOG === "true") return dummyblog;
         const messages = [new SystemChatMessage(SystemChatMessageForBlog), new HumanChatMessage(
-          blogPostForBlogger(this.outline.keyword, this.outline.lsiKeywords, this.outline.blogTitle, this.outline.headers, this.content, this.summaries))];
+          blogPostForBlogger(this.outline.keyword, this.outline.lsiKeywords, this.outline.blogTitle, this.outline.headers, this.config, this.summaries))];
         try {
           const model = new ChatOpenAI({ modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openAIKey});
           const response = await model.call(messages);
@@ -46,7 +46,7 @@ class Blogger {
         }
       };
 
-      postToBlogger = async (content) => {
+      postToBlogger = async (config) => {
         const response = await fetch(`https://www.googleapis.com/blogger/v3/blogs/${this.blogID}/posts/`,
           {
             method: "POST",
@@ -60,7 +60,7 @@ class Blogger {
                 id: this.blogID,
               },
               title: this.outline.blogTitle,
-              content: content,
+              config: config,
             }),
           }
         );
@@ -74,7 +74,7 @@ class Blogger {
           console.log(result.url);
           return {
             title: this.outline.blogTitle,
-            content: content,
+            config: config,
             url: result.url,
           };
         }

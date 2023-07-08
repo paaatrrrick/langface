@@ -165,7 +165,7 @@ class Researcher {
         const parserFromZod = StructuredOutputParser.fromZodSchema(
                 z.object({
                 longTailKeywords: z.string().describe("Up to 5 of the top long tail SEO keywords used in this article?"),
-                blogStrucutre: z.string().describe("Describe is the overarching structure of this blog (e.g a comparison, a list, a how-to, etc.) and how does it write the content to boost SEO?"),
+                blogStrucutre: z.string().describe("Describe is the overarching structure of this blog (e.g a comparison, a list, a how-to, etc.) and how does it write the config to boost SEO?"),
                 tips: z.string().describe("How could the text of this blog be improved to boost SEO?"),
                 similarTitles: z.array(z.string().describe("What is ONE title of a blog that would be similar to this one?")).max(1),
             }));

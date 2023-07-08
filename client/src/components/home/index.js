@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import constants, { defualtPills, sampleBlog } from "../../constants";
 import { getJwt, wordpressGetJwt, getUserAuthToken } from "../../utils/getJwt";
 import { scrollToBottom } from "../../utils/styles";
-import { setBannerMessage, newBlogAgent, setActiveBlogAgent, standardizeBlogAgent } from "../../store";
+import { setBannerMessage, newBlogAgent, setActiveBlogAgent, initializeBlogAgent } from "../../store";
 import { useDispatch } from "react-redux";
 import StatusPill from "../statusPill";
 import Dropdown from "../uxcore/dropdown";
@@ -19,39 +19,25 @@ const typeToImageMap = {
   success: CheckMark,
 };
 
-const dummyData = [
-  {
-    id: 1,
-    text: "Blog Post 1",
-  },
-  {
-    id: 2,
-    text: "Blog Post 2",
-  },
-  {
-    id: 3,
-    text: "Blog Post 3",
-  },
-]
-
-const Home = () => {
+const Home = ({joinRoom}) => {
     const activeBlogAgent = useSelector((state) => state.main.activeBlogAgent);
     const isLoggedIn = useSelector((state) => state.main.isLoggedIn);
     const blogAgents = useSelector((state) => state.main.blogAgents);
     const currentBlog = blogAgents[activeBlogAgent];
+    console.log('rerendering');
     console.log(currentBlog);
     const dispatch = useDispatch();
     const [version, setVersion] = useState(currentBlog.version || "wordpress");
     const [loops, setLoops] = useState(currentBlog.loops || "");
-    const [daysToRun, setDaysToRun] = useState(currentBlog.daysToRun || "");
+    const [daysLeft, setDaysToRun] = useState(currentBlog.daysLeft || "");
     const [jwt, setJwt] = useState(currentBlog.jwt || "");
     const [id, setId] = useState(currentBlog.id || "");
     const [subject, setSubject] = useState(currentBlog.blogSubject || "");
-    const [content, setContent] = useState(currentBlog.content || "");
+    const [config, setContent] = useState(currentBlog.config || "");
     const [data, setData] = useState(currentBlog.data || []);
     const [hasStarted, setHasStarted] = useState(currentBlog.hasStarted || false);
-    const [usedBlogPosts, setUsedBlogPosts] = useState(currentBlog.usedBlogPosts || 0);
-    const [maxBlogPosts, setMaxBlogPosts] = useState((currentBlog.maxBlogPosts) ? currentBlog.maxBlogPosts : (version === "blogger") ? constants.maxBloggerPosts : constants.maxWordpressPosts);
+    const [postsLeftToday, setUsedBlogPosts] = useState(currentBlog.postsLeftToday || 0);
+    const [maxNumberOfPosts, setMaxBlogPosts] = useState((currentBlog.maxNumberOfPosts) ? currentBlog.maxNumberOfPosts : constants.maxPosts);
     const messagesEndRef = useRef(null);
     if (version === "blogger") {
       defualtPills.splice(1, 1);
@@ -60,15 +46,15 @@ const Home = () => {
     useEffect(() => {
       setVersion(currentBlog.version || "wordpress");
       setLoops(currentBlog.loops || "");
-      setDaysToRun(currentBlog.daysToRun || "");
+      setDaysToRun(currentBlog.daysLeft || "");
       setJwt(currentBlog.jwt || "");
       setId(currentBlog.id || "");
       setSubject(currentBlog.blogSubject || "");
-      setContent(currentBlog.content || "");
+      setContent(currentBlog.config || "");
       setData(currentBlog.data || []);
       setHasStarted(currentBlog.hasStarted || false);
-      setUsedBlogPosts(currentBlog.usedBlogPosts || 0);
-      setMaxBlogPosts((currentBlog.maxBlogPosts) ? currentBlog.maxBlogPosts : (version === "blogger") ? constants.maxBloggerPosts : constants.maxWordpressPosts);
+      setUsedBlogPosts(currentBlog.postsLeftToday || 0);
+      setMaxBlogPosts((currentBlog.maxNumberOfPosts) ? currentBlog.maxNumberOfPosts : constants.maxPosts);
     }, [activeBlogAgent, currentBlog, currentBlog.data]);
 
     useEffect(() => {
@@ -104,7 +90,7 @@ const Home = () => {
     const samplePrompt = async () => {
       setLoops(sampleBlog.loops)
       setSubject(sampleBlog.subject);
-      setContent(sampleBlog.content);
+      setContent(sampleBlog.config);
     };
 
     const handleJWT = async () => {
@@ -121,11 +107,9 @@ const Home = () => {
     };
 
     const handleSubmit = async () => {
-      setData([]);
-      setHasStarted(true);
       const openAIKey = localStorage.getItem("openAIKey");
       const userAuthToken = getUserAuthToken();
-      const newData = {jwt, loops, blogID: id, config: content, openAIKey, version, subject, daysToRun, userAuthToken};
+      const newData = {jwt, loops, blogID: id, config: config, openAIKey, version, subject, daysLeft, userAuthToken, demo: currentBlog.demo};
       const res = await fetch(`${constants.url}/launchAgent`, {
         method: "POST",
         headers: {
@@ -134,7 +118,10 @@ const Home = () => {
         body: JSON.stringify(newData),
       });
       const data = await res.json();
+      console.log('we are back');
       console.log(data);
+      joinRoom(data._id);
+      dispatch(initializeBlogAgent({...data, ...newData}));
     };
 
     const selectChangeDropdown = (target) => {
@@ -167,7 +154,7 @@ const Home = () => {
         <h6>Post hundreds of Search Engine Optimized blog posts to {(version === "blogger") ? "Blogger" : "Wordpress"} </h6>
         <div className="home-results-container">
         <div className="home-input-top-row">
-          Daily Articles Used: {usedBlogPosts} / {maxBlogPosts}
+          Daily Articles Used: {maxNumberOfPosts - postsLeftToday} / {maxNumberOfPosts}
         </div>
         <div className="home-data-body" ref={messagesEndRef}>
           {(!hasStarted && data.length === 0) &&
@@ -177,7 +164,7 @@ const Home = () => {
               version={pill.version}
               title={pill.title}
               img={pill.img}
-              content={pill.content}
+              config={pill.config}
             />
           ))}
           {(hasStarted && data.length === 0) &&
@@ -192,7 +179,7 @@ const Home = () => {
               version={pill.type}
               title={pill.title}
               img={typeToImageMap[pill.type] || false}
-              content={pill.content}
+              config={pill.config}
               url={pill.url}
             />
           ))}
@@ -234,7 +221,7 @@ const Home = () => {
                 type="number"
                 min="1"
                 max="14"
-                value={daysToRun}
+                value={daysLeft}
                 onChange={(e) => setDaysToRun(e.target.value)}
                 placeholder="Days to Run"
               />
@@ -254,7 +241,7 @@ const Home = () => {
                 <h4>Config</h4>
               </div>
               <textarea 
-              value={content}
+              value={config}
               onChange={(e) => setContent(e.target.value)}
               className="input" placeholder="Optionally, what other additional context do you want to provide? This could be the style of each post, additional information on the product, or even affiliate links to include."/>
             </div>

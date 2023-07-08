@@ -7,6 +7,7 @@ const Blogger = require("./Blogger");
 const {Researcher} = require("./Researcher");
 const { LongTailResearcher } = require("./LongTailResearcher");
 const BlogDB = require("../mongo/blog");
+const DemoBlogDB = require("../mongo/demoBlog");
 const User = require("../mongo/user");
 const { StructuredOutputParser } = require("langchain/output_parsers");
 const { ChatOpenAI } = require("langchain/chat_models/openai");
@@ -14,8 +15,10 @@ const { HumanChatMessage } = require("langchain/schema");
 const { PromptTemplate } = require("langchain/prompts");
 
 class Agent {
-  constructor(openAIKey, sendData, jwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, uid = null) {
+  constructor(openAIKey, sendData, jwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, demo = false, uid = null) {
     // AGENT
+    this.demo = demo;
+    this.AgentDB = demo ? DemoBlogDB : BlogDB;
     this.uid = uid;
     this.openAIKey = openAIKey ? openAIKey : process.env.OPENAI_API_KEY;
     this.sendData = sendData;
@@ -57,15 +60,15 @@ class Agent {
       for (let i = 0; i < this.loops; i++) {
         try {
           console.log('trying to run here');
-          const {remainingPosts, dailyPostCount} = await BlogDB.checkRemainingPosts(this.blogMongoID);
-          if (remainingPosts <= 0) {
-            await this.sendData({ type: "ending", content: "Ending: You have reached your daily post limit", remainingPosts, dailyPostCount });
+          const { postsLeftToday } = await this.AgentDB.checkRemainingPosts(this.blogMongoID);
+          if (postsLeftToday <= 0) {
+            await this.sendData({ type: "ending", config: "Ending: You have reached your daily post limit" });
             return;
           }
-          await this.sendData({ type: "updating", content: `Step 1 of 3: Finding best longtail keywords`, title: `Loading... Article ${i + 1} / ${this.loops}` });
+          await this.sendData({ type: "updating", config: `Step 1 of 3: Finding best longtail keywords`, title: `Loading... Article ${i + 1} / ${this.loops}` });
           const outline = await this.researcher.getNextBlueprint();
           if (!outline) {
-            await this.sendData({ type: "ending", content: "Ran out of keywords", remainingPosts, dailyPostCount });
+            await this.sendData({ type: "ending", config: "Ran out of keywords" });
             return;
           }
           const blogSite = this.version === "blogger" ? 
@@ -74,17 +77,7 @@ class Agent {
 
           var result = await blogSite.run();
           this.summaries.push({summary: outline.headers, url: result.url});          
-          // const blog = await Blog.getBlog(this.blogID, this.version);
-          // let addedBlog = await User.addBlog('12345', blog);
-          // console.log(addedBlog);
-          // addedBlog = await User.addBlog('12345', blog);.
-          // console.log(addedBlog);
-          // const blogs = await User.getBlogs('12345');
-          // console.log(blogs);
-
-          const postsLeftData = await BlogDB.getPostsLeftToday(this.blogMongoID);
-
-          await this.sendData({...result, ...postsLeftData, type: 'success', content: outline.headers});
+          await this.sendData({...result, type: 'success', config: outline.headers});
         } catch (e) {
           errors++;
           if (errors >= 5) {

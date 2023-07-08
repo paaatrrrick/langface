@@ -6,6 +6,7 @@ const FormData = require("form-data");
 const User = require("../mongo/user");
 const fetch = require("node-fetch");
 const BlogDB = require("../mongo/blog");
+const DemoBlog = require("../mongo/demoBlog");
 const crypto = require('crypto');
 const { Agent } = require("../classes/Agent");
 const jwt = require('jsonwebtoken');
@@ -53,7 +54,7 @@ basicRoutes.post('/auth/google', async (req, res) => {
     const token = jwt.sign({ _id: uid, }, process.env.JWT_PRIVATE_KEY, { expiresIn: "1000d" });
     res.cookie("langface-token", token)
     res.json({ message: 'Login successful' });
-});
+}); 
 
 basicRoutes.get("/user", isLoggedInMiddleware, async (req, res) => {
     const blogIDs = req.user.blogs;
@@ -70,47 +71,54 @@ basicRoutes.get("/user", isLoggedInMiddleware, async (req, res) => {
 
 basicRoutes.post("/launchAgent", async (req, res) => {
     console.log(req.body);
-    var {openAIKey, blogID, subject, config, version, loops, daysToRun, userAuthToken } = req.body;
+    var {openAIKey, blogID, subject, config, version, loops, daysLeft, userAuthToken, demo } = req.body;
+    console.log("demo", demo);
     const blogJwt = req.body.jwt;
     if (version !== "blogger") {
       version = "wordpress";
     }
-  
-    var user = null;
-    if (userAuthToken) {
-      user = await User.getUserByID(jwt.verify(userAuthToken, process.env.JWT_PRIVATE_KEY));
+
+    var blogMongoID;
+    var userID;
+    var blog;
+
+    if (!demo) {
+        const user = await User.getUserByID(jwt.verify(userAuthToken, process.env.JWT_PRIVATE_KEY));
+        userID = user._id.toString();
+        //TODO check if there is another account connected to this blog. Is this an issue though?
+        blog = await BlogDB.createBlog({blogID, version, userID, version, openaiKey: openAIKey, blogJwt, subject, config, loops, daysLeft});
+        blogMongoID = blog?._id?.toString();
+        await User.addBlog(userID, blogMongoID);
+        await BlogDB.deleteAllBlogPosts(blogMongoID);
+    } else {
+        blog = await DemoBlog.createBlog({version, blogID});
+        console.log(blog);
+        blogMongoID = blog?._id?.toString();
     }
-    const userID = user ? user._id.toString() : null;
-  
     //this creates a blog or updates an old blog
-    const blog = await BlogDB.createBlog({blogID, version, userID, version, openaiKey: openAIKey, blogJwt, subject, config, loops, daysToRun});
-    const blogMongoID = blog?._id?.toString();
-
-    await BlogDB.deleteAllBlogPosts(blogMongoID);
-
-    if (blog.userID && blog.userID !== userID) {
-      return res.status(400).json({error: "This blog is already connected to another account. Reach out on discord to change this."});
-    } else if (user && blog.userID !== userID && !user.blogs?.includes(blogMongoID)) {
-        blog = await BlogDB.setUserId(blogMongoID, userID);
-        user = await User.addBlog(userID, blogMongoID);
-    }
     const sendData = async (dataForClient) => {
       console.log('sending data 1')
-      if (dataForClient.type === "ending") {
+      console.log(dataForClient);
+      if (!demo && dataForClient.type === "ending") {
         BlogDB.setHasStarted(blogMongoID, false);   
       }
+
+      
       if (dataForClient.type !== "updating") {
-        await BlogDB.addPost(blogMongoID, { url: dataForClient?.url || "", content: dataForClient?.content || "", title: dataForClient?.title || "", type: dataForClient?.type });
-      } 
+        const currAgent = demo ? DemoBlog : BlogDB;
+        const postsLeft = await currAgent.addPost(blogMongoID, { url: dataForClient?.url || "", config: dataForClient?.config || "", title: dataForClient?.title || "", type: dataForClient?.type || "error" });
+        dataForClient = { ...dataForClient, ...postsLeft };
+      }
       dataForClient.blogId = blogMongoID;
       sendDataToClient(dataForClient, blogIdToSocket);
     }
-    const agent = new Agent(openAIKey, sendData, blogJwt, blogID, subject, config, version, loops, daysToRun - 1, blogMongoID, user?._id);
-    await BlogDB.setHasStarted(blogMongoID, true);
+    const agent = new Agent(openAIKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft - 1, blogMongoID, demo, userID);
+    if (!demo) await BlogDB.setHasStarted(blogMongoID, true);
     console.log('about to run the agent');
     agent.run();
     console.log('ran the agent');
-    return res.json(JSON.stringify(blog));
+    blog._id = blog._id.toString();
+    return res.json(blog);
 });
 
 basicRoutes.post("/wordpress", async (req, res) => {

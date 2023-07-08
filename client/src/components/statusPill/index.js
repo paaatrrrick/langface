@@ -2,8 +2,8 @@ import React from "react";
 import "./statusPill.css";
 import Loader from "../loader";
 
-const StatusPill = ({ version, title, content, img, url  }) => {
-    if (!title && !content) return null;
+const StatusPill = ({ version, title, config, img, url  }) => {
+    if (!title && !config) return null;
     return (
         <div className={`status-pill ${version}`}>
             <div className="row align-center justify start">
@@ -11,7 +11,7 @@ const StatusPill = ({ version, title, content, img, url  }) => {
                 <h3>{title}</h3>
                 {version === "updating" && <Loader />}
             </div>
-            <p>{content}</p>
+            <p>{config}</p>
             {url && <a href={url} target="_blank">View Post</a>}
         </div>
     )
