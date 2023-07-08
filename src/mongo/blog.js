@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 const postSchema = Schema({
     title: String,
-    content: String,
+    config: String,
     url: String,
     type: String,
 }, { _id: false });

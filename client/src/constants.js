@@ -20,7 +20,7 @@ const defualtPills = [
     version: "initializing",
     title: "Research",
     img: MagnifyingSvg,
-    content: "For each blog post, our AI agent studies top performing articles in your niche to use as a model & identify gaps.",
+    config: "For each blog post, our AI agent studies top performing articles in your niche to use as a model & identify gaps.",
   },
   {
     version: "initializing",
