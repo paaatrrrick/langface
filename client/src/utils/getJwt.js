@@ -74,4 +74,16 @@ function deleteCookie(cookieName) {
   document.cookie = cookieName + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
 
-export { getJwt, wordpressGetJwt, deleteCookie };
+const getUserAuthToken = () => {
+    var userAuthToken = document.cookie.split(';').find(cookie => cookie.startsWith(`${constants.authCookieName}=`));
+  if (!userAuthToken) {
+    userAuthToken = document.cookie.split(';').find(cookie => cookie.startsWith(` ${constants.authCookieName}=`));
+  }
+  if (userAuthToken) {
+    userAuthToken = userAuthToken.split('=')[1];
+  }
+  return userAuthToken;
+}
+
+
+export { getJwt, wordpressGetJwt, deleteCookie, getUserAuthToken };

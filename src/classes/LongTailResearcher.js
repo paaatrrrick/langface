@@ -4,21 +4,9 @@ const { HumanChatMessage, SystemChatMessage } = require("langchain/schema");
 const { z } = require("zod");
 const { StructuredOutputParser } = require("langchain/output_parsers");
 const { parse } = require("path");
+const { dummyBlueprint } = require("../constants/dummyData");
 
-const dummyBlueprint = [
-    {
-        "keyword": "best long tail keyword research tool",
-        "blogTitle": "Best Long Tail Keyword Research Tool",
-        "lsiKeywords": "This is the best long tail keyword researc",
-        "headers": "Best Long Tail Keyword Research Tool",
-    },
-    {
-        "keyword": "best long tail keyword research tool",
-        "blogTitle": "Best Long Tail Keyword Research Tool",
-        "lsiKeywords": "This is the best long tail keyword researc",
-        "headers": "Best Long Tail Keyword Research Tool",
-    },
-]
+
 
 class LongTailResearcher {
     constructor(subject, loops, content, openAIApiKey) {
@@ -48,23 +36,23 @@ class LongTailResearcher {
     }
 
     getNextBlueprint = async () => {
-        return dummyBlueprint[0];
-        // try {
-        //     console.log('getting next blue print');
-        //     console.log(this.LongTailKeywords)
-        //     if (!this.hasInitialized) {
-        //         await this.initialize();
-        //         this.hasInitialized = true;
-        //     }
-        //     if (this.LongTailKeywords.length === 0) {
-        //         return false;
-        //     }
-        //     const nextKeyword = this.LongTailKeywords.pop();
-        //     return await this.validate(nextKeyword);
-        // } catch (error) {
-        //     console.log(error);
-        //     throw new Error('Error finding the best longtail keyword');
-        // }
+        if (process.env.MOCK_RESEARCH === 'true') return dummyBlueprint[0];
+        try {
+            console.log('getting next blue print');
+            console.log(this.LongTailKeywords)
+            if (!this.hasInitialized) {
+                await this.initialize();
+                this.hasInitialized = true;
+            }
+            if (this.LongTailKeywords.length === 0) {
+                return false;
+            }
+            const nextKeyword = this.LongTailKeywords.pop();
+            return await this.validate(nextKeyword);
+        } catch (error) {
+            console.log(error);
+            throw new Error('Error finding the best longtail keyword');
+        }
     }
 
 

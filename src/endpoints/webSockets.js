@@ -1,88 +1,80 @@
-if (process.env.NODE_ENV !== "production") {
-    require("dotenv").config();
-  }
-  const { Agent } = require("../classes/Agent");
-  const User = require("../mongo/user");
-  const BlogDB = require("../mongo/blog");
-  const cookie = require("cookie");
-  const jwt = require('jsonwebtoken');
-  const io = require("../app");
+const { getIO } = require('./socketConfig');
 
-  var SuccesfulPostsCount = 0
+var SuccesfulPostsCount = 0
+const blogIdToSocket = {};
+const activeTabIds = new Set();
 
-
-  blogIdToSocket = {};
-
-
-
-
-
-
-const webSocket = (io) => {
-    function sendDataToClient(dataForClient) {
-      try{
-        const blogId = dataForClient.blogId;
-        console.log('sending data');
-        console.log(blogId);
-        if (dataForClient.type !== "updating"){
-          SuccesfulPostsCount += 1;
-          console.log(`sending data to client: ${SuccesfulPostsCount}:`);
-          console.log(dataForClient);
-        }
-        io.to(blogId).emit('updateData', dataForClient);
-      } catch(e) {
-        console.log('sending data error')
-        console.log(e);
-      }
+const leaveRoom = (tabId) => {
+  console.log('leave');
+  for (let blogId in blogIdToSocket){
+    const index = blogIdToSocket[blogId].indexOf(tabId);
+    if (index > -1){
+      blogIdToSocket[blogId].splice(index, 1);
     }
+    if (blogIdToSocket[blogId].length === 0){
+      delete blogIdToSocket[blogId];
+    }
+  }
+  activeTabIds.delete(tabId);
+  console.log("Client disconnected");
+}
 
-    io.on("connection", (socket) => {
-      console.log("New client connected");
-      socket.on("disconnect", () => {
-        console.log("Client disconnected");
+const sendDataToClient = (dataForClient, blogIdToSocketMap) => {
+  try{
+    const io = getIO();
+    const blogId = dataForClient.blogId;
+    if (!blogIdToSocketMap[blogId]){
+      return;
+    }
+    for (let tabId of blogIdToSocketMap[blogId]){
+      if (dataForClient.type !== "updating"){
+        SuccesfulPostsCount += 1;
+        console.log(`sending data to client: ${SuccesfulPostsCount}:`);
+        console.log(dataForClient);
+      }
+      io.to(tabId).emit('updateData', dataForClient);
+    }
+  } catch(e) {
+    console.log(e);
+  }
+}
+
+
+const webSocket = () => {
+    const io = getIO();
+    io.on("connection", (socket) => { 
+      socket.on("leaveRoom", (newData) => {
+        console.log('at leave room');
+        console.log(newData);
+        leaveRoom(newData.tabId);
+      });
+      socket.on("joinRoom", async (newData) => {
+        const { tabId, blogIds } = newData;
+        for (let blogId of blogIds){
+          if (!blogIdToSocket[blogId]){
+            blogIdToSocket[blogId] = [tabId];
+          } else {
+            //check if tabId is already in the array
+            if (blogIdToSocket[blogId].indexOf(tabId) === -1){
+              blogIdToSocket[blogId].push(tabId);
+            }
+          }
+        }
+        activeTabIds.add(tabId);
+        socket.join(tabId);
       });
       socket.on("addData", async (newData) => {
+        console.log(socket.id);
         try {
-          var {openAIKey, blogID, subject, config, version, loops, daysLeft, userAuthToken} = newData;
-          socket.join(blogID);
-          if (version !== "blogger") {
-            version = "wordpress";
-          }
-          const blog = await BlogDB.getBlogByBlogID(blogID, version);
-          var uid = null;
-          if (userAuthToken) {
-            const decoded = jwt.verify(userAuthToken, process.env.JWT_PRIVATE_KEY);
-            var uid = decoded._id;
-            console.log(uid);
-          }
-          const sendData = (dataForClient) => {
-            console.log('send date wrapper has been called');
-            console.log(dataForClient);
-            dataForClient.blogId = blogID;
-            sendDataToClient(dataForClient);
-          }
-  
-          const agent = new Agent(
-            openAIKey,
-            sendData,
-            newData.jwt,
-            blogID,
-            subject,
-            config,
-            version,
-            loops,
-            daysLeft - 1,
-            uid,
-        );
-        agent.run();
+          await handleAddData(newData, io, socket);
         } catch (e) {
           console.log('bottom error');
           console.log(e);
           if (newData.blogID){
-            sendData({
+            socket.emit("updateData", { 
               blogId: newData.blogID,
               type: "ending",
-              content: e.message,
+              content: e.message
             });
           }
         }
@@ -90,4 +82,4 @@ const webSocket = (io) => {
     });
 };
 
-module.exports = webSocket;
+module.exports = { webSocket, blogIdToSocket, sendDataToClient };

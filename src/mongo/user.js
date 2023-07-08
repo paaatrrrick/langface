@@ -1,3 +1,4 @@
+const { convertToObjectId } = require('../utils/helpers');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const BlogDB = require('./blog');
@@ -22,6 +23,7 @@ const userSchema = new Schema({
 
 
 userSchema.statics.login = async function (id, params = {}) {
+    id = convertToObjectId(id);
     const user = await this.findById(id);
     if (user) {
         if (Object.keys(params).length === 0) {
@@ -33,7 +35,6 @@ userSchema.statics.login = async function (id, params = {}) {
         await user.save();
         return user;
     }
-    console.log({ _id: id, ...params })
     const newUser = new this({ _id: id, ...params });
     console.log(newUser)
     return await newUser.save();
@@ -47,13 +48,22 @@ userSchema.statics.login = async function (id, params = {}) {
 
 //getUserByID
 userSchema.statics.getUserByID = async function (id) {
+    id = convertToObjectId(id);
     const user = await this.findById(id);
     return user;
 }
 
+//delete all users
+userSchema.statics.deleteAllUsers = async function () {
+    await this.deleteMany({});
+}
+
+
+
 userSchema.statics.addBlog = async function (id, blogID) {
+    id = convertToObjectId(id);
     const user = await this.findById(id);
-    if (BlogDB.getOwner(blogID)){
+    if (user.blogs.includes(blogID)){
         // if user is running multiple agents on the same blog, we don't need to push the blogID to the array multiple times
         return user;
     }

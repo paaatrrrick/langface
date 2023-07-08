@@ -135,4 +135,20 @@ const dummyResearcher  = {
   ]
 };
 
-module.exports = { dummyblog, summarizeImages, dummyImagePrompts, dummyWordpressPhotos, dummyResearcher };
+const dummyBlueprint = [
+  {
+      "keyword": "best long tail keyword research tool",
+      "blogTitle": "Best Long Tail Keyword Research Tool",
+      "lsiKeywords": "This is the best long tail keyword researc",
+      "headers": "Best Long Tail Keyword Research Tool",
+  },
+  {
+      "keyword": "best long tail keyword research tool",
+      "blogTitle": "Best Long Tail Keyword Research Tool",
+      "lsiKeywords": "This is the best long tail keyword researc",
+      "headers": "Best Long Tail Keyword Research Tool",
+  },
+]
+
+
+module.exports = { dummyblog, summarizeImages, dummyImagePrompts, dummyWordpressPhotos, dummyResearcher, dummyBlueprint };

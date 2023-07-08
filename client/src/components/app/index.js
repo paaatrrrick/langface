@@ -2,8 +2,9 @@ import React, { useEffect } from 'react';
 import './app.css'
 import { useDispatch, useSelector } from 'react-redux';
 import constants from '../../constants';
-import { addAgent, clearBannerMessage, clearPopUpTemplate, updateBlogAgentData, setBannerMessage, login } from '../../store';
+import { clearBannerMessage, updateBlogAgentData, setBannerMessage, login } from '../../store';
 import { setColorScheme } from '../../utils/styles';
+import { getUserAuthToken } from '../../utils/getJwt';
 import NavController from '../navController';
 import BannerMessage from '../bannerMessage';
 import Home from '../home';
@@ -22,44 +23,40 @@ const templateMap = {
 
 const App = () => {
     const dispatch = useDispatch();
-    const { bannerMessage, currentView, colorScheme }= useSelector(state => state.main);
+    const { bannerMessage, currentView, colorScheme, tabId }= useSelector(state => state.main);
 
     useEffect(() => {
         setColorScheme(colorScheme);
     }, [colorScheme])
 
     const launch = async () => {
-        console.log('at launch')
-        console.log(document.cookie);
-        var userCookie = document.cookie.split(';').find(cookie => cookie.startsWith(`${constants.authCookieName}=`));
-        if (!userCookie) {
-            userCookie = document.cookie.split(';').find(cookie => cookie.startsWith(` ${constants.authCookieName}=`));
+        var userCookie = getUserAuthToken();
+        if (!userCookie) return;
+        const res = await fetch(`${constants.url}/user`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+        if (!res.ok) {
+            dispatch(setBannerMessage({type: 'error', message: 'Error: Could not authenticate user'}));
+            return;
         }
-        if (userCookie) {
-            userCookie = userCookie.split('=')[1];
-        }
-        console.log(userCookie);
-        if (userCookie) {
-            const res = await fetch(`${constants.url}/user`, {
-                method: 'GET',
-                credentials: 'include'
-            });
-            if (!res.ok) {
-                dispatch(setBannerMessage({type: 'error', message: 'Error: Could not authenticate user'}));
-            } else {
-                const data = await res.json();
-                dispatch(login({blogs: data.blogs, user: data.user}));
-            }
-        }
+        const data = await res.json();
+        dispatch(login({blogs: data.blogs, user: data.user}));
+        const blogIds = data.blogs.map(blog => blog._id);
+        socket.emit("joinRoom", { blogIds, tabId });
     }
-    useEffect(() => {
-        launch();
-    }, []);
 
     useEffect(() => {
         socket = io(constants.url);
-        socket.on("updateData", (incomingData) => {updateBlogAgentData(incomingData);});
+        socket.on("updateData", (incomingData) => {
+            console.log('incoming data');
+            console.log(incomingData);
+            dispatch(updateBlogAgentData(incomingData));
+        });
+        launch();
         return () => {
+          console.log('returning');
+          socket.emit("leaveRoom", { tabId })
           socket.disconnect();
         };
     }, []);

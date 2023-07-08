@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import io from "socket.io-client";
 import "./home.css";
 import { useSelector } from "react-redux";
 import constants, { defualtPills, sampleBlog } from "../../constants";
-import { getJwt, wordpressGetJwt } from "../../utils/getJwt";
+import { getJwt, wordpressGetJwt, getUserAuthToken } from "../../utils/getJwt";
 import { scrollToBottom } from "../../utils/styles";
 import { setBannerMessage, newBlogAgent, setActiveBlogAgent, standardizeBlogAgent } from "../../store";
 import { useDispatch } from "react-redux";
@@ -14,8 +13,6 @@ import WrenchSvg from "../../assets/build-outline.svg";
 import CaretForward from "../../assets/caret-forward-outline.svg";
 import CheckMark from "../../assets/checkmark-circle.svg";
 import Close from "../../assets/close-circle-sharp.svg";
-import { set } from "mongoose";
-let socket;
 
 const typeToImageMap = {
   error: Close,
@@ -38,17 +35,15 @@ const dummyData = [
 ]
 
 const Home = () => {
-    console.log('rerender')
     const activeBlogAgent = useSelector((state) => state.main.activeBlogAgent);
-    console.log(activeBlogAgent);
     const isLoggedIn = useSelector((state) => state.main.isLoggedIn);
     const blogAgents = useSelector((state) => state.main.blogAgents);
-    console.log(blogAgents);
     const currentBlog = blogAgents[activeBlogAgent];
+    console.log(currentBlog);
     const dispatch = useDispatch();
     const [version, setVersion] = useState(currentBlog.version || "wordpress");
     const [loops, setLoops] = useState(currentBlog.loops || "");
-    const [daysToRun, setDaysToRun] = useState(currentBlog.endDate || "");
+    const [daysToRun, setDaysToRun] = useState(currentBlog.daysToRun || "");
     const [jwt, setJwt] = useState(currentBlog.jwt || "");
     const [id, setId] = useState(currentBlog.id || "");
     const [subject, setSubject] = useState(currentBlog.blogSubject || "");
@@ -61,13 +56,6 @@ const Home = () => {
     if (version === "blogger") {
       defualtPills.splice(1, 1);
     }
-    useEffect(() => {
-      socket = io(constants.url);
-      return () => {
-        socket.disconnect();
-      };
-    }, []);
-
 
     useEffect(() => {
       setVersion(currentBlog.version || "wordpress");
@@ -75,13 +63,13 @@ const Home = () => {
       setDaysToRun(currentBlog.daysToRun || "");
       setJwt(currentBlog.jwt || "");
       setId(currentBlog.id || "");
-      setSubject(currentBlog.subject || "");
+      setSubject(currentBlog.blogSubject || "");
       setContent(currentBlog.content || "");
       setData(currentBlog.data || []);
       setHasStarted(currentBlog.hasStarted || false);
       setUsedBlogPosts(currentBlog.usedBlogPosts || 0);
       setMaxBlogPosts((currentBlog.maxBlogPosts) ? currentBlog.maxBlogPosts : (version === "blogger") ? constants.maxBloggerPosts : constants.maxWordpressPosts);
-    }, [activeBlogAgent]);
+    }, [activeBlogAgent, currentBlog, currentBlog.data]);
 
     useEffect(() => {
       scrollToBottom(messagesEndRef.current);
@@ -89,7 +77,6 @@ const Home = () => {
 
     const fetchWordpress = async (code) => {
       try {
-        console.log(code);
         const res = await fetch(`${constants.url}/wordpress`, {
           method: "POST",
           headers: {
@@ -98,8 +85,6 @@ const Home = () => {
           body: JSON.stringify({ code }),
         });
         const data = await res.json();
-        console.log('back from wordpress login');
-        console.log(data);
         if (data.error) {
           throw new Error(data.error);
         }
@@ -139,39 +124,20 @@ const Home = () => {
       setData([]);
       setHasStarted(true);
       const openAIKey = localStorage.getItem("openAIKey");
-      var userAuthToken = document.cookie.split(';').find(cookie => cookie.startsWith(`${constants.authCookieName}=`));
-      if (!userAuthToken) {
-        userAuthToken = document.cookie.split(';').find(cookie => cookie.startsWith(` ${constants.authCookieName}=`));
-      }
-      if (userAuthToken) {
-        userAuthToken = userAuthToken.split('=')[1];
-    }
-      const newData = {jwt, loops, blogID: id, content, openAIKey, version, subject, daysToRun, userAuthToken};
-      socket.on("updateData", (incomingData) => {
-        if (incomingData.type === "ending") {
-          setHasStarted(false);
-          socket.off("updateData");
-        }
-        setData((prevData) => {
-          const tempPrevData = [...prevData];
-          if (tempPrevData.length > 0 && tempPrevData[tempPrevData.length - 1].type === "updating") {
-            tempPrevData.pop();
-          }
-          tempPrevData.push(incomingData);
-          return tempPrevData;
-        });
-        if (incomingData.remainingPosts && incomingData.dailyPostCount) {
-          setUsedBlogPosts(incomingData.dailyPostCount - incomingData.remainingPosts);
-          setMaxBlogPosts(incomingData.dailyPostCount);
-        }
+      const userAuthToken = getUserAuthToken();
+      const newData = {jwt, loops, blogID: id, config: content, openAIKey, version, subject, daysToRun, userAuthToken};
+      const res = await fetch(`${constants.url}/launchAgent`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newData),
       });
-      socket.emit("addData", newData);
-      dispatch(standardizeBlogAgent({activeBlogAgent, data: newData}));
+      const data = await res.json();
+      console.log(data);
     };
 
     const selectChangeDropdown = (target) => {
-      console.log('selectChangeDropdown');
-      console.log(target);
       if (target === "AddNewAgent") {
         dispatch(newBlogAgent());
       } else if (target !== activeBlogAgent) {
@@ -185,10 +151,10 @@ const Home = () => {
     for (let i = 0; i < agentsKeys.length; i++) {
       dropDownOptions.push({
         id: agentsKeys[i],
-        text: agentsKeys[i],
+        text: blogAgents[agentsKeys[i]].blogSubject,
       });
     }
-    console.log(dropDownOptions)
+
   return (
     <div className="Home">
       {isLoggedIn && <Dropdown options={dropDownOptions} selected={activeBlogAgent} onSelectedChange={selectChangeDropdown}/>} 

@@ -4,21 +4,15 @@ if (process.env.NODE_ENV !== "production") {
 }
 const express = require("express");
 const http = require("http");
-const socketIo = require("socket.io");
 const cors = require("cors");
 const app = express();
 const bodyParser = require("body-parser");
-const { Agent } = require("./classes/Agent");
-const FormData = require("form-data");
-const User = require("./mongo/user");
 const mongoose = require("mongoose");
-const {OAuth2Client} = require('google-auth-library');
-const webSocket = require("./endpoints/webSockets");
+const { webSocket } = require("./endpoints/webSockets");
+const { socketInit } = require("./endpoints/socketConfig");
 const basicRoutes = require("./endpoints/basicRoutes");
 const cookieParser = require("cookie-parser");
 
-
-var SuccesfulPostsCount = 0; // counts how many blog posts were succesfully posted
 
 
 mongoose.set('strictQuery', true);
@@ -43,19 +37,8 @@ app.use(cors({credentials: true, origin: ["http://localhost:3000", "https://lang
 app.use("", basicRoutes);
 
 const server = http.createServer(app);
-const io = socketIo(server, {
-  cookie: true,
-  cors: {
-    origin: [
-      "http://localhost:3000",
-      "https://langface.netlify.app",
-      "https://langface.ai",
-    ],
-    methods: ["GET", "POST"],
-  },
-});
-
-webSocket(io);
+socketInit(server);
+webSocket();
 
 
 let PORT = process.env.PORT;
@@ -66,4 +49,3 @@ if (PORT == null || PORT == "") {
 server.listen(PORT, () => {
   return console.log(`✅ We're live: ${PORT}`);
 });
-

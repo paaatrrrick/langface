@@ -1,3 +1,13 @@
+const mongoose = require('mongoose');
+
+
+function convertToObjectId(value) {
+  if (typeof value === 'string') {
+    return new mongoose.Types.ObjectId(value);
+  }
+  return value;
+}
+
 function replaceStringInsideStringWithNewString(
   string,
   stringToReplace,
@@ -26,4 +36,5 @@ function arrayToString (array) {
 module.exports = {
   replaceStringInsideStringWithNewString,
   arrayToString,
+  convertToObjectId
 };

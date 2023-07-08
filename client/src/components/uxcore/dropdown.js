@@ -14,31 +14,25 @@ const trimStringTo15Chars = (str) => {
 const Dropdown = ({ options, selected, onSelectedChange }) => {
     const [open, setOpen] = useState(false);
     const active = options.find((option) => option.id === selected);
+    const optionsWithoutSelected = options.filter((option) => option.id !== selected);
     return (
     <div className="Dropdown">
-        <div className="Dropdown-row" onClick={() => setOpen(!open)}>
+        <div key={-1} className="Dropdown-row" onClick={() => setOpen(!open)}>
             <p>{trimStringTo15Chars(active.text)}</p>
-            <img src={TriangleSvg} className={!open && `rotate180`}/>
+            <img src={TriangleSvg} className={!open ? `rotate180` : ''}/>
         </div>
         {open && (
             <>
-            {options.map((option, index) => {
+            {optionsWithoutSelected.map((option, index) => {
                 return (
-                    <>
-                        {(option.id !== selected) && (
-                            <div className="Dropdown-row"
-                             key={index}
-                             onClick={() => {
-                                onSelectedChange(options[index].id);
-                                setOpen(false);
-                            }}>
-                                <p>{trimStringTo15Chars(options[index].text)}</p>
-                            </div>
-                        )}
-                    </>
-                )
-            })}
-            <div className="Dropdown-row"
+                    <div className="Dropdown-row" key={index} onClick={() => {onSelectedChange(option.id); setOpen(false);}}>
+                        <p>{option}</p>
+                        <p>{index}</p>
+                        <p>{trimStringTo15Chars(option.text)}</p>
+                    </div>
+            )})}
+            <div key={-2}
+            className="Dropdown-row"
             onClick={() => {
                 onSelectedChange("AddNewAgent");
                 setOpen(false);

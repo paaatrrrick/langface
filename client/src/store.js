@@ -5,9 +5,8 @@ import constants from "./constants";
 const defaultBlogAgent = {
   default: {
     content: "",
-    numPosts: 0,
+    maxNumberOfPosts: 0,
     daysToRun: 1,
-    subject: "",
     loops: "",
     jwt: "",
     id: "",
@@ -18,6 +17,7 @@ const defaultBlogAgent = {
     usedBlogPosts: 0,
     maxBlogPosts: constants.maxWordpressPosts,
     version: "wordpress",
+    dropDownTitle: "New Agent",
   }
 }
 
@@ -25,6 +25,7 @@ const defaultBlogAgent = {
 const slice = createSlice({
   name: "main",
   initialState: {
+    tabId: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
     bannerMessage: null,
     currentView: "home",
     isLoggedIn: false,
@@ -39,20 +40,34 @@ const slice = createSlice({
       state.activeBlogAgent = 'New Agent';
     },
     standardizeBlogAgent: (state, action) => {
-      console.log('at standardizeBlogAgent');
-      console.log(action.payload);
       state.blogAgents[action.payload.activeBlogAgent] = {...state.blogAgents[action.payload.activeBlogAgent], ...action.payload.data}
     },
     setActiveBlogAgent: (state, action) => {
       state.activeBlogAgent = action.payload;
     },
     login: (state, action) => {
-      console.log(action.payload)
-      var { blogs, user } = action.payload.blogs;
+      var { blogs, user } = action.payload;
       if (!blogs || blogs.length === 0) {
-        return {...state, isLoggedIn: true, user: action.payload.user}
+        return {...state, isLoggedIn: true, user }
+      };
+      const blogMap = {};
+      for (let blog of blogs) {
+        const tempBlog = {
+          content: blog.config || "",
+          version: blog.version || "wordpress",
+          maxBlogPosts: blog.maxNumberOfPosts || 0,
+          usedBlogPosts: blog.postsLeftToday || 0,
+          daysToRun: blog.daysLeft || 0,
+          loops: blog.loops || "",
+          jwt: blog.jwt || "",
+          id: blog.blogID || "",
+          blogSubject: blog.subject || `New Agent: #${Object.keys(blogMap).length + 1}`,
+          data: blog.blogPosts || [],
+          hasStarted: false,
+        }
+        blogMap[blog._id] = tempBlog;
       }
-      return {...state, isLoggedIn: true, blogAgents: blogs, user: user}
+      return {...state, isLoggedIn: true, blogAgents: blogMap, user: user, activeBlogAgent: Object.keys(blogMap)[0]}
     },
     signOut: (state) => {
       deleteCookie(constants.authCookieName);
@@ -77,21 +92,26 @@ const slice = createSlice({
       state.colorScheme = action.payload;
     },
     updateBlogAgentData: (state, action) => {
-      const { blogID, data, usedBlogPosts, maxBlogPosts } = action.payload;
+      console.log(action.payload);
+      const { blogId, type, title, url, content, usedBlogPosts, maxBlogPosts } = action.payload;
+      console.log(blogId);
+      const data = { type, title, url, content };
+      console.log(data);
+    
       if (data.type === "ending") {
-        state.blogAgents[blogID].hasStarted = false;
+        state.blogAgents[blogId].hasStarted = false;
       }
-      const oldData = [...state.blogAgents[blogID].data];
-      if (oldData.length > 0 && oldData[oldData.length - 1].type === "updating") {
-        oldData.pop();
+      if (state.blogAgents[blogId].data.length > 0 && state.blogAgents[blogId].data[state.blogAgents[blogId].data.length - 1].type === "updating") {
+        state.blogAgents[blogId].data.pop();
       }
-      oldData.push(data);
-      state.blogAgents[blogID].data = oldData;
+      state.blogAgents[blogId].data.push(data);      
       if (usedBlogPosts && maxBlogPosts) {
-        state.blogAgents[blogID].usedBlogPosts = usedBlogPosts;
-        state.blogAgents[blogID].maxBlogPosts = maxBlogPosts;
+        state.blogAgents[blogId].usedBlogPosts = usedBlogPosts;
+        state.blogAgents[blogId].maxBlogPosts = maxBlogPosts;
       }
     },
+
+    
     runAgent: (state, action) => {
       const { blogID } = action.payload;
       state.blogAgents[blogID].hasStarted = true;
