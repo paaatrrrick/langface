@@ -203,12 +203,12 @@ const Home = () => {
             <div className="home-sectioned-input">
               <div className="left">
                 <img src={SparklesSvg} alt="sparkles" />
-                <h4>Subject</h4>
+                <h4>Niche</h4>
               </div>
               <input 
               onChange={(e) => setSubject(e.target.value)}
               value={subject}
-              className="input" type="text" placeholder="History of Jiu Jitsu"/>
+              className="input" type="text" placeholder="Rock climbing for beginners"/>
             </div>
 
             <div className="home-tinyInputs">
@@ -256,7 +256,7 @@ const Home = () => {
               <textarea 
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="input" placeholder="Optionally, what other additional context do you want to provide? This could be the style of each post, additional information on the product, or even affiliate links to include."/>
+              className="input" placeholder="Optinally, is there anything in particular you want the posts to have? For example, if you'd like to market a product, include it here: Sal's climbing, affordable rock climbing equipment at www.salsclimbing.com "/>
             </div>
         </div>
         {(!hasStarted) && 

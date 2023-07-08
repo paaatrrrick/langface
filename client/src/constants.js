@@ -18,7 +18,7 @@ const defualtPills = [
     version: "initializing",
     title: "Research",
     img: LibrarySvg,
-    content: "For each blog post, our AI agent searches the web to find top performing articles in your niche to use as a model.",
+    content: "For each blog post, our AI agent studies top performing articles in your niche to use as a model & identify gaps.",
   },
   {
     version: "initializing",
