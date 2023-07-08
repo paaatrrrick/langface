@@ -1,93 +1,82 @@
 import React, { useState, useEffect, useRef } from "react";
-import io from "socket.io-client";
 import "./home.css";
 import { useSelector } from "react-redux";
-import constants from "../../constants";
-import { getJwt, wordpressGetJwt } from "../../utils/getJwt";
-import { setBannerMessage } from "../../store";
+import constants, { defualtPills, sampleBlog } from "../../constants";
+import { getJwt, wordpressGetJwt, getUserAuthToken } from "../../utils/getJwt";
+import { scrollToBottom } from "../../utils/styles";
+import { setBannerMessage, newBlogAgent, setActiveBlogAgent, standardizeBlogAgent } from "../../store";
 import { useDispatch } from "react-redux";
 import StatusPill from "../statusPill";
+import Dropdown from "../uxcore/dropdown";
 import SparklesSvg from "../../assets/sparkles-outline.svg";
 import WrenchSvg from "../../assets/build-outline.svg";
-import LibrarySvg from "../../assets/library-outline.svg";
-import ImageSvg from "../../assets/image-outline.svg";
-import StoreFrontSvg from "../../assets/storefront-outline.svg";
 import CaretForward from "../../assets/caret-forward-outline.svg";
 import CheckMark from "../../assets/checkmark-circle.svg";
 import Close from "../../assets/close-circle-sharp.svg";
-let socket;
 
 const typeToImageMap = {
   error: Close,
   success: CheckMark,
 };
 
-const Home = () => {
-    const version = useSelector((state) => state.main.version);
-    const dispatch = useDispatch();
-    const [loops, setLoops] = useState("");
-    const [jwt, setJwt] = useState("");
-    const [id, setId] = useState("");
-    const [blogSubject, setBlogSubject] = useState("");
-    const [content, setContent] = useState("");
-    const [data, setData] = useState([]);
-    const [hasStarted, setHasStarted] = useState(false);
-    const [usedBlogPosts, setUsedBlogPosts] = useState(0);
-    const [maxBlogPosts, setMaxBlogPosts] = useState((version === "blogger") ? 25 : 8);
-    const messagesEndRef = useRef(null);
+const dummyData = [
+  {
+    id: 1,
+    text: "Blog Post 1",
+  },
+  {
+    id: 2,
+    text: "Blog Post 2",
+  },
+  {
+    id: 3,
+    text: "Blog Post 3",
+  },
+]
 
-    const defualtPills = [
-      {
-        version: "initializing",
-        title: "Research",
-        img: LibrarySvg,
-        content: "For each blog post, we search the web to find top performing articles in your niche to use as a model.",
-      },
-      {
-        version: "initializing",
-        title: "Image Generation",
-        img: ImageSvg,
-        content: "AI image generators make unique images to compliment the message of your blog and improve your search ranking.",
-      },
-      {
-        version: "initializing",
-        title: "Content Generation",
-        img: StoreFrontSvg,
-        content: `A Search Engine Optimized blog post is written and posted to your ${version === 'blogger' ? 'Blogger' : "Wordpress"} account with specific long tail keywords, an optimal HTML header structure, and more!`,
-      }
-    ];
-    //if version is blogger, remove the 2 element in the array defualtPills
+const Home = () => {
+    const activeBlogAgent = useSelector((state) => state.main.activeBlogAgent);
+    const isLoggedIn = useSelector((state) => state.main.isLoggedIn);
+    const blogAgents = useSelector((state) => state.main.blogAgents);
+    const currentBlog = blogAgents[activeBlogAgent];
+    console.log(currentBlog);
+    const dispatch = useDispatch();
+    const [version, setVersion] = useState(currentBlog.version || "wordpress");
+    const [loops, setLoops] = useState(currentBlog.loops || "");
+    const [daysToRun, setDaysToRun] = useState(currentBlog.daysToRun || "");
+    const [jwt, setJwt] = useState(currentBlog.jwt || "");
+    const [id, setId] = useState(currentBlog.id || "");
+    const [subject, setSubject] = useState(currentBlog.blogSubject || "");
+    const [content, setContent] = useState(currentBlog.content || "");
+    const [data, setData] = useState(currentBlog.data || []);
+    const [hasStarted, setHasStarted] = useState(currentBlog.hasStarted || false);
+    const [usedBlogPosts, setUsedBlogPosts] = useState(currentBlog.usedBlogPosts || 0);
+    const [maxBlogPosts, setMaxBlogPosts] = useState((currentBlog.maxBlogPosts) ? currentBlog.maxBlogPosts : (version === "blogger") ? constants.maxBloggerPosts : constants.maxWordpressPosts);
+    const messagesEndRef = useRef(null);
     if (version === "blogger") {
       defualtPills.splice(1, 1);
     }
-    useEffect(() => {
-      socket = io(constants.url);
-      return () => {
-        socket.disconnect();
-      };
-    }, []);
 
     useEffect(() => {
-      scrollToBottom();
+      setVersion(currentBlog.version || "wordpress");
+      setLoops(currentBlog.loops || "");
+      setDaysToRun(currentBlog.daysToRun || "");
+      setJwt(currentBlog.jwt || "");
+      setId(currentBlog.id || "");
+      setSubject(currentBlog.blogSubject || "");
+      setContent(currentBlog.content || "");
+      setData(currentBlog.data || []);
+      setHasStarted(currentBlog.hasStarted || false);
+      setUsedBlogPosts(currentBlog.usedBlogPosts || 0);
+      setMaxBlogPosts((currentBlog.maxBlogPosts) ? currentBlog.maxBlogPosts : (version === "blogger") ? constants.maxBloggerPosts : constants.maxWordpressPosts);
+    }, [activeBlogAgent, currentBlog, currentBlog.data]);
+
+    useEffect(() => {
+      scrollToBottom(messagesEndRef.current);
     }, [data]);
-
-    const scrollToBottom = () => {
-      const element = messagesEndRef.current;
-      const totalHeight = element.scrollHeight;
-      const stepTime = Math.abs(Math.floor(8000 / totalHeight));
-      let currentPos = element.scrollTop;
-      const scrollInterval = setInterval(() => {
-        currentPos += 5;
-        element.scrollTop = currentPos;
-        if (currentPos >= totalHeight){
-          clearInterval(scrollInterval);
-        }
-      }, stepTime);
-    };
 
     const fetchWordpress = async (code) => {
       try {
-        console.log(code);
         const res = await fetch(`${constants.url}/wordpress`, {
           method: "POST",
           headers: {
@@ -96,6 +85,9 @@ const Home = () => {
           body: JSON.stringify({ code }),
         });
         const data = await res.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
         setJwt(data.access_token);
         setId(data.blog_id);
       } catch (e) {
@@ -110,9 +102,9 @@ const Home = () => {
     };
 
     const samplePrompt = async () => {
-      setLoops(3)
-      setBlogSubject("Adventures of Huckleberry Finn Book");
-      setContent("Have a fun and playful tone. Express the benefits of how reading this book is beneficial to the reader. Link to the book on Amazon: https://www.amazon.com/Adventures-Huckleberry-SeaWolf-Illustrated-Classic. Write everything for SEO standards. Refer to other similar books and compare them.")
+      setLoops(sampleBlog.loops)
+      setSubject(sampleBlog.subject);
+      setContent(sampleBlog.content);
     };
 
     const handleJWT = async () => {
@@ -129,40 +121,48 @@ const Home = () => {
     };
 
     const handleSubmit = async () => {
-      if (hasStarted) return;
       setData([]);
       setHasStarted(true);
       const openAIKey = localStorage.getItem("openAIKey");
-      const newData = {jwt, loops, id, content, openAIKey, version, blogSubject};
-      socket.on("updateData", (incomingData) => {
-        if (incomingData.type === "ending") {
-          setHasStarted(false);
-          socket.off("updateData");
-        }
-        setData((prevData) => {
-          const tempPrevData = [...prevData];
-          if (tempPrevData.length > 0 && tempPrevData[tempPrevData.length - 1].type === "updating") {
-            tempPrevData.pop();
-          }
-          tempPrevData.push(incomingData);
-          return tempPrevData;
-        });
-        if (incomingData.remainingPosts && incomingData.dailyPostCount) {
-          setUsedBlogPosts(incomingData.dailyPostCount - incomingData.remainingPosts);
-          setMaxBlogPosts(incomingData.dailyPostCount);
-        }
+      const userAuthToken = getUserAuthToken();
+      const newData = {jwt, loops, blogID: id, config: content, openAIKey, version, subject, daysToRun, userAuthToken};
+      const res = await fetch(`${constants.url}/launchAgent`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newData),
       });
-      socket.emit("addData", newData);
+      const data = await res.json();
+      console.log(data);
     };
 
-    const canStart = jwt !== "" && id !== "" && blogSubject !== "" && loops !== "";
+    const selectChangeDropdown = (target) => {
+      if (target === "AddNewAgent") {
+        dispatch(newBlogAgent());
+      } else if (target !== activeBlogAgent) {
+        dispatch(setActiveBlogAgent(target));
+      }
+    }
+
+    const canStart = jwt !== "" && id !== "" && subject !== "" && loops !== "";
+    const dropDownOptions = [];
+    const agentsKeys = Object.keys(blogAgents);
+    for (let i = 0; i < agentsKeys.length; i++) {
+      dropDownOptions.push({
+        id: agentsKeys[i],
+        text: blogAgents[agentsKeys[i]].blogSubject,
+      });
+    }
+
   return (
     <div className="Home">
+      {isLoggedIn && <Dropdown options={dropDownOptions} selected={activeBlogAgent} onSelectedChange={selectChangeDropdown}/>} 
       <div className="row align-center justify-start wrap">
         <h1
         style={{marginRight: "15px"}}
         >BloggerGPT</h1>
-        <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Sample prompt</button>
+        {(!hasStarted) && <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Sample prompt</button>}
       </div>
         <h6>Post hundreds of Search Engine Optimized blog posts to {(version === "blogger") ? "Blogger" : "Wordpress"} </h6>
         <div className="home-results-container">
@@ -206,16 +206,17 @@ const Home = () => {
                 <h4>Subject</h4>
               </div>
               <input 
-              onChange={(e) => setBlogSubject(e.target.value)}
-              value={blogSubject}
+              onChange={(e) => setSubject(e.target.value)}
+              value={subject}
               className="input" type="text" placeholder="History of Jiu Jitsu"/>
             </div>
 
             <div className="home-tinyInputs">
             <input 
-            value={loops}
-            onChange={(e) => setLoops(e.target.value)}
-            className="article-count" type="number" placeholder="Number of Posts"/>
+              value={loops}
+              onChange={(e) => setLoops(e.target.value)}
+              className="article-count" type="number" 
+              placeholder={(isLoggedIn) ? "Posts / Per Day" : "Number of Posts"}/>
             {(version === "blogger") &&
                 <input
                 className="article-count"
@@ -224,6 +225,18 @@ const Home = () => {
                 value={id}
                 onChange={(e) => setId(e.target.value)}
                 placeholder="blogger.com ID"
+              />
+            }
+            {(isLoggedIn) &&
+                <input
+                className="article-count"
+                style={{marginLeft: "0px"}}
+                type="number"
+                min="1"
+                max="14"
+                value={daysToRun}
+                onChange={(e) => setDaysToRun(e.target.value)}
+                placeholder="Days to Run"
               />
             }
             <button
@@ -246,13 +259,15 @@ const Home = () => {
               className="input" placeholder="Optionally, what other additional context do you want to provide? This could be the style of each post, additional information on the product, or even affiliate links to include."/>
             </div>
         </div>
+        {(!hasStarted) && 
         <button 
-        onClick={handleSubmit}
-        disabled={!(!hasStarted && canStart)}
-        className="runButton">
-          <img src={CaretForward} alt="run button" />
-          <h4>Start Agent</h4>
+          onClick={handleSubmit}
+          disabled={!(!hasStarted && canStart)}
+          className="runButton">
+            <img src={CaretForward} alt="run button" />
+            <h4>Start Agent</h4>
         </button>
+        }
     </div>
   );
 };

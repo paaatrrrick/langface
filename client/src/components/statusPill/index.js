@@ -3,6 +3,7 @@ import "./statusPill.css";
 import Loader from "../loader";
 
 const StatusPill = ({ version, title, content, img, url  }) => {
+    if (!title && !content) return null;
     return (
         <div className={`status-pill ${version}`}>
             <div className="row align-center justify start">

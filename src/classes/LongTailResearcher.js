@@ -4,6 +4,9 @@ const { HumanChatMessage, SystemChatMessage } = require("langchain/schema");
 const { z } = require("zod");
 const { StructuredOutputParser, CustomListOutputParser } = require("langchain/output_parsers");
 const { parse } = require("path");
+const { dummyBlueprint } = require("../constants/dummyData");
+
+
 
 class LongTailResearcher {
     constructor(subject, loops, content, openAIApiKey) {
@@ -55,6 +58,7 @@ class LongTailResearcher {
     // }
 
     getNextBlueprint = async () => {
+        if (process.env.MOCK_RESEARCH === 'true') return dummyBlueprint[0];
         try {
             console.log('getting next blue print');
             console.log(this.LongTailKeywords)
