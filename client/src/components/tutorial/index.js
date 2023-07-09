@@ -9,8 +9,10 @@ const Template = () => {
         'blogger': Blogger,
         'wordpresss': Wordpress
     }
-    const version = useSelector(state => state.main.version);
-    const Component = templateMap[version] || Wordpress;
+    const activeBlogAgent = useSelector((state) => state.main.activeBlogAgent);
+    const blogAgents = useSelector((state) => state.main.blogAgents);
+    const template = blogAgents[activeBlogAgent].version || 'wordpress';
+    const Component = templateMap[template] || Wordpress;
     return <Component/>
 }
 export default Template;

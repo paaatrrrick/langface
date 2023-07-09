@@ -9,7 +9,7 @@ const defaultBlogAgent = {
     daysLeft: "",
     loops: "",
     jwt: "",
-    id: "",
+    blogID: "",
     subject: "",
     config: "",
     data: [],
@@ -51,7 +51,7 @@ const slice = createSlice({
         daysLeft: daysLeft || 0,
         loops: loops || "",
         jwt: jwt || "",
-        id: blogID || "",
+        blogID: blogID || "",
         subject: subject || '',
         data: blogPosts || [],
         hasStarted: false,
@@ -69,7 +69,7 @@ const slice = createSlice({
       };
       const blogMap = {};
       for (let blog of blogs) {
-        const { config, version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, subject, blogPosts } = blog;
+        const { config, version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, subject, blogPosts, hasStarted } = blog;
         const tempBlog = {
           config: config || "",
           version: version || "wordpress",
@@ -78,14 +78,18 @@ const slice = createSlice({
           daysLeft: daysLeft || 0,
           loops: loops || "",
           jwt: jwt || "",
-          id: blogID || "",
+          blogID: blogID || "",
           subject: subject || ``,
           data: blogPosts || [],
-          hasStarted: false,
+          hasStarted: hasStarted,
         }
         blogMap[blog._id] = tempBlog;
       }
       return {...state, isLoggedIn: true, blogAgents: blogMap, user: user, activeBlogAgent: Object.keys(blogMap)[0]}
+    },
+    setVersion: (state, action) => {
+      const { activeBlogAgent, version } = action.payload;
+      state.blogAgents[activeBlogAgent].version = version;
     },
     signOut: (state) => {
       deleteCookie(constants.authCookieName);
@@ -97,10 +101,6 @@ const slice = createSlice({
     clearBannerMessage: (state) => {
       state.bannerMessage = null;
     },
-    setVersion: (state, action) => {
-      const { blogID, version } = action.payload;
-      state.blogAgents[blogID].version = version;
-    },
     setCurrentView: (state, action) => {
       state.bannerMessage = null;
       state.currentView = action.payload;
@@ -110,12 +110,11 @@ const slice = createSlice({
       state.colorScheme = action.payload;
     },
     updateBlogAgentData: (state, action) => {
-      const { blogId, type, title, url, config, postsLeftToday, maxNumberOfPosts } = action.payload;
+      const { blogId, type, title, url, config, postsLeftToday, maxNumberOfPosts, hasStarted } = action.payload;
+      console.log("updateBlogAgentData", action.payload)
       const data = { type, title, url, config };
     
-      if (data.type === "ending") {
-        state.blogAgents[blogId].hasStarted = false;
-      }
+      state.blogAgents[blogId].hasStarted = hasStarted;
       if (state.blogAgents[blogId].data.length > 0 && state.blogAgents[blogId].data[state.blogAgents[blogId].data.length - 1].type === "updating") {
         state.blogAgents[blogId].data.pop();
       }
@@ -127,8 +126,8 @@ const slice = createSlice({
     },
 
     initializeBlogAgent: (state, action) => {
-      const { subject, config, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, id, version, dropDownTitle, demo, _id } = action.payload;
-      const mapActualsTooInputs = {config, maxNumberOfPosts, daysLeft, loops, jwt, id, subject: subject, version, dropDownTitle, demo, data: [], hasStarted: true, postsLeftToday};
+      const { subject, config, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, version, dropDownTitle, demo, _id } = action.payload;
+      const mapActualsTooInputs = {config, maxNumberOfPosts, daysLeft, loops, jwt, blogID, subject, version, dropDownTitle, demo, data: [], hasStarted: true, postsLeftToday};
       if (!state.blogAgents[_id]) {
         delete state.blogAgents[state.activeBlogAgent];
         state.activeBlogAgent = _id;

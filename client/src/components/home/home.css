@@ -81,6 +81,12 @@
     color: var(--mainDark);
 }
 
+
+.home-input-top-row .hover:hover{
+    cursor: pointer;
+    color: var(--brandColor);
+}
+
 .home-sectioned-input{
     display: flex;
     flex-direction: row;

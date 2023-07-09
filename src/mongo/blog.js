@@ -164,7 +164,7 @@ BlogSchema.statics.addPost = async function(id, postContent) {
   }
   blog.dateRecentlyPosted = Date.now();
   await blog.save();
-  return {postsLeftToday: blog.postsLeftToday, maxNumberOfPosts: blog.maxNumberOfPosts};
+  return {postsLeftToday: blog.postsLeftToday, maxNumberOfPosts: blog.maxNumberOfPosts };
 };
 
 BlogSchema.statics.getActive = async () => {

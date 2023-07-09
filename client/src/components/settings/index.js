@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { setBannerMessage, setVersion, setColorScheme } from '../../store';
+import { setBannerMessage, setColorScheme } from '../../store';
 import { useDispatch, useSelector } from "react-redux";
 import "./settings.css";
 
@@ -23,20 +23,20 @@ const Settings = () => {
       })
     );
   };
-  const toggleCliked = (e, toggle) => {
-    if (
-      (toggle === "wordpress" && version === "wordpress") ||
-      (toggle === "blogger" && version === "wordpress")
-    ) {
-      dispatch(setVersion("blogger"));
-    }
-    if (
-      (toggle === "blogger" && version === "blogger") ||
-      (toggle === "wordpress" && version === "blogger")
-    ) {
-      dispatch(setVersion("wordpress"));
-    }
-  };
+  // const toggleCliked = (e, toggle) => {
+  //   if (
+  //     (toggle === "wordpress" && version === "wordpress") ||
+  //     (toggle === "blogger" && version === "wordpress")
+  //   ) {
+  //     dispatch(setVersion("blogger"));
+  //   }
+  //   if (
+  //     (toggle === "blogger" && version === "blogger") ||
+  //     (toggle === "wordpress" && version === "blogger")
+  //   ) {
+  //     dispatch(setVersion("wordpress"));
+  //   }
+  // };
 
   const toggleColorScheme = () => {
     if (colorScheme === "light") {
@@ -52,7 +52,7 @@ const Settings = () => {
       <div className="row align-center" style={{marginTop: "30px", marginBottom: "30px"}}>
         <p
         style={{marginRight: "10px"}}
-        >OpenAI Key:</p>
+        >OpenAI Key (optional):</p>
         <div className="addOpenAIKey">
             <input
             type="password"
@@ -65,7 +65,7 @@ const Settings = () => {
             <button onClick={addOpenAIKeyToLocalStorage}>Save Key</button>
         </div>
       </div>
-      <div className="toggleContent">
+      {/* <div className="toggleContent">
         <div className="row align-center">
         <div className="toggleContentRow">
           <p>Switch to using Wordpress</p>
@@ -99,8 +99,8 @@ const Settings = () => {
             </label>
           </div>
         </div>
-        </div>
-      </div>
+        </div> */}
+      {/* </div> */}
       <div className="toggleContent">
         <div className="row align-center">
         <div className="toggleContentRow">

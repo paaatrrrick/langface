@@ -90,6 +90,9 @@ basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
         userID = user._id.toString();
         //TODO check if there is another account connected to this blog. Is this an issue though?
         blog = await BlogDB.updateBlog(blogMongoID, {blogID, version, userID, version, openaiKey: openaiKey, blogJwt, subject, config, loops, daysLeft});
+        if (blog.hasStarted) {
+            return res.status(400).json({error: "Blog has already started"});
+        }
         await User.addBlog(userID, blogMongoID);
         await BlogDB.deleteAllBlogPosts(blogMongoID);
     } else {
@@ -98,8 +101,13 @@ basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
     }
     //this creates a blog or updates an old blog
     const sendData = async (dataForClient) => {
-      if (!demo && dataForClient.type === "ending") {
-        BlogDB.setHasStarted(blogMongoID, false);   
+     
+      dataForClient.hasStarted = true;
+      if (dataForClient.type === "ending") {
+        dataForClient.hasStarted = false;
+        if (!demo) {
+            BlogDB.setHasStarted(blogMongoID, false);  
+        }
       }
 
       if (dataForClient.type !== "updating") {
@@ -200,7 +208,7 @@ basicRoutes.get('/checkForNewBlog', isLoggedInMiddleware, asyncMiddleware(async(
 
 basicRoutes.use((err, req, res, next) => {
     console.error(err.stack); // Log the stack trace of the error
-    res.status(500).json({ message: 'An error occurred', error: err.message });
+    res.status(500).json({ error: `Oops, we had an error ${err.message}` });
 });
 
 module.exports = basicRoutes;

@@ -88,49 +88,53 @@ const getUserAuthToken = () => {
 
 async function createCheckoutSession() {
   const oauth = async () => {
-    const response = await fetch(`${constants.url}/create-checkout-session`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    try {
+      const response = await fetch(`${constants.url}/create-checkout-session`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    
+      const session = await response.json();
+      if (!session.url) {
+        return false
+      }
+        // Open the Stripe Checkout Session in a new window
+      const stripeWindow = window.open(session.url);
   
-    const session = await response.json();
-    if (!session.url) {
-      return false
-    }
-      // Open the Stripe Checkout Session in a new window
-    const stripeWindow = window.open(session.url);
-
-    // Return a new Promise that will resolve based on the Stripe Checkout Session result
-    return new Promise((resolve) => {
-      // Start a loop to check the URL of the new window
-      const checkInterval = setInterval(() => {
-        try {
-          if (stripeWindow.location.href.includes('?success=true')) {
-            stripeWindow.close();
-            clearInterval(checkInterval);
-            resolve(true);
-            return;
-          } else if (stripeWindow.location.href.includes('?canceled=true')) {
-            stripeWindow.close();
+      // Return a new Promise that will resolve based on the Stripe Checkout Session result
+      return new Promise((resolve) => {
+        // Start a loop to check the URL of the new window
+        const checkInterval = setInterval(() => {
+          try {
+            if (stripeWindow.location.href.includes('?success=true')) {
+              stripeWindow.close();
+              clearInterval(checkInterval);
+              resolve(true);
+              return;
+            } else if (stripeWindow.location.href.includes('?canceled=true')) {
+              stripeWindow.close();
+              clearInterval(checkInterval);
+              resolve(false);
+              return;
+            }
+          } catch (error) {
+            // This will throw an error when the Stripe Checkout Session is still in progress
+            // and the new window is on a different domain. This is expected and okay.
+          }
+  
+          // If the new window has been closed, stop checking
+          if (stripeWindow.closed) {
             clearInterval(checkInterval);
             resolve(false);
-            return;
           }
-        } catch (error) {
-          // This will throw an error when the Stripe Checkout Session is still in progress
-          // and the new window is on a different domain. This is expected and okay.
-        }
-
-        // If the new window has been closed, stop checking
-        if (stripeWindow.closed) {
-          clearInterval(checkInterval);
-          resolve(false);
-        }
-      }, 500);  // Check every half second
-    });
+        }, 500);  // Check every half second
+      });
+    } catch {
+      return false
+    }
   }
   function pollUserPermissions() {
     return new Promise((resolve) => {
