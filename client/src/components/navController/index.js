@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import './navController.css'
 import { useSelector, useDispatch } from 'react-redux';
 import { setCurrentView, setBannerMessage } from '../../store';
+import { createCheckoutSession } from '../../utils/getJwt';
 import HomeSvg from '../../assets/home-outline.svg';
 import SettingsSvg from '../../assets/settings-outline.svg';
 import RocketSvg from '../../assets/rocket-outline.svg';
@@ -32,6 +33,17 @@ const NavController = ({launch}) => {
         // Remove event listener on cleanup
         return () => window.removeEventListener("resize", handleResize);
     }, []);
+
+    const payment = async () => {
+        console.log('at payment')
+        const res = await createCheckoutSession();
+        if (!res) {
+            dispatch(setBannerMessage({message: "Payment failed. Reach out in the discord if you have any questions", type: "error"}));
+        } else {
+            dispatch(setBannerMessage({message: "Payment succeeded. ", type: "success"}));
+            dispatch()
+        }
+    }
 
     return (
         <div className="navController" ref={parentRef}>
@@ -76,12 +88,10 @@ const NavController = ({launch}) => {
                     <img src={BookSvg} />
                     <h6>Our Blog</h6>
                 </a>
-                <form action="http://localhost:8000/create-checkout-session" method="POST" target="_blank">
-                    <button className={`navController-pill`} type="submit">
+                <div className={`navController-pill`} onClick={payment}>
                         <img src={RobotSvg} />
                         <h6>Hire Agent</h6>
-                    </button>
-                </form>
+                </div>
                 {isLoggedIn && 
                         <a className={`navController-pill`} href="https://billing.stripe.com/p/login/28obKwfrLb5L6WIaEE" target="_blank">
                             <img src={RobotSvg} />

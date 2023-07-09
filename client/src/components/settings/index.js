@@ -7,15 +7,15 @@ import "./settings.css";
 const Settings = () => {
   const dispatch = useDispatch();
   let { version, colorScheme }  = useSelector((state) => state.main);
-  const [openAIKey, setOpenAIKey] = useState("");
+  const [openaiKey, setOpenAIKey] = useState("");
   useEffect(() => {
-    if (localStorage.getItem("openAIKey")) {
-      setOpenAIKey(localStorage.getItem("openAIKey"));
+    if (localStorage.getItem("openaiKey")) {
+      setOpenAIKey(localStorage.getItem("openaiKey"));
     }
   }, []);
   const addOpenAIKeyToLocalStorage = () => {
-    console.log(openAIKey);
-    localStorage.setItem("openAIKey", openAIKey);
+    console.log(openaiKey);
+    localStorage.setItem("openaiKey", openaiKey);
     dispatch(
       setBannerMessage({
         message: "OpenAI Key successfully Saved",
@@ -61,7 +61,7 @@ const Settings = () => {
             onChange={(e) => {
                 setOpenAIKey(e.target.value);
             }}
-            value={openAIKey}
+            value={openaiKey}
             />
             <button onClick={addOpenAIKeyToLocalStorage}>Save Key</button>
         </div>

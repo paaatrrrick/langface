@@ -18,17 +18,17 @@ const { StructuredOutputParser } = require("langchain/output_parsers");
 const search = new serpapi.GoogleSearch(process.env.SERPAPI_API_KEY);
 
 class Researcher {
-    constructor(query, openAIKey) {
+    constructor(query, openaiKey) {
         this.query = query;
         this.usedSearches = new Set();
         this.mostRecentQuery = null;
-        this.openAIApiKey = openAIKey;
+        this.openAIApiKey = openaiKey;
         console.log(this.openAIApiKey);
         this.model = new ChatOpenAI({
             modelName: "gpt-3.5-turbo",
             temperature: 0,
             maxTokens: 3000,
-            openAIApiKey: openAIKey
+            openAIApiKey: openaiKey
           });   
         this.nextGoogleQuery = []
         this.attempts = 0;  
@@ -180,7 +180,7 @@ class Researcher {
             partialVariables: { format_instructions: formatInstructions }
         });
             const input = await prompt.format();
-            const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 1000, openAIApiKey: this.openAIKey});
+            const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 1000, openAIApiKey: this.openaiKey});
             const response = await model.call([new HumanChatMessage(input)]);
             const parsed = await parserFromZod.parse(response.text);
             parsed.headers = headers;

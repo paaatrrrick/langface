@@ -15,8 +15,6 @@ const postSchema = Schema({
 const BlogSchema = new Schema({
     blogID: {
       type: String,
-      required: true,
-      unique: true
     },
     blogPosts: {
       type: [postSchema],
@@ -29,23 +27,18 @@ const BlogSchema = new Schema({
     version: {
       type: String,
       enum: ['blogger', 'wordpress'],
-      required: true
     },
     postsLeftToday: {
       type: Number,
-      default: function() {
-        return this.version === 'wordpress' ? 8 : 25;
-      }
+      default: 25
     },
     maxNumberOfPosts: {
         type: Number,
-        default: function() {
-            return this.version === 'wordpress' ? 8 : 25;
-          }
+        default: 25,
     },
     userID: {
       type: String,
-      default: ''
+      required: true,
     },
     openaiKey: {
       type: String
@@ -70,12 +63,37 @@ const BlogSchema = new Schema({
       type: Boolean,
       default: false
     },
+    newlyCreated: {
+      type: Boolean,
+      default: true
+    },
+    paymentID: {
+      type: String,
+      required: false,
+    },
   });
 
-// Method to create a new blog
-//create a newschema that doesn't have sstatics and then export it as Blog
-//setMaxNumberOfPosts
 
+
+//create a blog with default values
+BlogSchema.statics.createEmptyBlog = async function(userID, paymentID) {
+  const blog = new this({userID: userID, paymentID: paymentID});
+  await blog.save();
+  return blog;
+}
+
+//removeNewlyCreated
+BlogSchema.statics.removeNewlyCreated = async function(id) {
+  id = convertToObjectId(id);
+  const blog = await this.findById(id);
+  blog.newlyCreated = false;
+  await blog.save();
+  return blog;
+}
+
+// Method to create a new blog
+// create a newschema that doesn't have sstatics and then export it as Blog
+// setMaxNumberOfPosts
 //set HasStarted
 BlogSchema.statics.setHasStarted = async function(id, hasStarted) {
     id = convertToObjectId(id);
@@ -85,13 +103,6 @@ BlogSchema.statics.setHasStarted = async function(id, hasStarted) {
     return blog;
 };
 
-BlogSchema.statics.setMaxNumberOfPosts = async function(blogID, version, maxNumberOfPosts) {
-    const blog = await this.findOne({ blogID, version });
-    blog.maxNumberOfPosts = maxNumberOfPosts;
-    await blog.save();
-    return blog;
-}
-
 BlogSchema.statics.createNewBlog = async function(agent) {
   const existing = await this.findById(agent.blogID);
   if (existing) {
@@ -99,7 +110,7 @@ BlogSchema.statics.createNewBlog = async function(agent) {
       blogID: agent.blogID,
       version: agent.version,
       userID: agent.uid,
-      openaiKey: agent.openAIKey,
+      openaiKey: agent.openaiKey,
       jwt: agent.jwt,
       subject: agent.subject,
       config: agent.config,
@@ -108,18 +119,7 @@ BlogSchema.statics.createNewBlog = async function(agent) {
     })
     return await existing.save();
   }
-  const blog = new this({
-    blogID: agent.blogID,
-    version: agent.version,
-    userID: agent.uid,
-    openaiKey: agent.openAIKey,
-    jwt: agent.jwt,
-    subject: agent.subject,
-    config: agent.config,
-    loops: agent.loops,
-    daysLeft: agent.daysLeft
-  });
-  return await blog.save();
+  return existing;
 };
 
   
@@ -129,39 +129,13 @@ BlogSchema.statics.getBlog = async function(id) {
 }
 
 //createBlog
-BlogSchema.statics.createBlog = async function(params) {
-  const { blogID, version, userID, openAIKey, blogJwt, subject, config, loops, daysLeft } = params;
-  var blog = await this.findOne({ blogID, version });
-  if (blog) {
-    blog.set({
-      openaiKey: openAIKey,
-      jwt: blogJwt,
-      userID: userID,
-      subject: subject,
-      config: config,
-      loops: loops,
-      daysLeft: daysLeft
-    })
-    return await blog.save();
-  }
-  blog = new this({
-    blogID: blogID,
-    version: version,
-    userID: userID,
-    openaiKey: openAIKey,
-    jwt: blogJwt,
-    subject: subject,
-    config: config,
-    loops: loops,
-    daysLeft: daysLeft
-  });
+BlogSchema.statics.updateBlog = async function(id, params) {
+  id = convertToObjectId(id);
+  const { blogID, version, userID, openaiKey, blogJwt, subject, config, loops, daysLeft } = params;
+  const blog = await this.findById(id);
+  blog.set({blogID, version, userID, openaiKey,jwt: blogJwt,subject,config,loops,daysLeft})
   return await blog.save();
-}
 
-BlogSchema.statics.getBlogByBlogID = async function(blogID, version) {
-  let blog = await this.findOne({ blogID, version });
-  const id = blog._id;
-  return await this.findById(id);
 }
 
 // Method to check remaining posts

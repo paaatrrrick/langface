@@ -5,7 +5,6 @@ const blogIdToSocket = {};
 const activeTabIds = new Set();
 
 const leaveRoom = (tabId) => {
-  console.log('leave');
   for (let blogId in blogIdToSocket){
     const index = blogIdToSocket[blogId].indexOf(tabId);
     if (index > -1){
@@ -16,7 +15,6 @@ const leaveRoom = (tabId) => {
     }
   }
   activeTabIds.delete(tabId);
-  console.log("Client disconnected");
 }
 
 const sendDataToClient = (dataForClient, blogIdToSocketMap) => {
@@ -44,8 +42,6 @@ const webSocket = () => {
     const io = getIO();
     io.on("connection", (socket) => { 
       socket.on("leaveRoom", (newData) => {
-        console.log('at leave room');
-        console.log(newData);
         leaveRoom(newData.tabId);
       });
       socket.on("joinRoom", async (newData) => {
@@ -64,7 +60,6 @@ const webSocket = () => {
         socket.join(tabId);
       });
       socket.on("addData", async (newData) => {
-        console.log(socket.id);
         try {
           await handleAddData(newData, io, socket);
         } catch (e) {

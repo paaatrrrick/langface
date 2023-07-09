@@ -10,13 +10,13 @@ const { dummyblog } = require("../constants/dummyData");
 const { blogPost, SystemChatMessageForBlog } = require("../constants/prompts");  
 
 class Wordpress {
-    constructor(config, outline, jwt, blogID, sendData, openAIKey, loops, summaries, currentIteration) {
+    constructor(config, outline, jwt, blogID, sendData, openaiKey, loops, summaries, currentIteration) {
         this.config = config;
         this.outline = outline;
         this.jwt = jwt;
         this.blogID = blogID;
         this.sendData = sendData;
-        this.openAIKey = openAIKey;
+        this.openaiKey = openaiKey;
         this.loops = loops;
         this.summaries = summaries;
         this.sendData = sendData;
@@ -29,7 +29,7 @@ class Wordpress {
         this.sendData({ type: "updating", config: `Step 2 of 3: Writing the article`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}` });
         const post = await this.writePost();
         this.sendData({ type: "updating", config: `Step 3 of 3: Generating images`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}`});
-        const photosObject = new Photos(post, this.openAIKey, this.blogID, this.jwt, this.imageNames);
+        const photosObject = new Photos(post, this.openaiKey, this.blogID, this.jwt, this.imageNames);
         const cloudinaryUrls = await photosObject.run();
         const wordpresssUrls = await this.getWordpressImageURLs(cloudinaryUrls);
         await photosObject.deleteCloudinaryImages();
@@ -41,7 +41,7 @@ class Wordpress {
         if (process.env.MOCK_WRITING_BLOG === "true") return dummyblog;
         try {
           const modelType = process.env.CHEAP_GPT === 'true' ? "gpt-3.5-turbo-16k" : "gpt-4";
-          const model = new ChatOpenAI({ modelName: modelType, temperature: 0, openAIApiKey: this.openAIKey});
+          const model = new ChatOpenAI({ modelName: modelType, temperature: 0, openAIApiKey: this.openaiKey});
           const template = blogPost(this.outline.keyword, this.outline.lsiKeywords, this.outline.blogTitle, this.outline.headers, this.config, this.summaries, this.imageNames);
           const response = await model.call([new HumanChatMessage(template)]);
           const text = response.text;

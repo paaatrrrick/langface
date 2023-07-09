@@ -8,13 +8,13 @@ const { dummyblog } = require("../constants/dummyData");
 const { blogPostForBlogger, SystemChatMessageForBlog } = require("../constants/prompts");
 
 class Blogger {
-  constructor(config, outline, jwt, blogID, sendData, openAIKey, loops, summaries, currentIteration) {
+  constructor(config, outline, jwt, blogID, sendData, openaiKey, loops, summaries, currentIteration) {
         this.config = config;
         this.outline = outline;
         this.jwt = jwt;
         this.blogID = blogID;
         this.sendData = sendData;
-        this.openAIKey = openAIKey;
+        this.openaiKey = openaiKey;
         this.loops = loops;
         this.summaries = summaries;
         this.sendData = sendData;
@@ -34,7 +34,7 @@ class Blogger {
         const messages = [new SystemChatMessage(SystemChatMessageForBlog), new HumanChatMessage(
           blogPostForBlogger(this.outline.keyword, this.outline.lsiKeywords, this.outline.blogTitle, this.outline.headers, this.config, this.summaries))];
         try {
-          const model = new ChatOpenAI({ modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openAIKey});
+          const model = new ChatOpenAI({ modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openaiKey});
           const response = await model.call(messages);
           const text = response.text;
           console.log('writing post success');

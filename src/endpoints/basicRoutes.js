@@ -3,8 +3,8 @@ if (process.env.NODE_ENV !== "production") {
   }
 const express = require("express");
 const FormData = require("form-data");
-const User = require("../mongo/user");
 const fetch = require("node-fetch");
+const User = require("../mongo/user");
 const BlogDB = require("../mongo/blog");
 const DemoBlog = require("../mongo/demoBlog");
 const crypto = require('crypto');
@@ -74,40 +74,30 @@ basicRoutes.get("/user", isLoggedInMiddleware, async (req, res) => {
 });
 
 basicRoutes.post("/launchAgent", async (req, res) => {
-    console.log(req.body);
-    var {openAIKey, blogID, subject, config, version, loops, daysLeft, userAuthToken, demo } = req.body;
-    console.log("demo", demo);
+    var {openaiKey, blogID, subject, config, version, loops, daysLeft, userAuthToken, demo, blogMongoID } = req.body;
     const blogJwt = req.body.jwt;
     if (version !== "blogger") {
       version = "wordpress";
     }
-
-    var blogMongoID;
     var userID;
     var blog;
-
     if (!demo) {
         const user = await User.getUserByID(jwt.verify(userAuthToken, process.env.JWT_PRIVATE_KEY));
         userID = user._id.toString();
         //TODO check if there is another account connected to this blog. Is this an issue though?
-        blog = await BlogDB.createBlog({blogID, version, userID, version, openaiKey: openAIKey, blogJwt, subject, config, loops, daysLeft});
-        blogMongoID = blog?._id?.toString();
+        blog = await BlogDB.updateBlog(blogMongoID, {blogID, version, userID, version, openaiKey: openaiKey, blogJwt, subject, config, loops, daysLeft});
         await User.addBlog(userID, blogMongoID);
         await BlogDB.deleteAllBlogPosts(blogMongoID);
     } else {
         blog = await DemoBlog.createBlog({version, blogID});
-        console.log(blog);
         blogMongoID = blog?._id?.toString();
     }
     //this creates a blog or updates an old blog
     const sendData = async (dataForClient) => {
-      console.log('sending data 1')
-      console.log(dataForClient);
       if (!demo && dataForClient.type === "ending") {
         BlogDB.setHasStarted(blogMongoID, false);   
       }
 
-      
       if (dataForClient.type !== "updating") {
         const currAgent = demo ? DemoBlog : BlogDB;
         const postsLeft = await currAgent.addPost(blogMongoID, { url: dataForClient?.url || "", config: dataForClient?.config || "", title: dataForClient?.title || "", type: dataForClient?.type || "error" });
@@ -116,12 +106,10 @@ basicRoutes.post("/launchAgent", async (req, res) => {
       dataForClient.blogId = blogMongoID;
       sendDataToClient(dataForClient, blogIdToSocket);
     }
-    const agent = new Agent(openAIKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft - 1, blogMongoID, demo, userID);
+    const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft - 1, blogMongoID, demo, userID);
     if (!demo) await BlogDB.setHasStarted(blogMongoID, true);
-    console.log('about to run the agent');
     agent.run();
-    console.log('ran the agent');
-    blog._id = blog._id.toString();
+    blog._id = blogMongoID;
     return res.json(blog);
 });
 
@@ -148,57 +136,62 @@ basicRoutes.post("/dailyrun", async (req, res) => {
     if (req.body === 'dailyrunpassword') {
         const activeBlog = await BlogDB.getActive();
         activeBlog.foreach(blog => {
-            const agent = new Agent(
-                blog.uid,
-                blog.openAIKey,
-                socket,
-                blog.jwt,
-                blog.blogID,
-                blog.subject,
-                blog.config,
-                blog.version,
-                blog.loops,
-                blog.daysLeft - 1
-            );
+            const agent = new Agent(blog.uid, blog.openaiKey, socket, blog.jwt, blog.blogID, blog.subject, blog.config, blog.version, blog.loops, blog.daysLeft - 1);
             agent.run();
         });
     }
 });
 
-basicRoutes.post('/create-checkout-session', async (req, res) => {
+basicRoutes.post('/create-checkout-session', isLoggedInMiddleware, async (req, res) => {
+    const userId = req.user._id.toString();
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
-          // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
           price: 'price_1NRNozBA5cR4seZqGGQRAxcc',
           quantity: 1,
         },
       ],
       mode: 'subscription',
-      success_url: `http://localhost:3000/?success=true`,
-      cancel_url: `http://localhost:3000/?canceled=true`,
+      success_url: `${process.env.WORDPRESS_REDIRECT_URI}/?success=true`,
+      cancel_url: `${process.env.WORDPRESS_REDIRECT_URI}/?canceled=true`,
+      metadata: {userId}
     });
-    res.redirect(303, session.url);
+    res.json({url: session.url});
 });
 
-basicRoutes.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, response) => {
+basicRoutes.post('/webhook', bodyParser.raw({type: 'application/json'}), async (request, response) => {
     const payload = request.body;
     const sig = request.headers['stripe-signature'];
     let event;
-    console.log('hitting');
     try {
       event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
     } catch (err) {
-        console.log(err.message);
         return response.status(400).send(`Webhook Error: ${err.message}`);
     }
-    if (event.type === 'customer.subscription.created') {
-        console.log(event.data.object.id); // subscription ID -- used to query and manage subscriptions on stripe
-        // if authenticated, add subscription ID to user in mongodb and say the user has an active subscription.
-        // and we can check before each agent run if it is still active
+    if (event.type === 'checkout.session.completed') {
+        const userId = event.data?.object?.metadata?.userId;
+        const validatedUserID = await User.getUserByID(userId);
+        if (!validatedUserID) {
+            console.log('shucks we need to refund: ' + event.data.object.id);
+        }
+        const blog = await BlogDB.createEmptyBlog(userId, event.data.object.id);
+        const user = await User.addBlog(userId, blog._id.toString());
     }
 
-    response.status(200).end();
+    response.status(200).json({received: true});
 });
 
+//basic route to check if there is a new blog on user which has not been started
+basicRoutes.get('/checkForNewBlog', isLoggedInMiddleware, async (req, res) => {
+    const user = await User.getUserByID(req.user._id);
+    console.log(user)
+    for (const blogID of user.blogs) {
+        const blogObj = await BlogDB.getBlog(blogID);
+        if (blogObj.newlyCreated) {
+            await BlogDB.removeNewlyCreated(blogID);
+            return res.json(blogObj);
+        }
+    }
+    return res.json({});
+});
 module.exports = basicRoutes;

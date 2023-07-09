@@ -6,14 +6,14 @@ import { useDispatch, useSelector } from "react-redux";
 const Settings = ({ close }) => {
   const dispatch = useDispatch();
   let version = useSelector((state) => state.main.version);
-  const [openAIKey, setOpenAIKey] = useState("");
+  const [openaiKey, setOpenAIKey] = useState("");
   useEffect(() => {
-    if (localStorage.getItem("openAIKey")) {
-      setOpenAIKey(localStorage.getItem("openAIKey"));
+    if (localStorage.getItem("openaiKey")) {
+      setOpenAIKey(localStorage.getItem("openaiKey"));
     }
   }, []);
   const addOpenAIKeyToLocalStorage = () => {
-    localStorage.setItem("openAIKey", openAIKey);
+    localStorage.setItem("openaiKey", openaiKey);
     dispatch(
       setBannerMessage({
         message: "OpenAI Key successfully Saved",
@@ -47,7 +47,7 @@ const Settings = ({ close }) => {
           onChange={(e) => {
             setOpenAIKey(e.target.value);
           }}
-          value={openAIKey}
+          value={openaiKey}
         />
         <button onClick={addOpenAIKeyToLocalStorage}>Save</button>
       </div>

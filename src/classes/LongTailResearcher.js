@@ -35,7 +35,7 @@ class LongTailResearcher {
           loops: this.loops,
         });
         console.log(input);
-        const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 3000, openAIApiKey: this.openAIKey});
+        const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 3000, openAIApiKey: this.openaiKey});
         const response = await model.call([new HumanChatMessage(input)]);
         this.LongTailKeywords  = response.text.split("\n");
         return this.LongTailKeywords;
@@ -50,7 +50,7 @@ class LongTailResearcher {
     //     const humanMessage = `Blog Subject: "${this.subject}"${(this.content) && `\n\nBLOG SPECIFICATIONS:\n\n "${this.content}" \n\n{format_instructions}`}`
     //     const humanPrompt = new PromptTemplate({template: humanMessage, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
     //     const humanInput = await humanPrompt.format();
-    //     const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openAIKey});
+    //     const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openaiKey});
     //     const response = await model.call([new SystemChatMessage(systemMessage), new HumanChatMessage(humanInput)]);
     //     const parsed = await parserFromZod.parse(response.text);
     //     this.LongTailKeywords = parsed;
@@ -94,7 +94,7 @@ class LongTailResearcher {
         const template = `You are worldclass SEO expert. You have been hired by a company to write a blog. The company wants to rank for the keyword "${keyword}". The blog is about "${this.subject}"${(this.config) && ` and has the following specifications: "${this.config}"`}. \n\n{format_instructions}`;
         const prompt = new PromptTemplate({template: template, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const input = await prompt.format();
-        const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openAIKey});
+        const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openaiKey});
         const response = await model.call([new HumanChatMessage(input)]);
         const parsed = await parserFromZod.parse(response.text)   
         const { blogTitle, lsiKeywords, headers } = parsed;

@@ -15,9 +15,9 @@ if (process.env.NODE_ENV !== "production") {
   const { dummyWordpressPhotos } = require("../constants/dummyData");
 
 class Photos {
-    constructor(text, openAIKey, wordpressBlogId, wordpressJwtToken, imageNamesUsedInBlog) {
+    constructor(text, openaiKey, wordpressBlogId, wordpressJwtToken, imageNamesUsedInBlog) {
         this.text = text;
-        this.openAIKey = openAIKey;
+        this.openaiKey = openaiKey;
         this.wordpressBlogId = wordpressBlogId;
         this.wordpressJwtToken = wordpressJwtToken;
         this.imageNamesUsedInBlog = imageNamesUsedInBlog;
@@ -55,7 +55,7 @@ class Photos {
         const template = `For the following ${this.imageNamesUsedInBlog.length} images: ${arrayToString(this.imageNamesUsedInBlog)} which are in the following blog, write a description of them: BLOG:${this.text} \n{format_instructions}.`;
         const prompt = new PromptTemplate({template: template, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const input = await prompt.format();
-        const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k",temperature: 0, maxTokens: 1000, openAIApiKey: this.openAIKey});
+        const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k",temperature: 0, maxTokens: 1000, openAIApiKey: this.openaiKey});
         const response = await model.call([new HumanChatMessage(input)]);
         const parsed = await parserFromZod.parse(response.text)
         const { style, imageArray } = parsed;
@@ -76,7 +76,7 @@ class Photos {
         const prompt = new PromptTemplate({template: `${text2ImgPrompt(imageDescriptions, this.style)} \n{format_instructions}.`, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const input = await prompt.format();
         const modelType = process.env.CHEAP_GPT === 'true' ? "gpt-3.5-turbo-16k" : "gpt-4";
-        const model = new ChatOpenAI({modelName: modelType,temperature: 0.1, maxTokens: 1000, openAIApiKey: this.openAIKey});
+        const model = new ChatOpenAI({modelName: modelType,temperature: 0.1, maxTokens: 1000, openAIApiKey: this.openaiKey});
         const response = await model.call([new HumanChatMessage(input)]);
         const parsed = await parserFromZod.parse(response.text) ;
         return parsed;

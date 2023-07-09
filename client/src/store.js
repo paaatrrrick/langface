@@ -10,7 +10,7 @@ const defaultBlogAgent = {
     loops: "",
     jwt: "",
     id: "",
-    blogSubject: "",
+    subject: "",
     config: "",
     data: [],
     hasStarted: false,
@@ -45,6 +45,24 @@ const slice = createSlice({
       state.blogAgents = {...state.blogAgents, 'New Agent': defaultBlogAgent.default}
       state.activeBlogAgent = 'New Agent';
     },
+    addBlogAgent: (state, action) => {
+      const { config, version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, subject, blogPosts, _id } = action.payload;
+      const tempBlog = {
+        config: config || "",
+        version: version || "wordpress",
+        maxNumberOfPosts: maxNumberOfPosts || 0,
+        postsLeftToday: postsLeftToday || 0,
+        daysLeft: daysLeft || 0,
+        loops: loops || "",
+        jwt: jwt || "",
+        id: blogID || "",
+        subject: subject || '',
+        data: blogPosts || [],
+        hasStarted: false,
+      }
+      state.blogAgents[_id] = tempBlog;
+      state.activeBlogAgent = _id;
+    },
     standardizeBlogAgent: (state, action) => {
       state.blogAgents[action.payload.activeBlogAgent] = {...state.blogAgents[action.payload.activeBlogAgent], ...action.payload.data}
     },
@@ -68,7 +86,7 @@ const slice = createSlice({
           loops: loops || "",
           jwt: jwt || "",
           id: blogID || "",
-          blogSubject: subject || `New Agent: #${Object.keys(blogMap).length + 1}`,
+          subject: subject || ``,
           data: blogPosts || [],
           hasStarted: false,
         }
@@ -122,7 +140,7 @@ const slice = createSlice({
       const { subject, config, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, id, version, dropDownTitle, demo, _id } = action.payload;
       console.log(action.payload);
       console.log(state.activeBlogAgent)
-      const mapActualsTooInputs = {config, maxNumberOfPosts, daysLeft, loops, jwt, id, blogSubject: subject, version, dropDownTitle, demo, data: [], hasStarted: true, postsLeftToday};
+      const mapActualsTooInputs = {config, maxNumberOfPosts, daysLeft, loops, jwt, id, subject: subject, version, dropDownTitle, demo, data: [], hasStarted: true, postsLeftToday};
       if (!state.blogAgents[_id]) {
         delete state.blogAgents[state.activeBlogAgent];
         state.activeBlogAgent = _id;

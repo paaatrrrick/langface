@@ -23,16 +23,15 @@ const Home = ({joinRoom}) => {
     const activeBlogAgent = useSelector((state) => state.main.activeBlogAgent);
     const isLoggedIn = useSelector((state) => state.main.isLoggedIn);
     const blogAgents = useSelector((state) => state.main.blogAgents);
+    console.log(blogAgents);
     const currentBlog = blogAgents[activeBlogAgent];
-    console.log('rerendering');
-    console.log(currentBlog);
     const dispatch = useDispatch();
     const [version, setVersion] = useState(currentBlog.version || "wordpress");
     const [loops, setLoops] = useState(currentBlog.loops || "");
     const [daysLeft, setDaysToRun] = useState(currentBlog.daysLeft || "");
     const [jwt, setJwt] = useState(currentBlog.jwt || "");
     const [id, setId] = useState(currentBlog.id || "");
-    const [subject, setSubject] = useState(currentBlog.blogSubject || "");
+    const [subject, setSubject] = useState(currentBlog.subject || "");
     const [config, setContent] = useState(currentBlog.config || "");
     const [data, setData] = useState(currentBlog.data || []);
     const [hasStarted, setHasStarted] = useState(currentBlog.hasStarted || false);
@@ -49,7 +48,7 @@ const Home = ({joinRoom}) => {
       setDaysToRun(currentBlog.daysLeft || "");
       setJwt(currentBlog.jwt || "");
       setId(currentBlog.id || "");
-      setSubject(currentBlog.blogSubject || "");
+      setSubject(currentBlog.subject || "");
       setContent(currentBlog.config || "");
       setData(currentBlog.data || []);
       setHasStarted(currentBlog.hasStarted || false);
@@ -107,9 +106,9 @@ const Home = ({joinRoom}) => {
     };
 
     const handleSubmit = async () => {
-      const openAIKey = localStorage.getItem("openAIKey");
+      const openaiKey = localStorage.getItem("openaiKey");
       const userAuthToken = getUserAuthToken();
-      const newData = {jwt, loops, blogID: id, config: config, openAIKey, version, subject, daysLeft, userAuthToken, demo: currentBlog.demo};
+      const newData = {jwt, loops, blogID: id, config: config, openaiKey, version, subject, daysLeft, userAuthToken, demo: currentBlog.demo, blogMongoID: activeBlogAgent };
       const res = await fetch(`${constants.url}/launchAgent`, {
         method: "POST",
         headers: {
@@ -138,7 +137,7 @@ const Home = ({joinRoom}) => {
     for (let i = 0; i < agentsKeys.length; i++) {
       dropDownOptions.push({
         id: agentsKeys[i],
-        text: blogAgents[agentsKeys[i]].blogSubject,
+        text: blogAgents[agentsKeys[i]].subject,
       });
     }
 

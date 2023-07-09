@@ -25,7 +25,6 @@ const userSchema = new Schema({
 userSchema.statics.login = async function (uid, params = {}) {
     let id = convertToObjectId(uid);
     const user = await this.findById(id);
-    console.log(user);
     if (user) {
         if (Object.keys(params).length === 0) {
          return user; 
@@ -37,7 +36,6 @@ userSchema.statics.login = async function (uid, params = {}) {
         return user;
     }
     const newUser = new this({ _id: id, ...params });
-    console.log(newUser)
     return await newUser.save();
 
     // const blog = new this({
@@ -63,9 +61,9 @@ userSchema.statics.deleteAllUsers = async function () {
 
 userSchema.statics.addBlog = async function (id, blogID) {
     id = convertToObjectId(id);
+    blogID = convertToObjectId(blogID);
     const user = await this.findById(id);
     if (user.blogs.includes(blogID)){
-        // if user is running multiple agents on the same blog, we don't need to push the blogID to the array multiple times
         return user;
     }
     user.blogs.push(blogID);

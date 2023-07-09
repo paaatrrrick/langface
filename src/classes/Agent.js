@@ -15,12 +15,12 @@ const { HumanChatMessage } = require("langchain/schema");
 const { PromptTemplate } = require("langchain/prompts");
 
 class Agent {
-  constructor(openAIKey, sendData, jwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, demo = false, uid = null) {
+  constructor(openaiKey, sendData, jwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, demo = false, uid = null) {
     // AGENT
     this.demo = demo;
     this.AgentDB = demo ? DemoBlogDB : BlogDB;
     this.uid = uid;
-    this.openAIKey = openAIKey ? openAIKey : process.env.OPENAI_API_KEY;
+    this.openaiKey = openaiKey ? openaiKey : process.env.OPENAI_API_KEY;
     this.sendData = sendData;
 
     // BLOG
@@ -36,8 +36,8 @@ class Agent {
     this.blogOutlines = [];
     
     // TOOLS
-    // this.researcher = new Researcher(blogSubject, this.openAIKey);
-    this.researcher = new LongTailResearcher(subject, loops, config, this.openAIKey);
+    // this.researcher = new Researcher(subject, this.openaiKey);
+    this.researcher = new LongTailResearcher(subject, loops, config, this.openaiKey);
   }
 
   getBlogState() {
@@ -59,7 +59,6 @@ class Agent {
       var errors = 0;
       for (let i = 0; i < this.loops; i++) {
         try {
-          console.log('trying to run here');
           const { postsLeftToday } = await this.AgentDB.checkRemainingPosts(this.blogMongoID);
           if (postsLeftToday <= 0) {
             await this.sendData({ type: "ending", config: "Ending: You have reached your daily post limit" });
@@ -72,8 +71,8 @@ class Agent {
             return;
           }
           const blogSite = this.version === "blogger" ? 
-          new Blogger(this.config, outline, this.jwt, this.blogID, this.sendData, this.openAIKey, this.loops, this.summaries, i) : 
-          new Wordpress(this.config, outline, this.jwt, this.blogID, this.sendData, this.openAIKey, this.loops, this.summaries, i);
+          new Blogger(this.config, outline, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i) : 
+          new Wordpress(this.config, outline, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i);
 
           var result = await blogSite.run();
           this.summaries.push({summary: outline.headers, url: result.url});          
