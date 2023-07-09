@@ -6,7 +6,7 @@ const defaultBlogAgent = {
   default: {
     config: "",
     postsLeftToday: constants.maxPosts,
-    daysLeft: 1,
+    daysLeft: "",
     loops: "",
     jwt: "",
     id: "",
@@ -131,8 +131,8 @@ const slice = createSlice({
       state.blogAgents[blogId].data.push(data);      
       if (postsLeftToday !== null && maxNumberOfPosts !== null) {
         console.log('setting it here')
-        state.blogAgents[blogId].postsLeftToday = postsLeftToday;
-        state.blogAgents[blogId].maxNumberOfPosts = maxNumberOfPosts;
+        state.blogAgents[blogId].postsLeftToday = postsLeftToday || state.blogAgents[blogId].postsLeftToday;
+        state.blogAgents[blogId].maxNumberOfPosts = maxNumberOfPosts || state.blogAgents[blogId].maxNumberOfPosts;
       }
     },
 
@@ -153,7 +153,7 @@ const slice = createSlice({
 // Now we configure the store
 const store = configureStore({ reducer: { main: slice.reducer } });
 export default store;
-export const { setBannerMessage, setBlogIds, clearBannerMessage, setVersion, setCurrentView, setColorScheme, updateBlogAgentData, login, signOut, newBlogAgent, setActiveBlogAgent, initializeBlogAgent, runAgent } = slice.actions;
+export const { setBannerMessage, setBlogIds, clearBannerMessage, setVersion, setCurrentView, setColorScheme, updateBlogAgentData, login, signOut, newBlogAgent, setActiveBlogAgent, initializeBlogAgent, runAgent, addBlogAgent } = slice.actions;
 // export const actions = { ...slice.actions};
 
 

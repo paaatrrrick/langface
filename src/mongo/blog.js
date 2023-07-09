@@ -103,7 +103,8 @@ BlogSchema.statics.setHasStarted = async function(id, hasStarted) {
     return blog;
 };
 
-BlogSchema.statics.createNewBlog = async function(agent) {
+BlogSchema.statics.createNewBlog = async function(id) {
+  console.log('at create new blog');
   const existing = await this.findById(agent.blogID);
   if (existing) {
     existing.set({
@@ -131,10 +132,14 @@ BlogSchema.statics.getBlog = async function(id) {
 //createBlog
 BlogSchema.statics.updateBlog = async function(id, params) {
   id = convertToObjectId(id);
+  console.log('at update blog');
   const { blogID, version, userID, openaiKey, blogJwt, subject, config, loops, daysLeft } = params;
+  console.log('params', params);
   const blog = await this.findById(id);
+  console.log('blog', blog);
   blog.set({blogID, version, userID, openaiKey,jwt: blogJwt,subject,config,loops,daysLeft})
-  return await blog.save();
+  await blog.save();
+  return blog;
 
 }
 

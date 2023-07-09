@@ -54,7 +54,7 @@ basicRoutes.get("/data", (req, res) => {
 basicRoutes.post('/auth/google', async (req, res) => {
     const { idToken, email, photoURL, name } = req.body;
     const uid = randomStringToHash24Bits(idToken);
-    const user = await User.login(uid, { email, photoURL, name })
+    const user = await User.loginOrSignUp(uid, { email, photoURL, name })
     const token = jwt.sign({ _id: uid, }, process.env.JWT_PRIVATE_KEY, { expiresIn: "1000d" });
     res.cookie("langface-token", token)
     res.json({ message: 'Login successful' });
@@ -75,6 +75,7 @@ basicRoutes.get("/user", isLoggedInMiddleware, async (req, res) => {
 
 basicRoutes.post("/launchAgent", async (req, res) => {
     var {openaiKey, blogID, subject, config, version, loops, daysLeft, userAuthToken, demo, blogMongoID } = req.body;
+    console.log(req.body);
     const blogJwt = req.body.jwt;
     if (version !== "blogger") {
       version = "wordpress";
@@ -82,13 +83,19 @@ basicRoutes.post("/launchAgent", async (req, res) => {
     var userID;
     var blog;
     if (!demo) {
+        console.log('first')
         const user = await User.getUserByID(jwt.verify(userAuthToken, process.env.JWT_PRIVATE_KEY));
         userID = user._id.toString();
         //TODO check if there is another account connected to this blog. Is this an issue though?
+        console.log('second')
         blog = await BlogDB.updateBlog(blogMongoID, {blogID, version, userID, version, openaiKey: openaiKey, blogJwt, subject, config, loops, daysLeft});
+        console.log('third');
         await User.addBlog(userID, blogMongoID);
+        console.log('fourth')
         await BlogDB.deleteAllBlogPosts(blogMongoID);
+        console.log('fifth');
     } else {
+        console.log('it is a demo')
         blog = await DemoBlog.createBlog({version, blogID});
         blogMongoID = blog?._id?.toString();
     }

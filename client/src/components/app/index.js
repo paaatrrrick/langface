@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import './app.css'
 import { useDispatch, useSelector } from 'react-redux';
 import constants from '../../constants';
-import { clearBannerMessage, updateBlogAgentData, setBannerMessage, login, setBlogIds } from '../../store';
+import { clearBannerMessage, updateBlogAgentData, setBannerMessage, login, setBlogIds, signOut } from '../../store';
 import { setColorScheme } from '../../utils/styles';
 import { getUserAuthToken } from '../../utils/getJwt';
 import NavController from '../navController';
@@ -37,7 +37,8 @@ const App = () => {
             credentials: 'include'
         });
         if (!res.ok) {
-            dispatch(setBannerMessage({type: 'error', message: 'Error: Could not authenticate user'}));
+            dispatch(setBannerMessage({type: 'error', message: 'Error: Could not authenticate user', timeout: 5000}));
+            dispatch(signOut());
             return;
         }
         const data = await res.json();

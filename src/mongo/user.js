@@ -21,8 +21,13 @@ const userSchema = new Schema({
     },    
 });
 
+userSchema.statics.login = async function (uid) {
+    let id = convertToObjectId(uid);
+    return await this.findById(id);
+}
 
-userSchema.statics.login = async function (uid, params = {}) {
+
+userSchema.statics.loginOrSignUp = async function (uid, params = {}) {
     let id = convertToObjectId(uid);
     const user = await this.findById(id);
     if (user) {
@@ -37,13 +42,9 @@ userSchema.statics.login = async function (uid, params = {}) {
     }
     const newUser = new this({ _id: id, ...params });
     return await newUser.save();
-
-    // const blog = new this({
-    //     blogID,
-    //     version
-    //   });
-    //   return await blog.save();
 }
+
+
 
 //getUserByID
 userSchema.statics.getUserByID = async function (id) {

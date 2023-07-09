@@ -10,10 +10,8 @@ const trimStringTo15Chars = (str) => {
     }
 }
 
-
 const Dropdown = ({ options, selected, onSelectedChange }) => {
     const [open, setOpen] = useState(false);
-
     var nameLessCount = 0
     for (let i = 0; i < options.length; i++) {
         if (options[i].text === '') {
@@ -21,12 +19,8 @@ const Dropdown = ({ options, selected, onSelectedChange }) => {
             options[i].text = `New Agent ${nameLessCount}`;
         }
     }
-
     const active = options.find((option) => option.id === selected);
     const optionsWithoutSelected = options.filter((option) => option.id !== selected);
-    console.log("Dropdown")
-    console.log(options);
-    console.log(optionsWithoutSelected);
     return (
     <div className="Dropdown">
         <div key={-1} className="Dropdown-row" onClick={() => setOpen(!open)}>

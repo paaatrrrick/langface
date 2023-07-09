@@ -117,8 +117,6 @@ const Home = ({joinRoom}) => {
         body: JSON.stringify(newData),
       });
       const data = await res.json();
-      console.log('we are back');
-      console.log(data);
       joinRoom(data._id);
       dispatch(initializeBlogAgent({...data, ...newData}));
     };
@@ -135,9 +133,13 @@ const Home = ({joinRoom}) => {
     const dropDownOptions = [];
     const agentsKeys = Object.keys(blogAgents);
     for (let i = 0; i < agentsKeys.length; i++) {
+      var text = blogAgents[agentsKeys[i]].subject;
+      if (agentsKeys[i] === "default"){
+        text = "Demo Agent"
+      }
       dropDownOptions.push({
         id: agentsKeys[i],
-        text: blogAgents[agentsKeys[i]].subject,
+        text
       });
     }
 

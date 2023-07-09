@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './navController.css'
 import { useSelector, useDispatch } from 'react-redux';
-import { setCurrentView, setBannerMessage } from '../../store';
+import { setCurrentView, setBannerMessage,addBlogAgent } from '../../store';
 import { createCheckoutSession } from '../../utils/getJwt';
 import HomeSvg from '../../assets/home-outline.svg';
 import SettingsSvg from '../../assets/settings-outline.svg';
@@ -9,9 +9,6 @@ import RocketSvg from '../../assets/rocket-outline.svg';
 import DiscordSvg from '../../assets/logo-discord.svg';
 import BookSvg from '../../assets/book-outline.svg';
 import Auth from "../auth"
-import { GoogleLogin } from '@react-oauth/google';
-import constants from "../../constants";
-import EarthSvg from '../../assets/earth-outline.svg';
 import RobotSvg from '../../assets/robot-outline.svg'
 
 const NavController = ({launch}) => {
@@ -35,13 +32,12 @@ const NavController = ({launch}) => {
     }, []);
 
     const payment = async () => {
-        console.log('at payment')
         const res = await createCheckoutSession();
         if (!res) {
             dispatch(setBannerMessage({message: "Payment failed. Reach out in the discord if you have any questions", type: "error"}));
         } else {
-            dispatch(setBannerMessage({message: "Payment succeeded. ", type: "success"}));
-            dispatch()
+            dispatch(setBannerMessage({message: "Payment succeeded. ", type: "success", timeout: 5000}));
+            dispatch(addBlogAgent(res))
         }
     }
 
