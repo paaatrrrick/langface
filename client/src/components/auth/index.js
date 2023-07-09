@@ -6,7 +6,8 @@ import { initializeApp } from "firebase/app";
 import { useDispatch, useSelector } from 'react-redux';
 import { setBannerMessage, signOut } from "../../store";
 import constants from "../../constants";
-
+import '../navController/navController.css'
+import RobotSvg from '../../assets/robot-outline.svg'
 
 const firebaseConfig = {
     apiKey: "AIzaSyBdOHXmq235jFOtiAg7KtnXE6zriN8r6xU",
@@ -22,7 +23,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-const Auth = ({ launch }) => {
+const Auth = ({ launch, mask }) => {
     const { isLoggedIn, user, } = useSelector((state) => state.main);
     const dispatch = useDispatch();
 
@@ -49,12 +50,31 @@ const Auth = ({ launch }) => {
         console.log('successfuly logged in');
         const data = await res.json();
         launch();
+        if (mask==="true"){
+            const form = document.createElement('form');
+            form.action="http://localhost:8000/create-checkout-session";
+            form.method="POST"; 
+            form.target="_blank";
+            document.body.appendChild(form);
+            form.submit();
+        }
     };
 
     const signOutClicked = async () => {
         // document.cookie = constants.authCookieName + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
         dispatch(signOut());
     };
+
+    if (mask==="true"){
+        return (
+            <div className="Auth">
+                <button className={`navController-pill`} onClick={handleGoogle}>
+                    <img src={RobotSvg} />
+                    <h6>Hire Agent</h6>
+                </button>
+            </div>
+        )
+    }
 
     if (isLoggedIn) {
         return (
