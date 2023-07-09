@@ -135,6 +135,10 @@ a:hover{
     cursor: pointer;
 }
 
+.nohover:hover{
+    cursor: default;
+}
+
 .App-right-section{
     background-color: var(--lighterBackground);
     flex: 1;

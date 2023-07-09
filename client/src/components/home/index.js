@@ -154,8 +154,14 @@ const Home = ({joinRoom, payment}) => {
     <div className="Home">
       {isLoggedIn && <Dropdown options={dropDownOptions} selected={activeBlogAgent} onSelectedChange={selectChangeDropdown}/>} 
       <div className="row align-center justify-start wrap">
+        
         <h1 style={{marginRight: "15px"}}>BloggerGPT</h1>
-        {(!hasStarted && demo) && <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Demo</button>}
+        {(demo) 
+        ? 
+        <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Demo</button>
+         : 
+         <button className="runButton2 nohover" style={{margin: "0px"}}>Standard</button>
+         }
       </div>
         <h6>Hire an AI agent that works autonomously to grow your blog</h6>
         <div className="home-results-container">
