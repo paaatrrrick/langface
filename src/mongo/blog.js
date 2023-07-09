@@ -103,6 +103,17 @@ BlogSchema.statics.setHasStarted = async function(id, hasStarted) {
     return blog;
 };
 
+//subtract days left
+BlogSchema.statics.subtractDaysLeft = async function(id) {
+  id = convertToObjectId(id);
+  const blog = await this.findById(id);
+  if (blog.daysLeft > 0) {
+    blog.daysLeft = blog.daysLeft - 1;
+    await blog.save();
+  }
+  return blog;
+};
+
 BlogSchema.statics.createNewBlog = async function(id) {
   const existing = await this.findById(agent.blogID);
   if (existing) {
@@ -167,9 +178,8 @@ BlogSchema.statics.addPost = async function(id, postContent) {
   return {postsLeftToday: blog.postsLeftToday, maxNumberOfPosts: blog.maxNumberOfPosts };
 };
 
-BlogSchema.statics.getActive = async () => {
-  const activeBlogs = await this.find({ daysLeft: { $gt: 0 } });
-  return activeBlogs; 
+BlogSchema.statics.getActive = async function() {
+  return await mongoose.model('Blog').find({ daysLeft: { $gt: 0 }, hasStarted: false });
 }
 
 BlogSchema.statics.getOwner = async (id) => {

@@ -4,15 +4,9 @@ if (process.env.NODE_ENV !== "production") {
 }
 const Wordpress = require("./Wordpress");
 const Blogger = require("./Blogger");
-const {Researcher} = require("./Researcher");
 const { LongTailResearcher } = require("./LongTailResearcher");
 const BlogDB = require("../mongo/blog");
-const DemoBlogDB = require("../mongo/demoBlog");
-const User = require("../mongo/user");
-const { StructuredOutputParser } = require("langchain/output_parsers");
-const { ChatOpenAI } = require("langchain/chat_models/openai");
-const { HumanChatMessage } = require("langchain/schema");
-const { PromptTemplate } = require("langchain/prompts");
+const DemoBlogDB = require("../mongo/demoBlog");;
 
 class Agent {
   constructor(openaiKey, sendData, jwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, demo = false, uid = null) {
@@ -40,22 +34,9 @@ class Agent {
     this.researcher = new LongTailResearcher(subject, loops, config, this.openaiKey);
   }
 
-  getBlogState() {
-    return {
-      uid: this.uid || "",
-      jwt: this.jwt,
-      blogID: this.blogID,
-      subject: this.subject,
-      config: this.config,
-      version: this.version,
-      loops: this.loops,
-      daysLeft: this.daysLeft,
-      summaries: this.summaries,
-      blogOutlines: this.blogOutlines,
-    }
-  }
-
   run = async () => {
+    try {
+      if (!this.demo) await this.AgentDB.setHasStarted(this.blogMongoID, true);
       var errors = 0;
       for (let i = 0; i < this.loops; i++) {
         try {
@@ -94,10 +75,12 @@ class Agent {
       else {
         await this.sendData({ type: "ending", title: "Process Complete." });
       }
-      // store blog so we can do: rate limits, daily runs, long term looking UI 
-      // const blog = await BlogDB.createNewBlog(this.getBlogState());
-      // attach blog to user, so we can tell the frontend what to display
+    } catch (e) {
+      console.log('error from agent')
+      console.log(e);
+    }
   };
+
 }
 
 module.exports = { Agent };

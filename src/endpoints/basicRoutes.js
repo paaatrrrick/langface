@@ -9,12 +9,10 @@ const BlogDB = require("../mongo/blog");
 const DemoBlog = require("../mongo/demoBlog");
 const crypto = require('crypto');
 const { Agent } = require("../classes/Agent");
+const initSendData = require("../utils/sendData");
 const jwt = require('jsonwebtoken');
-const { sendDataToClient, blogIdToSocket } = require("./webSockets");
 const stripe = require('stripe')('sk_test_51NRJ0JBA5cR4seZqut5sOds81PKF0TLvnCCcBcuV9AdTwDVxtPaqsdctYdNX9vQalRshkaMlcBMjdMA1IIGXw53m00IpIuF1hP');
 const bodyParser = require('body-parser');
-const endpointSecret = 'whsec_1d8104297244891d4410191284d52f9f430c66d55a6e7f4a9d065fc0035f1609';
-
 
 const basicRoutes = express.Router();
 
@@ -88,38 +86,16 @@ basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
     if (!demo) {
         const user = await User.getUserByID(jwt.verify(userAuthToken, process.env.JWT_PRIVATE_KEY));
         userID = user._id.toString();
-        //TODO check if there is another account connected to this blog. Is this an issue though?
         blog = await BlogDB.updateBlog(blogMongoID, {blogID, version, userID, version, openaiKey: openaiKey, blogJwt, subject, config, loops, daysLeft});
-        if (blog.hasStarted) {
-            return res.status(400).json({error: "Blog has already started"});
-        }
+        if (blog.hasStarted) return res.status(400).json({error: "Blog has already started"});
         await User.addBlog(userID, blogMongoID);
         await BlogDB.deleteAllBlogPosts(blogMongoID);
     } else {
         blog = await DemoBlog.createBlog({version, blogID});
         blogMongoID = blog?._id?.toString();
     }
-    //this creates a blog or updates an old blog
-    const sendData = async (dataForClient) => {
-     
-      dataForClient.hasStarted = true;
-      if (dataForClient.type === "ending") {
-        dataForClient.hasStarted = false;
-        if (!demo) {
-            BlogDB.setHasStarted(blogMongoID, false);  
-        }
-      }
-
-      if (dataForClient.type !== "updating") {
-        const currAgent = demo ? DemoBlog : BlogDB;
-        const postsLeft = await currAgent.addPost(blogMongoID, { url: dataForClient?.url || "", config: dataForClient?.config || "", title: dataForClient?.title || "", type: dataForClient?.type || "error" });
-        dataForClient = { ...dataForClient, ...postsLeft };
-      }
-      dataForClient.blogId = blogMongoID;
-      sendDataToClient(dataForClient, blogIdToSocket);
-    }
+    const sendData = initSendData(blogMongoID, demo);
     const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft - 1, blogMongoID, demo, userID);
-    if (!demo) await BlogDB.setHasStarted(blogMongoID, true);
     agent.run();
     blog._id = blogMongoID;
     return res.json(blog);
@@ -144,13 +120,20 @@ basicRoutes.post("/wordpress", asyncMiddleware(async (req, res) => {
     }
 }));
 
-basicRoutes.post("/dailyrun", asyncMiddleware(async (req, res) => {
-    if (req.body === 'dailyrunpassword') {
+basicRoutes.post("/dailyrun", asyncMiddleware(async (req) => {
+    console.log('daily run');
+    console.log(req.body);
+    if (req.body.password === process.env.dailyRunPassword) {
         const activeBlog = await BlogDB.getActive();
-        activeBlog.foreach(blog => {
-            const agent = new Agent(blog.uid, blog.openaiKey, socket, blog.jwt, blog.blogID, blog.subject, blog.config, blog.version, blog.loops, blog.daysLeft - 1);
+        console.log(activeBlog);
+        for (let blog of activeBlog) {
+            const {openaiKey, blogID, subject, config, version, loops, daysLeft, _id, userID } = blog;
+            const blogMongoID = _id.toString();
+            const blogJwt = blog.jwt;
+            const sendData = initSendData(blogMongoID);
+            const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, false, userID);
             agent.run();
-        });
+        }
     }
 }));
 
@@ -159,7 +142,7 @@ basicRoutes.post('/create-checkout-session', isLoggedInMiddleware, asyncMiddlewa
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
-          price: 'price_1NRNozBA5cR4seZqGGQRAxcc',
+          price: process.env.STRIPE_PRODUCT_ID,
           quantity: 1,
         },
       ],
@@ -176,7 +159,7 @@ basicRoutes.post('/webhook', bodyParser.raw({type: 'application/json'}), asyncMi
     const sig = request.headers['stripe-signature'];
     let event;
     try {
-      event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
+      event = stripe.webhooks.constructEvent(payload, sig, process.env.STRIPE_WEBHOOK_SECRET);
     } catch (err) {
         return response.status(400).send(`Webhook Error: ${err.message}`);
     }
@@ -185,9 +168,10 @@ basicRoutes.post('/webhook', bodyParser.raw({type: 'application/json'}), asyncMi
         const validatedUserID = await User.getUserByID(userId);
         if (!validatedUserID) {
             console.log('shucks we need to refund: ' + event.data.object.id);
+            return 
         }
         const blog = await BlogDB.createEmptyBlog(userId, event.data.object.id);
-        const user = await User.addBlog(userId, blog._id.toString());
+        await User.addBlog(userId, blog._id.toString());
     }
 
     response.status(200).json({received: true});

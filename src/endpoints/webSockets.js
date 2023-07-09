@@ -1,4 +1,4 @@
-const { getIO } = require('./socketConfig');
+const { getIO } = require('../utils/socketConfig');
 
 var SuccesfulPostsCount = 0
 const blogIdToSocket = {};

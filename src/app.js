@@ -9,11 +9,9 @@ const app = express();
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const { webSocket } = require("./endpoints/webSockets");
-const { socketInit } = require("./endpoints/socketConfig");
+const { socketInit } = require("./utils/socketConfig");
 const basicRoutes = require("./endpoints/basicRoutes");
 const cookieParser = require("cookie-parser");
-
-
 
 mongoose.set('strictQuery', true);
 mongoose.connect(process.env.MONGO_URI, {
