@@ -88,10 +88,12 @@ const NavController = ({launch}) => {
                     <img src={BookSvg} />
                     <h6>Our Blog</h6>
                 </a>
-                <div className={`navController-pill`} onClick={payment}>
-                        <img src={RobotSvg} />
-                        <h6>Hire Agent</h6>
-                </div>
+                {isLoggedIn ? 
+                (<div className={`navController-pill`} onClick={payment}>
+                    <img src={RobotSvg} />
+                    <h6>Hire Agent</h6>
+                </div>) : 
+                ( <Auth launch={launch} mask="true"/> )}
                 {isLoggedIn && 
                         <a className={`navController-pill`} href="https://billing.stripe.com/p/login/28obKwfrLb5L6WIaEE" target="_blank">
                             <img src={RobotSvg} />
