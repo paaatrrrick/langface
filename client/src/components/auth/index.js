@@ -23,7 +23,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-const Auth = ({ launch, mask }) => {
+const Auth = ({ launch, mask, payment }) => {
     const { isLoggedIn, user, } = useSelector((state) => state.main);
     const dispatch = useDispatch();
 
@@ -51,12 +51,7 @@ const Auth = ({ launch, mask }) => {
         const data = await res.json();
         launch();
         if (mask==="true"){
-            const form = document.createElement('form');
-            form.action="http://localhost:8000/create-checkout-session";
-            form.method="POST"; 
-            form.target="_blank";
-            document.body.appendChild(form);
-            form.submit();
+            payment();
         }
     };
 

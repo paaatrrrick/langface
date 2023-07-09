@@ -93,7 +93,7 @@ const NavController = ({launch}) => {
                     <img src={RobotSvg} />
                     <h6>Hire Agent</h6>
                 </div>) : 
-                ( <Auth launch={launch} mask="true"/> )}
+                ( <Auth launch={launch} mask="true" payment={payment}/> )}
                 {isLoggedIn && 
                         <a className={`navController-pill`} href="https://billing.stripe.com/p/login/28obKwfrLb5L6WIaEE" target="_blank">
                             <img src={RobotSvg} />
