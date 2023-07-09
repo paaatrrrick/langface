@@ -3,9 +3,9 @@ if (process.env.NODE_ENV !== "production") {
 }
 const fetch = require("node-fetch");
 const { ChatOpenAI } = require("langchain/chat_models/openai");
-const { HumanChatMessage, SystemChatMessage } = require("langchain/schema");
+const { HumanChatMessage } = require("langchain/schema");
 const { dummyblog } = require("../constants/dummyData");
-const { blogPostForBlogger, SystemChatMessageForBlog } = require("../constants/prompts");
+const { blogPostForBlogger } = require("../constants/prompts");
 
 class Blogger {
   constructor(config, outline, jwt, blogID, sendData, openaiKey, loops, summaries, currentIteration) {
@@ -31,11 +31,11 @@ class Blogger {
 
     writePost = async () => {
         if (process.env.MOCK_WRITING_BLOG === "true") return dummyblog;
-        const messages = [new SystemChatMessage(SystemChatMessageForBlog), new HumanChatMessage(
-          blogPostForBlogger(this.outline.keyword, this.outline.lsiKeywords, this.outline.blogTitle, this.outline.headers, this.config, this.summaries))];
+        const template = blogPostForBlogger(this.outline.keyword, this.outline.lsiKeywords, this.outline.blogTitle, this.outline.headers, this.config, this.summaries)
+        console.log(template);
         try {
           const model = new ChatOpenAI({ modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openaiKey});
-          const response = await model.call(messages);
+          const response = await model.call([new HumanChatMessage(template)]);
           const text = response.text;
           return text;
         } catch (e) {
@@ -59,7 +59,7 @@ class Blogger {
                 id: this.blogID,
               },
               title: this.outline.blogTitle,
-              config: config,
+              content: config,
             }),
           }
         );

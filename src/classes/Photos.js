@@ -158,6 +158,7 @@ class Photos {
       };
 
       deleteCloudinaryImages = async () => {
+        if (process.env.MOCK_PHOTOS === "true") return;
         for (let image of this.cloudinaryImages) {
             try {
                 cloudinary.uploader.destroy(image.public_id);

@@ -4,7 +4,7 @@ if (process.env.NODE_ENV !== "production") {
 const fetch = require("node-fetch");
 const { replaceStringInsideStringWithNewString } = require("../utils/helpers");
 const { ChatOpenAI } = require("langchain/chat_models/openai");
-const { HumanChatMessage, AIChatMessage, SystemChatMessage } = require("langchain/schema");
+const { HumanChatMessage, } = require("langchain/schema");
 const Photos = require("./Photos");
 const { dummyblog } = require("../constants/dummyData");
 const { blogPost, SystemChatMessageForBlog } = require("../constants/prompts");  
@@ -45,6 +45,8 @@ class Wordpress {
           const template = blogPost(this.outline.keyword, this.outline.lsiKeywords, this.outline.blogTitle, this.outline.headers, this.config, this.summaries, this.imageNames);
           const response = await model.call([new HumanChatMessage(template)]);
           const text = response.text;
+          console.log('here is the post');
+          console.log(text);
           return text;
         } catch (e) {
           console.log(e)
@@ -54,7 +56,7 @@ class Wordpress {
       };
 
       getWordpressImageURLs = async (cloudinaryUrls) => {
-        if (!cloudinaryUrls || cloudinaryUrls.length === 0) return;
+        if (!cloudinaryUrls || cloudinaryUrls.length === 0 || process.env.MOCK_PHOTOS === "true") return;
         const response = await fetch(
             `https://public-api.wordpress.com/rest/v1.1/sites/${this.blogID}/media/new`,
           {
@@ -85,6 +87,7 @@ class Wordpress {
 
     postToWordpress = async (post, imageUrls) => {
         if (process.env.MOCK_POST_TO_WORDPRESS === "true") return {title: this.outline.blogTitle, config: post, url: "https://historylover4.wordpress.com/2021/08/16/this-is-a-test-post/"};
+        console.log('posting to wordpress');
         for (let i in imageUrls) {
             post = replaceStringInsideStringWithNewString(post, this.imageNames[i], imageUrls[i]);
         }
@@ -97,7 +100,7 @@ class Wordpress {
             },
             body: JSON.stringify({
               title: this.outline.blogTitle,
-              config: post,
+              content: post,
             }),
           }
         );
@@ -111,8 +114,6 @@ class Wordpress {
           return {title: this.outline.blogTitle, config: post, url: result.URL};
         }
       };
-
-
 }
 
 
