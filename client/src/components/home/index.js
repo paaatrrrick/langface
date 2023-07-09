@@ -167,7 +167,7 @@ const Home = ({joinRoom, payment}) => {
         <div className="home-input-top-row">
           <p>Daily Articles Used: {maxNumberOfPosts - postsLeftToday} / {maxNumberOfPosts}</p>
           {(!jwt && !blogID) && <p className="hover" onClick={versionToggler}>
-            Use to {(version === "wordpress") ? "Blogger.com" : "Wordpress.com"}
+            Switch to {(version === "wordpress") ? "Blogger.com" : "Wordpress.com"}
           </p>}
         </div>
         <div className="home-data-body" ref={messagesEndRef}>
