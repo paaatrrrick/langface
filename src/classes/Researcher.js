@@ -23,7 +23,6 @@ class Researcher {
         this.usedSearches = new Set();
         this.mostRecentQuery = null;
         this.openAIApiKey = openaiKey;
-        console.log(this.openAIApiKey);
         this.model = new ChatOpenAI({
             modelName: "gpt-3.5-turbo",
             temperature: 0,
@@ -72,8 +71,6 @@ class Researcher {
                 } else {
                     query = await this.getSimilarQueries(this.mostRecentQuery);
                 }
-                console.log('at get model urls')
-                console.log(query)
                 this.mostRecentQuery = query;
                 var data = false;
                 search.json({engine: "google", q: query}, (res) => {data = res;});
@@ -89,8 +86,6 @@ class Researcher {
                         const $ = cheerio.load(blogResponse.data);
                         var paragraphText = $('p').text();
                         if (paragraphText.length > 1000) {
-                            console.log('found a good url')
-                            console.log(tempUrl)
                             break;
                         }
                         k++;
@@ -132,7 +127,6 @@ class Researcher {
         const input = await prompt.format({ subject: `Google search query for blogs that is different, but related to ${query}` });
         const response = await this.model.call([new HumanChatMessage(`${input}`)]);
         const formattedResponse =  await parser.parse(response.text);
-        console.log(formattedResponse)
         for (let res of formattedResponse) {
             this.nextGoogleQuery.push(res);
         }
@@ -148,7 +142,6 @@ class Researcher {
             paragraphText = paragraphText.slice(0, 15000);
         }
         if (paragraphText.length < 1500) {
-            console.log("not enough text");
             return false;
         }
         var headers = [];
@@ -189,10 +182,8 @@ class Researcher {
     }
     
     searchTopBlogs = async(keywords) => {
-        console.log("searching blogs");
         const input = `What are the URLs of the highest ranking blogs using the keywords ${keywords}?`;
         const result = await this.getExecutor().call({ input });
-        console.log(result);
         return result;
     
     }    

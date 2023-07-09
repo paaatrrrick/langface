@@ -60,8 +60,6 @@ class LongTailResearcher {
     getNextBlueprint = async () => {
         if (process.env.MOCK_RESEARCH === 'true') return dummyBlueprint[0];
         try {
-            console.log('getting next blue print');
-            console.log(this.LongTailKeywords)
             if (!this.hasInitialized) {
                 await this.writeTitles();
                 this.hasInitialized = true;

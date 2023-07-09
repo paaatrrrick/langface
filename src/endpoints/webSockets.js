@@ -63,8 +63,6 @@ const webSocket = () => {
         try {
           await handleAddData(newData, io, socket);
         } catch (e) {
-          console.log('bottom error');
-          console.log(e);
           if (newData.blogID){
             socket.emit("updateData", { 
               blogId: newData.blogID,

@@ -37,7 +37,6 @@ class Blogger {
           const model = new ChatOpenAI({ modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openaiKey});
           const response = await model.call(messages);
           const text = response.text;
-          console.log('writing post success');
           return text;
         } catch (e) {
           console.error(e)
@@ -71,7 +70,6 @@ class Blogger {
           throw new Error(`Error creating your post: we failed to post to blogger`);
         } else {
           const result = await response.json();
-          console.log(result.url);
           return {
             title: this.outline.blogTitle,
             config: config,

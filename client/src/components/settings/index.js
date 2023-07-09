@@ -14,7 +14,6 @@ const Settings = () => {
     }
   }, []);
   const addOpenAIKeyToLocalStorage = () => {
-    console.log(openaiKey);
     localStorage.setItem("openaiKey", openaiKey);
     dispatch(
       setBannerMessage({

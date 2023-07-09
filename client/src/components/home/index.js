@@ -23,7 +23,6 @@ const Home = ({joinRoom}) => {
     const activeBlogAgent = useSelector((state) => state.main.activeBlogAgent);
     const isLoggedIn = useSelector((state) => state.main.isLoggedIn);
     const blogAgents = useSelector((state) => state.main.blogAgents);
-    console.log(blogAgents);
     const currentBlog = blogAgents[activeBlogAgent];
     const dispatch = useDispatch();
     const [version, setVersion] = useState(currentBlog.version || "wordpress");

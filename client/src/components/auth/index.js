@@ -47,7 +47,6 @@ const Auth = ({ launch, mask, payment }) => {
             dispatch(setBannerMessage("Error logging in with google"));
             return;
         }
-        console.log('successfuly logged in');
         const data = await res.json();
         launch();
         if (mask==="true"){

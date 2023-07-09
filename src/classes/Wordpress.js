@@ -45,7 +45,6 @@ class Wordpress {
           const template = blogPost(this.outline.keyword, this.outline.lsiKeywords, this.outline.blogTitle, this.outline.headers, this.config, this.summaries, this.imageNames);
           const response = await model.call([new HumanChatMessage(template)]);
           const text = response.text;
-          console.log('writing post success');
           return text;
         } catch (e) {
           console.log(e)
@@ -109,7 +108,6 @@ class Wordpress {
           throw new Error(`Error creating your post: we failed to post to Wordpress`);
         } else {
           const result = await response.json();
-          console.log('successfully posted to wordpress at this url ' + result.URL);
           return {title: this.outline.blogTitle, config: post, url: result.URL};
         }
       };

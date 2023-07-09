@@ -117,9 +117,7 @@ const slice = createSlice({
       state.colorScheme = action.payload;
     },
     updateBlogAgentData: (state, action) => {
-      console.log('updating blog agent data')
       const { blogId, type, title, url, config, postsLeftToday, maxNumberOfPosts } = action.payload;
-      console.log(blogId);
       const data = { type, title, url, config };
     
       if (data.type === "ending") {
@@ -130,7 +128,6 @@ const slice = createSlice({
       }
       state.blogAgents[blogId].data.push(data);      
       if (postsLeftToday !== null && maxNumberOfPosts !== null) {
-        console.log('setting it here')
         state.blogAgents[blogId].postsLeftToday = postsLeftToday || state.blogAgents[blogId].postsLeftToday;
         state.blogAgents[blogId].maxNumberOfPosts = maxNumberOfPosts || state.blogAgents[blogId].maxNumberOfPosts;
       }
@@ -138,8 +135,6 @@ const slice = createSlice({
 
     initializeBlogAgent: (state, action) => {
       const { subject, config, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, id, version, dropDownTitle, demo, _id } = action.payload;
-      console.log(action.payload);
-      console.log(state.activeBlogAgent)
       const mapActualsTooInputs = {config, maxNumberOfPosts, daysLeft, loops, jwt, id, subject: subject, version, dropDownTitle, demo, data: [], hasStarted: true, postsLeftToday};
       if (!state.blogAgents[_id]) {
         delete state.blogAgents[state.activeBlogAgent];

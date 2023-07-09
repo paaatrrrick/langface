@@ -100,7 +100,6 @@ async function createCheckoutSession() {
     if (!session.url) {
       return false
     }
-    console.log(session);
       // Open the Stripe Checkout Session in a new window
     const stripeWindow = window.open(session.url);
 
@@ -110,13 +109,11 @@ async function createCheckoutSession() {
       const checkInterval = setInterval(() => {
         try {
           if (stripeWindow.location.href.includes('?success=true')) {
-            console.log('Payment succeeded!');
             stripeWindow.close();
             clearInterval(checkInterval);
             resolve(true);
             return;
           } else if (stripeWindow.location.href.includes('?canceled=true')) {
-            console.log('Payment was cancelled.');
             stripeWindow.close();
             clearInterval(checkInterval);
             resolve(false);
@@ -129,7 +126,6 @@ async function createCheckoutSession() {
 
         // If the new window has been closed, stop checking
         if (stripeWindow.closed) {
-          console.log('Window has been closed without completing payment.');
           clearInterval(checkInterval);
           resolve(false);
         }
@@ -148,24 +144,16 @@ async function createCheckoutSession() {
             },
           });
           const blog = await response.json();
-          console.log('server response');
-          console.log(blog);
           if (blog.userID) {
-            console.log('Received updated permissions');
-            console.log('just create a new blog');
-            console.log(blog);
             clearInterval(pollInterval);
             resolve(blog);
           }
         } catch (error) {
-          console.log('error');
-          console.log(error);
         }
       }, 2000);  // Check every 2 seconds
     });
   }
   const auth = await oauth();
-  console.log(auth);
   if (!auth) {
     return false;
   }

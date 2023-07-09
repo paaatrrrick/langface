@@ -79,7 +79,6 @@ basicRoutes.get("/user", isLoggedInMiddleware, asyncMiddleware(async (req, res) 
 
 basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
     var {openaiKey, blogID, subject, config, version, loops, daysLeft, userAuthToken, demo, blogMongoID } = req.body;
-    console.log(req.body);
     const blogJwt = req.body.jwt;
     if (version !== "blogger") {
       version = "wordpress";
@@ -87,19 +86,13 @@ basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
     var userID;
     var blog;
     if (!demo) {
-        console.log('first')
         const user = await User.getUserByID(jwt.verify(userAuthToken, process.env.JWT_PRIVATE_KEY));
         userID = user._id.toString();
         //TODO check if there is another account connected to this blog. Is this an issue though?
-        console.log('second')
         blog = await BlogDB.updateBlog(blogMongoID, {blogID, version, userID, version, openaiKey: openaiKey, blogJwt, subject, config, loops, daysLeft});
-        console.log('third');
         await User.addBlog(userID, blogMongoID);
-        console.log('fourth')
         await BlogDB.deleteAllBlogPosts(blogMongoID);
-        console.log('fifth');
     } else {
-        console.log('it is a demo')
         blog = await DemoBlog.createBlog({version, blogID});
         blogMongoID = blog?._id?.toString();
     }
@@ -195,7 +188,6 @@ basicRoutes.post('/webhook', bodyParser.raw({type: 'application/json'}), asyncMi
 //basic route to check if there is a new blog on user which has not been started
 basicRoutes.get('/checkForNewBlog', isLoggedInMiddleware, asyncMiddleware(async(req, res) => {
     const user = await User.getUserByID(req.user._id);
-    console.log(user)
     for (const blogID of user.blogs) {
         const blogObj = await BlogDB.getBlog(blogID);
         if (blogObj.newlyCreated) {
