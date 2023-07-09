@@ -13,7 +13,6 @@ import WrenchSvg from "../../assets/build-outline.svg";
 import CaretForward from "../../assets/caret-forward-outline.svg";
 import CheckMark from "../../assets/checkmark-circle.svg";
 import Close from "../../assets/close-circle-sharp.svg";
-import { set } from "mongoose";
 
 const typeToImageMap = {
   error: Close,
