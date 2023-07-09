@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import constants, { defualtPills, sampleBlog } from "../../constants";
 import { getJwt, wordpressGetJwt, getUserAuthToken } from "../../utils/getJwt";
 import { scrollToBottom } from "../../utils/styles";
-import { setBannerMessage, newBlogAgent, setActiveBlogAgent, initializeBlogAgent } from "../../store";
+import { setBannerMessage, setActiveBlogAgent, initializeBlogAgent } from "../../store";
 import { useDispatch } from "react-redux";
 import StatusPill from "../statusPill";
 import Dropdown from "../uxcore/dropdown";
@@ -19,7 +19,7 @@ const typeToImageMap = {
   success: CheckMark,
 };
 
-const Home = ({joinRoom}) => {
+const Home = ({joinRoom, payment}) => {
     const activeBlogAgent = useSelector((state) => state.main.activeBlogAgent);
     const isLoggedIn = useSelector((state) => state.main.isLoggedIn);
     const blogAgents = useSelector((state) => state.main.blogAgents);
@@ -122,7 +122,7 @@ const Home = ({joinRoom}) => {
 
     const selectChangeDropdown = (target) => {
       if (target === "AddNewAgent") {
-        dispatch(newBlogAgent());
+        payment();
       } else if (target !== activeBlogAgent) {
         dispatch(setActiveBlogAgent(target));
       }
@@ -149,7 +149,7 @@ const Home = ({joinRoom}) => {
         <h1
         style={{marginRight: "15px"}}
         >BloggerGPT</h1>
-        {(!hasStarted) && <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Demo</button>}
+        {(!hasStarted && currentBlog.demo) && <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Demo</button>}
       </div>
         <h6>Hire an AI agent that works autonomously to grow your blog</h6>
         <div className="home-results-container">

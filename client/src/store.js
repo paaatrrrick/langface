@@ -41,10 +41,6 @@ const slice = createSlice({
       //remove duplicates
       state.blogIds = [...new Set(res)];
     },
-    newBlogAgent: (state) => {
-      state.blogAgents = {...state.blogAgents, 'New Agent': defaultBlogAgent.default}
-      state.activeBlogAgent = 'New Agent';
-    },
     addBlogAgent: (state, action) => {
       const { config, version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, subject, blogPosts, _id } = action.payload;
       const tempBlog = {
@@ -62,9 +58,6 @@ const slice = createSlice({
       }
       state.blogAgents[_id] = tempBlog;
       state.activeBlogAgent = _id;
-    },
-    standardizeBlogAgent: (state, action) => {
-      state.blogAgents[action.payload.activeBlogAgent] = {...state.blogAgents[action.payload.activeBlogAgent], ...action.payload.data}
     },
     setActiveBlogAgent: (state, action) => {
       state.activeBlogAgent = action.payload;
@@ -148,7 +141,7 @@ const slice = createSlice({
 // Now we configure the store
 const store = configureStore({ reducer: { main: slice.reducer } });
 export default store;
-export const { setBannerMessage, setBlogIds, clearBannerMessage, setVersion, setCurrentView, setColorScheme, updateBlogAgentData, login, signOut, newBlogAgent, setActiveBlogAgent, initializeBlogAgent, runAgent, addBlogAgent } = slice.actions;
+export const { setBannerMessage, setBlogIds, clearBannerMessage, setVersion, setCurrentView, setColorScheme, updateBlogAgentData, login, signOut, setActiveBlogAgent, initializeBlogAgent, runAgent, addBlogAgent } = slice.actions;
 // export const actions = { ...slice.actions};
 
 

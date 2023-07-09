@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import './app.css'
 import { useDispatch, useSelector } from 'react-redux';
+import { createCheckoutSession } from '../../utils/getJwt';
 import constants from '../../constants';
-import { clearBannerMessage, updateBlogAgentData, setBannerMessage, login, setBlogIds, signOut } from '../../store';
+import { clearBannerMessage, updateBlogAgentData, setBannerMessage, login, setBlogIds, signOut, addBlogAgent } from '../../store';
 import { setColorScheme } from '../../utils/styles';
 import { getUserAuthToken } from '../../utils/getJwt';
 import NavController from '../navController';
@@ -47,6 +48,16 @@ const App = () => {
         joinRoom(blogIds);
     }
 
+    const payment = async () => {
+        const res = await createCheckoutSession();
+        if (!res) {
+            dispatch(setBannerMessage({message: "Payment failed. Reach out in the discord if you have any questions", type: "error"}));
+        } else {
+            dispatch(setBannerMessage({message: "Payment succeeded. ", type: "success", timeout: 5000}));
+            dispatch(addBlogAgent(res))
+        }
+    }
+
     const joinRoom = async (blogIds) => {
         //check if type string, cast to array if so 
         if (typeof blogIds === 'string') blogIds = [blogIds];
@@ -69,12 +80,12 @@ const App = () => {
     const Component = templateMap[currentView] || Home;
     return (
         <div className="App">
-            <NavController launch={launch} />
+            <NavController launch={launch} payment={payment} />
             <div className="App-right-section">
                 <div className="flex-grow-1"/>
                 <div className="body">
                     {bannerMessage && <BannerMessage messageObject={bannerMessage} close={() => dispatch(clearBannerMessage())} />}
-                    <Component joinRoom={joinRoom}/>
+                    <Component joinRoom={joinRoom} payment={payment}/>
                 </div>
                 <div className="flex-grow-1"/>
             </div>

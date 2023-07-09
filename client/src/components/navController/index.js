@@ -1,8 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './navController.css'
 import { useSelector, useDispatch } from 'react-redux';
-import { setCurrentView, setBannerMessage,addBlogAgent } from '../../store';
-import { createCheckoutSession } from '../../utils/getJwt';
+import { setCurrentView } from '../../store';
 import HomeSvg from '../../assets/home-outline.svg';
 import SettingsSvg from '../../assets/settings-outline.svg';
 import RocketSvg from '../../assets/rocket-outline.svg';
@@ -11,7 +10,7 @@ import BookSvg from '../../assets/book-outline.svg';
 import Auth from "../auth"
 import RobotSvg from '../../assets/robot-outline.svg'
 
-const NavController = ({launch}) => {
+const NavController = ({launch, payment}) => {
     const dispatch = useDispatch();
     const { currentView, blogAgents, isLoggedIn } = useSelector(state => state.main);
     const [parentRefWidth, setParentRefWidth] = useState(0);
@@ -30,16 +29,6 @@ const NavController = ({launch}) => {
         // Remove event listener on cleanup
         return () => window.removeEventListener("resize", handleResize);
     }, []);
-
-    const payment = async () => {
-        const res = await createCheckoutSession();
-        if (!res) {
-            dispatch(setBannerMessage({message: "Payment failed. Reach out in the discord if you have any questions", type: "error"}));
-        } else {
-            dispatch(setBannerMessage({message: "Payment succeeded. ", type: "success", timeout: 5000}));
-            dispatch(addBlogAgent(res))
-        }
-    }
 
     return (
         <div className="navController" ref={parentRef}>
@@ -91,10 +80,10 @@ const NavController = ({launch}) => {
                 </div>) : 
                 ( <Auth launch={launch} mask="true" payment={payment}/> )}
                 {isLoggedIn && 
-                        <a className={`navController-pill`} href="https://billing.stripe.com/p/login/28obKwfrLb5L6WIaEE" target="_blank">
-                            <img src={RobotSvg} />
-                            <h6>Fire Agent</h6>
-                        </a>
+                    <a className={`navController-pill`} href="https://billing.stripe.com/p/login/28obKwfrLb5L6WIaEE" target="_blank">
+                        <img src={RobotSvg} />
+                        <h6>Fire Agent</h6>
+                    </a>
                 }
                 </div>
             </div>
