@@ -34,6 +34,12 @@ const Dropdown = ({ options, selected, onSelectedChange }) => {
             <div key={-2}
             className="Dropdown-row"
             onClick={() => {
+                const form = document.createElement('form');
+                form.action="http://localhost:8000/create-checkout-session";
+                form.method="POST"; 
+                form.target="_blank";
+                document.body.appendChild(form);
+                form.submit();    
                 onSelectedChange("AddNewAgent");
                 setOpen(false);
             }}>

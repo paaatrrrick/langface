@@ -76,12 +76,14 @@ const NavController = ({launch}) => {
                     <img src={BookSvg} />
                     <h6>Our Blog</h6>
                 </a>
-                <form action="http://localhost:8000/create-checkout-session" method="POST" target="_blank">
+                {isLoggedIn ? 
+                (<form action="http://localhost:8000/create-checkout-session" method="POST" target="_blank">
                     <button className={`navController-pill`} type="submit">
                         <img src={RobotSvg} />
                         <h6>Hire Agent</h6>
                     </button>
-                </form>
+                </form>) : 
+                ( <Auth launch={launch} mask="true"/> )}
                 {isLoggedIn && 
                         <a className={`navController-pill`} href="https://billing.stripe.com/p/login/28obKwfrLb5L6WIaEE" target="_blank">
                             <img src={RobotSvg} />
