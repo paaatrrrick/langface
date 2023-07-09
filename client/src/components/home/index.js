@@ -86,6 +86,10 @@ const Home = ({joinRoom, payment}) => {
     };
 
     const samplePrompt = async () => {
+      if (hasStarted){
+        // if agent is running, don't do anything on click.
+        return;
+      }
       setLoops(sampleBlog.loops)
       setSubject(sampleBlog.subject);
       setContent(sampleBlog.config);
@@ -149,7 +153,9 @@ const Home = ({joinRoom, payment}) => {
         <h1
         style={{marginRight: "15px"}}
         >BloggerGPT</h1>
-        {(!hasStarted && currentBlog.demo) && <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Demo</button>}
+        {(currentBlog.demo) ? (
+        <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Demo</button>
+        ) : (<button className="runButton2" style={{margin: "0px"}}>Standard</button>)}
       </div>
         <h6>Hire an AI agent that works autonomously to grow your blog</h6>
         <div className="home-results-container">
