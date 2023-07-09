@@ -18,6 +18,10 @@ const endpointSecret = 'whsec_1d8104297244891d4410191284d52f9f430c66d55a6e7f4a9d
 
 const basicRoutes = express.Router();
 
+const asyncMiddleware = fn => 
+  (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+};
 
 const randomStringToHash24Bits = (inputString) => {
     return crypto.createHash('sha256').update(inputString).digest('hex').substring(0, 24);
@@ -46,21 +50,21 @@ const isLoggedInMiddleware = async (req, res, next) => {
 }
 
 // test whether backend is responding
-basicRoutes.get("/data", (req, res) => {
+basicRoutes.get("/data", asyncMiddleware((req, res) => {
     res.send("data");
-});
+}));
 
 
-basicRoutes.post('/auth/google', async (req, res) => {
+basicRoutes.post('/auth/google', asyncMiddleware(async (req, res) => {
     const { idToken, email, photoURL, name } = req.body;
     const uid = randomStringToHash24Bits(idToken);
     const user = await User.loginOrSignUp(uid, { email, photoURL, name })
     const token = jwt.sign({ _id: uid, }, process.env.JWT_PRIVATE_KEY, { expiresIn: "1000d" });
     res.cookie("langface-token", token)
     res.json({ message: 'Login successful' });
-}); 
+})); 
 
-basicRoutes.get("/user", isLoggedInMiddleware, async (req, res) => {
+basicRoutes.get("/user", isLoggedInMiddleware, asyncMiddleware(async (req, res) => {
     const blogIDs = req.user.blogs;
     const blogs = []
     for (let id of blogIDs) {
@@ -71,9 +75,9 @@ basicRoutes.get("/user", isLoggedInMiddleware, async (req, res) => {
         }
     }
     res.json({blogs: blogs, user: {photoURL: req.user.photoURL}});
-});
+}));
 
-basicRoutes.post("/launchAgent", async (req, res) => {
+basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
     var {openaiKey, blogID, subject, config, version, loops, daysLeft, userAuthToken, demo, blogMongoID } = req.body;
     console.log(req.body);
     const blogJwt = req.body.jwt;
@@ -118,9 +122,9 @@ basicRoutes.post("/launchAgent", async (req, res) => {
     agent.run();
     blog._id = blogMongoID;
     return res.json(blog);
-});
+}));
 
-basicRoutes.post("/wordpress", async (req, res) => {
+basicRoutes.post("/wordpress", asyncMiddleware(async (req, res) => {
     const { code } = req.body;
     var formdata = new FormData();
     formdata.append("client_id", process.env.WORDPRESS_CLIENT_ID);
@@ -137,9 +141,9 @@ basicRoutes.post("/wordpress", async (req, res) => {
         const data = await result.json();
         res.send(data);
     }
-});
+}));
 
-basicRoutes.post("/dailyrun", async (req, res) => {
+basicRoutes.post("/dailyrun", asyncMiddleware(async (req, res) => {
     if (req.body === 'dailyrunpassword') {
         const activeBlog = await BlogDB.getActive();
         activeBlog.foreach(blog => {
@@ -147,9 +151,9 @@ basicRoutes.post("/dailyrun", async (req, res) => {
             agent.run();
         });
     }
-});
+}));
 
-basicRoutes.post('/create-checkout-session', isLoggedInMiddleware, async (req, res) => {
+basicRoutes.post('/create-checkout-session', isLoggedInMiddleware, asyncMiddleware(async (req, res) => {
     const userId = req.user._id.toString();
     const session = await stripe.checkout.sessions.create({
       line_items: [
@@ -164,9 +168,9 @@ basicRoutes.post('/create-checkout-session', isLoggedInMiddleware, async (req, r
       metadata: {userId}
     });
     res.json({url: session.url});
-});
+}));
 
-basicRoutes.post('/webhook', bodyParser.raw({type: 'application/json'}), async (request, response) => {
+basicRoutes.post('/webhook', bodyParser.raw({type: 'application/json'}), asyncMiddleware(async (request, response) => {
     const payload = request.body;
     const sig = request.headers['stripe-signature'];
     let event;
@@ -186,10 +190,10 @@ basicRoutes.post('/webhook', bodyParser.raw({type: 'application/json'}), async (
     }
 
     response.status(200).json({received: true});
-});
+}));
 
 //basic route to check if there is a new blog on user which has not been started
-basicRoutes.get('/checkForNewBlog', isLoggedInMiddleware, async (req, res) => {
+basicRoutes.get('/checkForNewBlog', isLoggedInMiddleware, asyncMiddleware(async(req, res) => {
     const user = await User.getUserByID(req.user._id);
     console.log(user)
     for (const blogID of user.blogs) {
@@ -200,5 +204,11 @@ basicRoutes.get('/checkForNewBlog', isLoggedInMiddleware, async (req, res) => {
         }
     }
     return res.json({});
+}));
+
+basicRoutes.use((err, req, res, next) => {
+    console.error(err.stack); // Log the stack trace of the error
+    res.status(500).json({ message: 'An error occurred', error: err.message });
 });
+
 module.exports = basicRoutes;
