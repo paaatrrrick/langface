@@ -7,76 +7,29 @@ const fetch = require("node-fetch");
 const User = require("../mongo/user");
 const BlogDB = require("../mongo/blog");
 const DemoBlog = require("../mongo/demoBlog");
-const crypto = require('crypto');
 const { Agent } = require("../classes/Agent");
+const { isLoggedInMiddleware, asyncMiddleware } = require("./middleware");
 const initSendData = require("../utils/sendData");
+const { randomStringToHash24Bits } = require("../utils/helpers");
 const jwt = require('jsonwebtoken');
 const stripe = require('stripe')('sk_test_51NRJ0JBA5cR4seZqut5sOds81PKF0TLvnCCcBcuV9AdTwDVxtPaqsdctYdNX9vQalRshkaMlcBMjdMA1IIGXw53m00IpIuF1hP');
 const bodyParser = require('body-parser');
 
 const basicRoutes = express.Router();
 
-const asyncMiddleware = fn => 
-  (req, res, next) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-};
-
-const randomStringToHash24Bits = (inputString) => {
-    return crypto.createHash('sha256').update(inputString).digest('hex').substring(0, 24);
-}
-
-const isLoggedInMiddleware = async (req, res, next) => {
-    const token = req.cookies["langface-token"];
-    if (!token) {
-        res.status(401).json({error: "Not logged in"});
-        return;
-    }
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
-        const user = await User.login(decoded._id);
-        if (!user) {
-            res.clearCookie("langface-token");
-            res.status(401).json({error: "Not logged in"});
-            return;
-        }
-        req.user = user;
-        next();
-    } catch (err) {
-        res.clearCookie("langface-token");
-        res.status(401).json({error: "Not logged in"});
-    }
-}
-
 // test whether backend is responding
 basicRoutes.get("/data", asyncMiddleware((req, res) => {
     res.send("data");
 }));
-
 
 basicRoutes.post('/auth/google', asyncMiddleware(async (req, res) => {
     console.log('hit auth google');
     console.log(req.body);
     const { idToken, email, photoURL, name } = req.body;
     const uid = randomStringToHash24Bits(idToken);
-    console.log(uid);
-    const user = await User.loginOrSignUp(uid, { email, photoURL, name })
+    await User.loginOrSignUp(uid, { email, photoURL, name })
     const token = jwt.sign({ _id: uid, }, process.env.JWT_PRIVATE_KEY, { expiresIn: "1000d" });
-    console.log(token);
-    console.log(process.env.NODE_ENV)
-    if (process.env.NODE_ENV !== "production") {
-        console.log("not production");
-        res.cookie("langface-token",token);
-    } else {
-        res.cookie("langface-token", token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            domain: 'langface.ai',
-            path: '/',
-            maxAge: 1000 * 60 * 60 * 24 * 365 // cookie valid for 1 year
-        });
-    }
-    res.json({ message: 'Login successful' });
+    res.json({token});
 })); 
 
 basicRoutes.get("/user", isLoggedInMiddleware, asyncMiddleware(async (req, res) => {
@@ -138,8 +91,6 @@ basicRoutes.post("/wordpress", asyncMiddleware(async (req, res) => {
 }));
 
 basicRoutes.post("/dailyrun", asyncMiddleware(async (req) => {
-    console.log('daily run');
-    console.log(req.body);
     if (req.body.password === process.env.dailyRunPassword) {
         const activeBlog = await BlogDB.getActive();
         console.log(activeBlog);

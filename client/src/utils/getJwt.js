@@ -1,5 +1,24 @@
 import constants from "../constants";
 
+const isAuthenticatedResponse = (res, logout) => {
+  if (res.status === 401){
+    window.localStorage.removeItem("langface-auth");
+    logout();
+    return false;
+  }
+  return true
+};
+
+
+function deleteCookie() {
+  // Setting the cookie's expiry date to a time in the past will effectively delete it
+  window.localStorage.removeItem("langface-auth");
+}
+
+const getUserAuthToken = () => {
+  return window.localStorage.getItem('langface-auth')
+}
+
 const getJwt = async (setToken, setError) => {
   var oauth2Endpoint = "https://accounts.google.com/o/oauth2/v2/auth";
   var params = {
@@ -41,8 +60,6 @@ const getJwt = async (setToken, setError) => {
   }, 50);
 };
 
-export default getJwt;
-
 const wordpressGetJwt = async (setError, fetchWordpress) => {
   const client_id = constants.WP_CLIENT_ID;
   const redirect_url = constants.localUrl;
@@ -69,31 +86,14 @@ const wordpressGetJwt = async (setError, fetchWordpress) => {
   }, 500);
 };
 
-function deleteCookie(cookieName) {
-  // Setting the cookie's expiry date to a time in the past will effectively delete it
-  document.cookie = cookieName + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-}
-
-const getUserAuthToken = () => {
-    var userAuthToken = document.cookie.split(';').find(cookie => cookie.startsWith(`${constants.authCookieName}=`));
-  if (!userAuthToken) {
-    userAuthToken = document.cookie.split(';').find(cookie => cookie.startsWith(` ${constants.authCookieName}=`));
-  }
-  if (userAuthToken) {
-    userAuthToken = userAuthToken.split('=')[1];
-  }
-  return userAuthToken;
-}
-
-
 async function createCheckoutSession() {
   const oauth = async () => {
     try {
       const response = await fetch(`${constants.url}/create-checkout-session`, {
         method: 'POST',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
+          "x-access'langface-auth-token": getUserAuthToken()
         },
       });
     
@@ -142,9 +142,9 @@ async function createCheckoutSession() {
         try {
           const response = await fetch(`${constants.url}/checkForNewBlog`, {
             method: 'GET',
-            credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
+              "x-access'langface-auth-token": getUserAuthToken(),
             },
           });
           const blog = await response.json();
@@ -167,4 +167,4 @@ async function createCheckoutSession() {
 
 
 
-export { getJwt, wordpressGetJwt, deleteCookie, getUserAuthToken, createCheckoutSession };
+export { getJwt, wordpressGetJwt, deleteCookie, getUserAuthToken, createCheckoutSession, isAuthenticatedResponse };

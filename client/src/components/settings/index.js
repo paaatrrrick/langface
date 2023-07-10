@@ -9,12 +9,12 @@ const Settings = () => {
   let { version, colorScheme }  = useSelector((state) => state.main);
   const [openaiKey, setOpenAIKey] = useState("");
   useEffect(() => {
-    if (localStorage.getItem("openaiKey")) {
+    if (window.localStorage.getItem("openaiKey")) {
       setOpenAIKey(localStorage.getItem("openaiKey"));
     }
   }, []);
   const addOpenAIKeyToLocalStorage = () => {
-    localStorage.setItem("openaiKey", openaiKey);
+    window.localStorage.setItem("openaiKey", openaiKey);
     dispatch(
       setBannerMessage({
         message: "OpenAI Key successfully Saved",

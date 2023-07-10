@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import "./home.css";
 import { useSelector } from "react-redux";
 import constants, { defualtPills, sampleBlog } from "../../constants";
-import { getJwt, wordpressGetJwt, getUserAuthToken } from "../../utils/getJwt";
+import { getJwt, wordpressGetJwt, getUserAuthToken, isAuthenticatedResponse } from "../../utils/getJwt";
 import { scrollToBottom } from "../../utils/styles";
-import { setBannerMessage, setActiveBlogAgent, initializeBlogAgent, setVersion } from "../../store";
+import { setBannerMessage, setActiveBlogAgent, initializeBlogAgent, setVersion, signOut } from "../../store";
 import { useDispatch } from "react-redux";
 import StatusPill from "../statusPill";
 import Dropdown from "../uxcore/dropdown";
@@ -98,16 +98,18 @@ const Home = ({joinRoom, payment}) => {
     };
 
     const handleSubmit = async () => {
-      const openaiKey = localStorage.getItem("openaiKey");
+      const openaiKey = window.localStorage.getItem("openaiKey");
       const userAuthToken = getUserAuthToken();
       const newData = {jwt, loops, blogID, config, openaiKey, version, subject, daysLeft, userAuthToken, demo, blogMongoID: activeBlogAgent };
       const res = await fetch(`${constants.url}/launchAgent`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-access'langface-auth-token": getUserAuthToken()
         },
         body: JSON.stringify(newData),
       });
+      if(!isAuthenticatedResponse(res, () => {dispatch(signOut())})) return;
       const data = await res.json();
       //check if there is an error in the response. If so, dispatch an error message
       if (res.status !== 200) {

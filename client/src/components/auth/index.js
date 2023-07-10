@@ -31,15 +31,12 @@ const Auth = ({ launch, mask, payment }) => {
         var result = null;
         try {
             result = await signInWithPopup(auth, provider);
-            console.log('result');
-            console.log(result)
         } catch (err) {
             console.log(err);
             dispatch(setBannerMessage({type: "error", message: "Error logging in with google"}));
             return;
         }
         const res = await fetch(`${constants.url}/auth/google`, {
-            credentials: "include",
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -48,10 +45,10 @@ const Auth = ({ launch, mask, payment }) => {
         });
         const data = await res.json();
         if (!res.ok) {
-            console.log(data);
             dispatch(setBannerMessage({type: "error", message: "Error logging in with google"}));
             return;
         }
+        window.localStorage.setItem("langface-auth", data.token);
         launch();
         if (mask==="true"){
             payment();

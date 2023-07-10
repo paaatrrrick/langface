@@ -6,7 +6,6 @@ let io;
 module.exports = {
   socketInit: (httpServer) => {
     io = socketIo(httpServer, {
-      cookie: true,
       cors: {
         origin: [
           "http://localhost:3000",

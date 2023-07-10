@@ -92,7 +92,7 @@ const slice = createSlice({
       state.blogAgents[activeBlogAgent].version = version;
     },
     signOut: (state) => {
-      deleteCookie(constants.authCookieName);
+      deleteCookie();
       return {...state, isLoggedIn: false, user: {}, blogAgents: defaultBlogAgent, activeBlogAgent: "default"}
     },
     setBannerMessage: (state, action) => {
@@ -106,7 +106,7 @@ const slice = createSlice({
       state.currentView = action.payload;
     },
     setColorScheme: (state, action) => {
-      localStorage.setItem("bloggerGPT-colorScheme", action.payload);
+      window.localStorage.setItem("bloggerGPT-colorScheme", action.payload);
       state.colorScheme = action.payload;
     },
     updateBlogAgentData: (state, action) => {

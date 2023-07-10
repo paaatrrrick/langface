@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import './app.css'
 import { useDispatch, useSelector } from 'react-redux';
-import { createCheckoutSession } from '../../utils/getJwt';
+import { createCheckoutSession, isAuthenticatedResponse } from '../../utils/getJwt';
 import constants from '../../constants';
 import { clearBannerMessage, updateBlogAgentData, setBannerMessage, login, setBlogIds, signOut, addBlogAgent } from '../../store';
 import { setColorScheme } from '../../utils/styles';
@@ -31,12 +31,17 @@ const App = () => {
     }, [colorScheme])
 
     const launch = async () => {
-        var userCookie = getUserAuthToken();
-        if (!userCookie) return;
+        var userToken = getUserAuthToken();
+        if (!userToken) return;
         const res = await fetch(`${constants.url}/user`, {
             method: 'GET',
-            credentials: 'include'
+            headers: {
+                "x-access'langface-auth-token": getUserAuthToken()
+            },
         });
+
+        if(!isAuthenticatedResponse(res, () => {setBannerMessage({type: 'error', message: 'Error: Could not authenticate user', timeout: 5000});dispatch(signOut());})){return};
+
         if (!res.ok) {
             dispatch(setBannerMessage({type: 'error', message: 'Error: Could not authenticate user', timeout: 5000}));
             dispatch(signOut());

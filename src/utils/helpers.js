@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 
 
 function convertToObjectId(value) {
@@ -6,6 +7,10 @@ function convertToObjectId(value) {
     return new mongoose.Types.ObjectId(value);
   }
   return value;
+}
+
+const randomStringToHash24Bits = (inputString) => {
+  return crypto.createHash('sha256').update(inputString).digest('hex').substring(0, 24);
 }
 
 function replaceStringInsideStringWithNewString(
@@ -36,5 +41,6 @@ function arrayToString (array) {
 module.exports = {
   replaceStringInsideStringWithNewString,
   arrayToString,
-  convertToObjectId
+  convertToObjectId,
+  randomStringToHash24Bits
 };
