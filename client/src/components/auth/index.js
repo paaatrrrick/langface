@@ -30,9 +30,12 @@ const Auth = ({ launch, mask, payment }) => {
     const handleGoogle = async () => {
         var result = null;
         try {
-            result = await signInWithPopup(auth, provider)
+            result = await signInWithPopup(auth, provider);
+            console.log('result');
+            console.log(result)
         } catch (err) {
-            dispatch(setBannerMessage("Error logging in with google"));
+            console.log(err);
+            dispatch(setBannerMessage({type: "error", message: "Error logging in with google"}));
             return;
         }
         const res = await fetch(`${constants.url}/auth/google`, {
@@ -43,11 +46,12 @@ const Auth = ({ launch, mask, payment }) => {
             },
             body: JSON.stringify({ idToken: result.user.uid, email: result.user.email, photoURL: result.user.photoURL, name: result.user.displayName }),
         });
+        const data = await res.json();
         if (!res.ok) {
-            dispatch(setBannerMessage("Error logging in with google"));
+            console.log(data);
+            dispatch(setBannerMessage({type: "error", message: "Error logging in with google"}));
             return;
         }
-        const data = await res.json();
         launch();
         if (mask==="true"){
             payment();
