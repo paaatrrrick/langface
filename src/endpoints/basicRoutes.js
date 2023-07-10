@@ -62,14 +62,20 @@ basicRoutes.post('/auth/google', asyncMiddleware(async (req, res) => {
     const user = await User.loginOrSignUp(uid, { email, photoURL, name })
     const token = jwt.sign({ _id: uid, }, process.env.JWT_PRIVATE_KEY, { expiresIn: "1000d" });
     console.log(token);
-    res.cookie("langface-token",token, {
-        // httpOnly: true,
-        secure: process.env.WORDPRESS_REDIRECT_URI !== "http://localhost:3000", // set to true if https
-        sameSite: 'lax', // set to 'none' if your app is served from a different domain
-        // domain: "http://locahost",// set your domain here
-        path: '/',
-        maxAge: 1000 * 60 * 60 * 24 * 365 // cookie valid for 1 year
-    });
+    console.log(process.env.NODE_ENV)
+    if (process.env.NODE_ENV !== "production") {
+        console.log("not production");
+        res.cookie("langface-token",token);
+    } else {
+        res.cookie("langface-token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            domain: 'langface.ai',
+            path: '/',
+            maxAge: 1000 * 60 * 60 * 24 * 365 // cookie valid for 1 year
+        });
+    }
     res.json({ message: 'Login successful' });
 })); 
 
