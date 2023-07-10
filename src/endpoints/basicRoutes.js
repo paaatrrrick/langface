@@ -123,16 +123,14 @@ basicRoutes.post('/webhook', bodyParser.raw({type: 'application/json'}), asyncMi
     const payload = request.body;
     const sig = request.headers['stripe-signature'];
     let event;
-    console.log('we are here at webhook top')
     try {
       event = stripe.webhooks.constructEvent(payload, sig, process.env.STRIPE_WEBHOOK_SECRET);
     } catch (err) {
         console.log(err);
         return response.status(400).send(`Webhook Error: ${err.message}`);
     }
-    console.log(event.type);
     if (event.type === 'checkout.session.completed') {
-        console.log('we are here')
+        console.log("PURCHASE!!!!!");
         const userId = event.data?.object?.metadata?.userId;
         console.log(userId);
         const validatedUserID = await User.getUserByID(userId);
