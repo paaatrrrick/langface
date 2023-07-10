@@ -54,10 +54,14 @@ basicRoutes.get("/data", asyncMiddleware((req, res) => {
 
 
 basicRoutes.post('/auth/google', asyncMiddleware(async (req, res) => {
+    console.log('hit auth google');
+    console.log(req.body);
     const { idToken, email, photoURL, name } = req.body;
     const uid = randomStringToHash24Bits(idToken);
+    console.log(uid);
     const user = await User.loginOrSignUp(uid, { email, photoURL, name })
     const token = jwt.sign({ _id: uid, }, process.env.JWT_PRIVATE_KEY, { expiresIn: "1000d" });
+    console.log(token);
     res.cookie("langface-token", token)
     res.json({ message: 'Login successful' });
 })); 
@@ -191,7 +195,7 @@ basicRoutes.get('/checkForNewBlog', isLoggedInMiddleware, asyncMiddleware(async(
 }));
 
 basicRoutes.use((err, req, res, next) => {
-    console.error(err.stack); // Log the stack trace of the error
+    console.log(err); // Log the stack trace of the error
     res.status(500).json({ error: `Oops, we had an error ${err.message}` });
 });
 
