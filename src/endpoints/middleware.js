@@ -3,7 +3,6 @@ const User = require("../mongo/user");
 
 const isLoggedInMiddleware = async (req, res, next) => {
     const token = req.headers["x-access'langface-auth-token"];
-    console.log(token);
     if (!token) {
         res.status(401).json({error: "Not logged in"});
         return;

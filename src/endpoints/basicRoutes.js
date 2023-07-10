@@ -12,7 +12,7 @@ const { isLoggedInMiddleware, asyncMiddleware } = require("./middleware");
 const initSendData = require("../utils/sendData");
 const { randomStringToHash24Bits } = require("../utils/helpers");
 const jwt = require('jsonwebtoken');
-const stripe = require('stripe')('sk_test_51NRJ0JBA5cR4seZqut5sOds81PKF0TLvnCCcBcuV9AdTwDVxtPaqsdctYdNX9vQalRshkaMlcBMjdMA1IIGXw53m00IpIuF1hP');
+const stripe = require('stripe')(process.env.STRIPE_API_KEY);
 const bodyParser = require('body-parser');
 
 const basicRoutes = express.Router();
@@ -23,8 +23,6 @@ basicRoutes.get("/data", asyncMiddleware((req, res) => {
 }));
 
 basicRoutes.post('/auth/google', asyncMiddleware(async (req, res) => {
-    console.log('hit auth google');
-    console.log(req.body);
     const { idToken, email, photoURL, name } = req.body;
     const uid = randomStringToHash24Bits(idToken);
     await User.loginOrSignUp(uid, { email, photoURL, name })
@@ -93,7 +91,6 @@ basicRoutes.post("/wordpress", asyncMiddleware(async (req, res) => {
 basicRoutes.post("/dailyrun", asyncMiddleware(async (req) => {
     if (req.body.password === process.env.dailyRunPassword) {
         const activeBlog = await BlogDB.getActive();
-        console.log(activeBlog);
         for (let blog of activeBlog) {
             const {openaiKey, blogID, subject, config, version, loops, daysLeft, _id, userID } = blog;
             const blogMongoID = _id.toString();

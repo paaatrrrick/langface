@@ -30,11 +30,11 @@ const BlogSchema = new Schema({
     },
     postsLeftToday: {
       type: Number,
-      default: 25
+      default: 15
     },
     maxNumberOfPosts: {
         type: Number,
-        default: 25,
+        default: 15,
     },
     userID: {
       type: String,
