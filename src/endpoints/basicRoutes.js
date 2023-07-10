@@ -128,8 +128,11 @@ basicRoutes.post('/webhook', bodyParser.raw({type: 'application/json'}), asyncMi
     } catch (err) {
         return response.status(400).send(`Webhook Error: ${err.message}`);
     }
+    console.log(event.type);
     if (event.type === 'checkout.session.completed') {
+        console.log('we are here')
         const userId = event.data?.object?.metadata?.userId;
+        console.log(userId);
         const validatedUserID = await User.getUserByID(userId);
         if (!validatedUserID) {
             console.log('shucks we need to refund: ' + event.data.object.id);
