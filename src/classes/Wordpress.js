@@ -99,6 +99,7 @@ class Wordpress {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
+              // status: "draft",
               title: this.outline.blogTitle,
               content: post,
             }),
