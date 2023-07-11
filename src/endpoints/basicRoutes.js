@@ -115,7 +115,7 @@ basicRoutes.post('/create-checkout-session', isLoggedInMiddleware, asyncMiddlewa
       success_url: `${process.env.WORDPRESS_REDIRECT_URI}/?success=true`,
       cancel_url: `${process.env.WORDPRESS_REDIRECT_URI}/?canceled=true`,
       metadata: {userId},
-      client_reference_id: request.headers['referral-id'] || "checkout-#{SecureRandom.uuid}"
+      client_reference_id: req.headers['referral-id'] || "checkout-#{SecureRandom.uuid}"
     });
     res.json({url: session.url});
 }));
