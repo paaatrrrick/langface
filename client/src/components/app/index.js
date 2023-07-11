@@ -83,20 +83,11 @@ const App = () => {
         };
     }, []);
 
-    const sendReferral = async (id) => {
-        const res = await fetch(`${constants.url}/rewardful`, {
-            method: 'POST',
-            headers: {
-                "x-access'langface-auth-token": getUserAuthToken(),
-                "referral-id": id,
-            },
-        });
-    }
     useEffect(() => {
         window.rewardful('ready', function() {
             if(window.Rewardful.referral) {
                 console.log("referral: " + window.Rewardful.referral);
-                sendReferral(window.Rewardful.referral);
+                window.localStorage.setItem("referral-id", window.Rewardful.referral);
             }
         });
     });      

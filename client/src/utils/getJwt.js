@@ -93,7 +93,8 @@ async function createCheckoutSession() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          "x-access'langface-auth-token": getUserAuthToken()
+          "x-access'langface-auth-token": getUserAuthToken(),
+          "referral-id": window.localStorage.getItem("referral-id")
         },
       });
     
