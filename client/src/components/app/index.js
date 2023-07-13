@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import './app.css'
+import './app.css';
+import HtmlModal from "../htmlModal";
 import { useDispatch, useSelector } from 'react-redux';
 import { createCheckoutSession, isAuthenticatedResponse } from '../../utils/getJwt';
 import constants from '../../constants';
-import { clearBannerMessage, updateBlogAgentData, setBannerMessage, login, setBlogIds, signOut, addBlogAgent } from '../../store';
+import { clearBannerMessage, updateBlogAgentData, setBannerMessage, login, setBlogIds, signOut, addBlogAgent, setHtmlModal } from '../../store';
 import { setColorScheme } from '../../utils/styles';
 import { getUserAuthToken } from '../../utils/getJwt';
 import NavController from '../navController';
@@ -24,7 +25,7 @@ const templateMap = {
 
 const App = () => {
     const dispatch = useDispatch();
-    const { bannerMessage, currentView, colorScheme, tabId }= useSelector(state => state.main);
+    const { bannerMessage, currentView, colorScheme, tabId, htmlModal }= useSelector(state => state.main);
 
     useEffect(() => {
         setColorScheme(colorScheme);
@@ -86,6 +87,7 @@ const App = () => {
     return (
         <div className="App">
             <NavController launch={launch} payment={payment} />
+            {htmlModal && <HtmlModal html={htmlModal} close={() =>{dispatch(setHtmlModal(""))}}/>}
             <div className="App-right-section">
                 <div className="flex-grow-1"/>
                 <div className="body">

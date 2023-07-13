@@ -25,7 +25,7 @@
     display: flex;
     flex-direction: column;
     margin-top: 15px;
-    margin-bottom: 15px;
+    margin-bottom: 0px;
 }
 
 .runButton2{
@@ -43,18 +43,6 @@
     color: #fff;
 }
 
-.runButton{
-    width: 170px;
-    height: 36px;
-    background-color: var(--brandColor);
-    border-radius: 18px;
-    display: flex;
-    flex-direction: row;
-    padding: 0px 15px;
-    align-items: center;
-    justify-content: flex-start;
-    margin-bottom: 15px;
-}
 
 .runButton img{
     width: 24px;
@@ -125,30 +113,12 @@
 }
 
 .home-tinyInputs{
+    width: 100%;
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: flex-start;
-}
-
-@container sidebar (max-width: 850px){
-    .home-firstInputRow{
-        width: 100%;
-        display: flex;
-        flex-direction: column-reverse;
-        align-items: flex-start;
-        justify-content: flex-start;
-    }
-    .home-tinyInputs{
-        margin-top: -15px;
-        margin-bottom: 15px;
-        flex-wrap: wrap;
-    }
-
-    .home-tinyInputs *{
-        margin: 15px 15px 0px 0px !important;
-    }
-    
+    justify-content: space-between;
+    flex-wrap: wrap;
 }
 
 .home-sectioned-input .left h4{
@@ -170,18 +140,57 @@
 .home-sectioned-input .input:focus{
     outline: none;
 }
-
-
-.home-input-container .article-count{
+.home-tinyInputs .article-count {
     height: 40px;
-    width: 150px;
+    width: 175px;
     border-radius: 20px;
-    margin: 0px 15px;
+    margin: 15px 15px 0px 0px;
     border: 2px solid var(--lightDark);
-    padding-left: 15px;
+    padding: 15px 0px 15px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+.home-tinyInputs .article-count * {
+    color: #fff;
 }
 
-.home-input-container button{
+.home-tinyInputs .article-count label {
+    font-size: 14px;
+    font-weight: 300;
+    width: 1;
+}
+
+.article-count input[type="number"]::-webkit-inner-spin-button {
+    opacity: 1;
+}
+
+
+.home-tinyInputs .article-count input {
+    border: none;
+    width: 40px;
+    margin-right: 15px;
+    width: 40px;
+    text-align: center;
+    text-decoration: underline;
+}
+
+
+
+.home-tinyInputs .mock-container{
+    height: 40px;
+    width: 200px;
+    margin: 15px 15px 0px 0px;
+} 
+
+
+/*first instance of article-count should have no left margin*/
+/* .home-tinyInputs .article-count:first-child{
+    margin-ri: 0px;
+} */
+
+.home-tinyInputs .login-button{
     height: 40px;
     width: 150px;
     border-radius: 20px;
@@ -189,13 +198,27 @@
     background-color: var(--lighterBackground);
     border: 2px solid var(--lightDark);
     padding-left: 7px 15px;
+    margin: 15px 15px 0px 0px;
 }
 
 
-.home-input-container .logged-in{
+.home-tinyInputs .logged-in{
     border-color: var(--brandColor);
     color: var(--brandColor);
     background-color: var(--brandOffColor);
+}
+
+.runButton{
+    width: 170px;
+    height: 36px;
+    background-color: var(--brandColor);
+    border-radius: 18px;
+    display: flex;
+    flex-direction: row;
+    margin-top: 15px;
+    padding: 0px 15px;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 

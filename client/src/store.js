@@ -6,8 +6,8 @@ const defaultBlogAgent = {
   default: {
     config: "",
     postsLeftToday: constants.maxPosts,
-    daysLeft: "",
-    loops: "",
+    daysLeft: 1,
+    loops: 1,
     jwt: "",
     blogID: "",
     subject: "",
@@ -15,7 +15,7 @@ const defaultBlogAgent = {
     data: [],
     hasStarted: false,
     maxNumberOfPosts: constants.maxPosts,
-    version: "wordpress",
+    version: "html",
     dropDownTitle: "New Agent",
     demo: true,
   }
@@ -28,6 +28,7 @@ const slice = createSlice({
     tabId: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
     bannerMessage: null,
     currentView: "home",
+    htmlModal: "<h1>yo</h1>",
     isLoggedIn: false,
     blogIds: [],
     user: {},
@@ -36,6 +37,10 @@ const slice = createSlice({
     blogAgents: defaultBlogAgent
   },
   reducers: {
+    setHtmlModal: (state, action) => {
+      console.log(action.payload);
+      state.htmlModal = action.payload;
+    },
     setBlogIds (state, action) {
       const res = [...state.blogIds, ...action.payload];
       //remove duplicates
@@ -140,7 +145,7 @@ const slice = createSlice({
 // Now we configure the store
 const store = configureStore({ reducer: { main: slice.reducer } });
 export default store;
-export const { setBannerMessage, setBlogIds, clearBannerMessage, setVersion, setCurrentView, setColorScheme, updateBlogAgentData, login, signOut, setActiveBlogAgent, initializeBlogAgent, runAgent, addBlogAgent } = slice.actions;
+export const { setBannerMessage, setBlogIds, clearBannerMessage, setVersion, setCurrentView, setColorScheme, updateBlogAgentData, login, signOut, setActiveBlogAgent, initializeBlogAgent, runAgent, addBlogAgent, setHtmlModal } = slice.actions;
 // export const actions = { ...slice.actions};
 
 

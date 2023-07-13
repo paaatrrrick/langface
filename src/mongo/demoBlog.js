@@ -3,19 +3,9 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const DemoBlogSchema = new Schema({
-    blogID: {
-      type: String,
-      required: true,
-      unique: true
-    },
     dateRecentlyPosted: {
       type: Date,
       default: Date.now
-    },
-    version: {
-      type: String,
-      enum: ['blogger', 'wordpress'],
-      required: true
     },
     postsLeftToday: {
       type: Number,

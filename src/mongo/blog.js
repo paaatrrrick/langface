@@ -26,7 +26,7 @@ const BlogSchema = new Schema({
     },
     version: {
       type: String,
-      enum: ['blogger', 'wordpress'],
+      enum: ['blogger', 'wordpress', 'html'],
     },
     postsLeftToday: {
       type: Number,

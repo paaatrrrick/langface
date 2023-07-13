@@ -5,6 +5,7 @@ import constants, { defualtPills, sampleBlog } from "../../constants";
 import { getJwt, wordpressGetJwt, getUserAuthToken, isAuthenticatedResponse } from "../../utils/getJwt";
 import { scrollToBottom } from "../../utils/styles";
 import { setBannerMessage, setActiveBlogAgent, initializeBlogAgent, setVersion, signOut } from "../../store";
+import HtmlModal from "../htmlModal";
 import { useDispatch } from "react-redux";
 import StatusPill from "../statusPill";
 import Dropdown from "../uxcore/dropdown";
@@ -38,12 +39,11 @@ const Home = ({joinRoom, payment}) => {
     const [maxNumberOfPosts, setMaxBlogPosts] = useState(constants.maxPosts);
     const messagesEndRef = useRef(null);
     const demo = currentBlog.demo;
-    var newPills = (version === "wordpress" ? [...defualtPills] : [defualtPills[0], defualtPills[2]]);
 
     useEffect(() => {
-      setActiveVersion(currentBlog.version || "wordpress");
-      setLoops(currentBlog.loops || "");
-      setDaysToRun(currentBlog.daysLeft || "");
+      setActiveVersion(currentBlog.version || "html");
+      setLoops(currentBlog.loops || 1);
+      setDaysToRun(currentBlog.daysLeft || 1);
       setJwt(currentBlog.jwt || "");
       setBlogID(currentBlog.blogID || "");
       setSubject(currentBlog.subject || "");
@@ -62,9 +62,7 @@ const Home = ({joinRoom, payment}) => {
       try {
         const res = await fetch(`${constants.url}/wordpress`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json",},
           body: JSON.stringify({ code }),
         });
         const data = await res.json();
@@ -82,6 +80,7 @@ const Home = ({joinRoom, payment}) => {
       setLoops(sampleBlog.loops)
       setSubject(sampleBlog.subject);
       setContent(sampleBlog.config);
+      versionToggler('html');
     };
 
     const handleJWT = async () => {
@@ -128,20 +127,17 @@ const Home = ({joinRoom, payment}) => {
       }
     }
 
-    const versionToggler = () => {
-      if (version === "wordpress") {
-        setActiveVersion("blogger");
-        dispatch(setVersion({activeBlogAgent, version:"blogger"}))
-      } else {
-        setActiveVersion("wordpress");
-        dispatch(setVersion({activeBlogAgent, version:"wordpress"}))
-      }
+    const versionToggler = (version) => {
+      setActiveVersion(version);
+      dispatch(setVersion({activeBlogAgent, version}))
       setJwt("");
       setBlogID("");
     };
 
-    const canStart = jwt !== "" && blogID !== "" && subject !== "" && loops !== "";
-    const dropDownOptions = [];
+    const canStart = ((version === "html") || (blogID && jwt)) !== "" && subject && loops;
+
+
+    var dropDownOptions = [];
     const agentsKeys = Object.keys(blogAgents);
     for (let i = 0; i < agentsKeys.length; i++) {
       var text = blogAgents[agentsKeys[i]].subject;
@@ -150,10 +146,13 @@ const Home = ({joinRoom, payment}) => {
       }
       dropDownOptions.push({id: agentsKeys[i], text});
     }
+    dropDownOptions = [...dropDownOptions, {id: "AddNewAgent", text: "Add New Agent +"}];
+
+    const versionSelectorOptions = [{id: "html", text: "Raw HTML"}, {id: "wordpress", text: "Post to Wordpress"}, {id: "blogger", text: "Post to Blogger.com"}];
 
   return (
     <div className="Home">
-      {isLoggedIn && <Dropdown options={dropDownOptions} selected={activeBlogAgent} onSelectedChange={selectChangeDropdown}/>} 
+      {/* {isLoggedIn && <Dropdown options={dropDownOptions} selected={activeBlogAgent} onSelectedChange={selectChangeDropdown}/>}  */}
       <div className="row align-center justify-start wrap">
         
         <h1 style={{marginRight: "15px"}}>BloggerGPT</h1>
@@ -174,7 +173,7 @@ const Home = ({joinRoom, payment}) => {
         </div>
         <div className="home-data-body" ref={messagesEndRef}>
           {(!hasStarted && data.length === 0) &&
-           newPills.map((pill, index) => (
+           defualtPills.map((pill, index) => (
             <StatusPill
               key={index}
               version={pill.version}
@@ -213,43 +212,6 @@ const Home = ({joinRoom, payment}) => {
               value={subject}
               className="input" type="text" placeholder="Rock climbing for beginners"/>
             </div>
-
-            <div className="home-tinyInputs">
-            <input 
-              value={loops}
-              onChange={(e) => setLoops(e.target.value)}
-              className="article-count" type="number" 
-              placeholder={(!demo) ? "Posts / Per Day" : "Number of Posts"}/>
-            {(version === "blogger") &&
-                <input
-                className="article-count"
-                style={{marginLeft: "0px"}}
-                type="text"
-                value={blogID}
-                onChange={(e) => setBlogID(e.target.value)}
-                placeholder="blogger.com ID"
-              />
-            }
-            {(!demo) &&
-                <input
-                className="article-count"
-                style={{marginLeft: "0px"}}
-                type="number"
-                min="1"
-                max="14"
-                value={daysLeft}
-                onChange={(e) => setDaysToRun(e.target.value)}
-                placeholder="Days to Run"
-              />
-            }
-            <button
-              onClick={handleJWT}
-              className={`${jwt !== "" && "logged-in"}`}
-              disabled={jwt !== ""}
-            >
-              {(jwt !== "") ? "Logged In" : `${(version === "blogger") ? "Blogger" : "Wordpress"} Site`}
-            </button>
-            </div>
           </div>
           <div className="home-sectioned-input" style={{height: '80px'}}>
               <div className="left">
@@ -262,15 +224,65 @@ const Home = ({joinRoom, payment}) => {
               className="input" placeholder="Optinally, is there anything in particular you want the posts to have? For example, if you'd like to market a product, include it here: Sal's climbing, affordable rock climbing equipment at www.salsclimbing.com "/>
             </div>
         </div>
-        {(!hasStarted) && 
-        <button 
-          onClick={handleSubmit}
-          disabled={!(!hasStarted && canStart)}
-          className="runButton">
-            <img src={CaretForward} alt="run button" />
-            <h4>Start Agent</h4>
-        </button>
-        }
+        <div className="home-tinyInputs">
+          <div className="row align-center justify-start wrap">
+          <div className="mock-container">
+            <Dropdown options={versionSelectorOptions} selected={version} onSelectedChange={versionToggler}/>
+          </div>
+          <div className="article-count">
+            <label for="postsToday">
+              {(!demo) ? "Posts Per Day:" : "Post Count:"}
+            </label>
+              <input
+                id="postsToday"
+                type="number" 
+                value={loops} 
+                min={1}
+                max={postsLeftToday}
+                onChange={(e) => setLoops(e.target.value)}
+              />
+          </div>
+          {(!demo) &&
+            <div className="article-count">
+            <label for="postsToday">
+            Days to Run
+            </label>
+              <input
+                id="postsToday"
+                type="number" 
+                value={daysLeft} 
+                min={1}
+                max={14}
+                onChange={(e) => setDaysToRun(e.target.value)}
+              />
+          </div>}
+          {(version === "blogger") &&
+                <input
+                className="article-count"
+                style={{marginLeft: "0px"}}
+                type="text"
+                value={blogID}
+                onChange={(e) => setBlogID(e.target.value)}
+                placeholder="blogger.com ID"
+              />
+            }
+            {(version !== "html") &&
+              <button
+                onClick={handleJWT}
+                className={`${jwt !== "" && "logged-in"} login-button`}
+                disabled={jwt !== ""}
+              >
+                {(jwt !== "") ? "Logged In" : `${(version === "blogger") ? "Blogger" : "Wordpress"} Login`}
+              </button>
+            }
+          </div>
+            {(!hasStarted) && 
+              <button  onClick={handleSubmit} disabled={!(!hasStarted && canStart)} className="runButton">
+                  <img src={CaretForward} alt="run button" />
+                  <h4>Start Agent</h4>
+              </button>
+            }
+      </div>
     </div>
   );
 };

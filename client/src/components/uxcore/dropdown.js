@@ -3,8 +3,8 @@ import "./dropdown.css";
 import TriangleSvg from "../../assets/triangle.svg";
 
 const trimStringTo15Chars = (str) => {
-    if (str.length > 15) {
-        return str.substring(0, 13) + "...";
+    if (str.length > 25) {
+        return str.substring(0, 22) + "...";
     } else {
         return str;
     }
@@ -21,23 +21,31 @@ const Dropdown = ({ options, selected, onSelectedChange }) => {
     }
     const active = options.find((option) => option.id === selected);
     const optionsWithoutSelected = options.filter((option) => option.id !== selected);
+
+    if (!open){
+        return (
+            <div key={-1} className="Dropdown-parent Dropdown-pill Dropdown-row-hover" onClick={() => setOpen(!open)}>
+                <p>{trimStringTo15Chars(active.text)}</p>
+                <img src={TriangleSvg} className={`rotate180`}/>
+            </div>
+        )
+    }
+
+
     return (
-    <div className="Dropdown">
-        <div key={-1} className="Dropdown-row" onClick={() => setOpen(!open)}>
+    <div className="Dropdown-parent Dropdown">
+        <div key={-1} className="Dropdown-row Dropdown-row-hover" onClick={() => setOpen(!open)}>
             <p>{trimStringTo15Chars(active.text)}</p>
-            <img src={TriangleSvg} className={!open ? `rotate180` : ''}/>
+            <img src={TriangleSvg}/>
         </div>
         {open && (
             <>
             {optionsWithoutSelected.map((option, index) => {
                 return (
-                    <div className="Dropdown-row" key={index} onClick={() => {onSelectedChange(option.id); setOpen(false);}}>
+                    <div className="Dropdown-row Dropdown-row-hover" key={index} onClick={() => {onSelectedChange(option.id); setOpen(false);}}>
                         <p>{trimStringTo15Chars(option.text)}</p>
                     </div>
             )})}
-            <div key={-2} className="Dropdown-row" onClick={() => {onSelectedChange("AddNewAgent");setOpen(false);}}>
-                <p>Add New Agent + </p>
-            </div>
             </>
         )}
     </div>
