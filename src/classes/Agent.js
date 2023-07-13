@@ -1,4 +1,5 @@
 //require dotenv
+// @ts-nocheck
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
@@ -7,6 +8,10 @@ const Blogger = require("./Blogger");
 const { LongTailResearcher } = require("./LongTailResearcher");
 const BlogDB = require("../mongo/blog");
 const DemoBlogDB = require("../mongo/demoBlog");;
+const { PineconeClient } = require("@pinecone-database/pinecone");
+const { WeaviateStore } = require ("langchain/vectorstores/weaviate");
+const { OpenAIEmbeddings } = require("langchain/embeddings/openai");
+const weaviate = require('weaviate-ts-client');
 
 class Agent {
   constructor(openaiKey, sendData, jwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, demo = false, uid = null, draft=false) {
@@ -47,18 +52,30 @@ class Agent {
             return;
           }
           await this.sendData({ type: "updating", config: `Step 1 of 3: Finding best longtail keywords`, title: `Loading... Article ${i + 1} / ${this.loops}` });
-          const outline = await this.researcher.getNextBlueprint();
-          if (!outline) {
+          var blueprint = await this.researcher.getNextBlueprint();
+          if (!blueprint) {
             await this.sendData({ type: "ending", config: "Ran out of keywords" });
             return;
           }
+          
+          var rewriteAttempts = 0;
+          while (!this.isUnique(blueprint) && (rewriteAttempts < 3)){
+            blueprint = await this.researcher.rewriteBlueprint(blueprint);
+            if (!blueprint) { 
+              await this.sendData({type:"ending", config:"ran out of keywords"}); 
+              return;
+            }
+            rewriteAttempts++;
+          }
+          await this.postToPincecone(i, blueprint);
+          
           const blogSite = this.version === "blogger" ? 
-          new Blogger(this.config, outline, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i) : 
-          new Wordpress(this.config, outline, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, draft);
+          new Blogger(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i) : 
+          new Wordpress(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, draft);
 
           var result = await blogSite.run();
-          this.summaries.push({summary: outline.headers, url: result.url});          
-          await this.sendData({...result, type: 'success', config: outline.headers});
+          this.summaries.push({summary: blueprint.headers, url: result.url});          
+          await this.sendData({...result, type: 'success', config: blueprint.headers});
         } catch (e) {
           errors++;
           if (errors >= 5) {
@@ -82,6 +99,70 @@ class Agent {
     }
   };
 
+
+  postToPincecone = async (id, blueprint) => {
+    return;
+    const pinecone = new PineconeClient();
+    await pinecone.init({
+	    environment: process.env.PINECONE_ENV,
+	    apiKey: process.env.PINECONE_KEY,
+    });
+
+    const index = pinecone.Index(this.blogMongoID);
+
+    const upsertResponse = await index.upsert({
+      upsertRequest: {
+        vectors: [
+          {
+            id: id,
+            values: [blueprint.blogTitle, blueprint.lsiKeywords, blueprint.keyword, blueprint.headers],
+          },
+      ],
+    }
+    });
+  }
+
+  isUnique = async (blueprint) => {
+    return true; 
+
+    const pinecone = new PineconeClient();
+    await pinecone.init({
+	    environment: process.env.PINECONE_ENV,
+	    apiKey: process.env.PINECONE_KEY,
+    });
+
+    var indexList = await pinecone.listIndexes()
+
+    // probably doesn't do what i want: check if index exists, if not then make it
+    if (!pinecone.Index(this.blogMongoID)){     
+      await pinecone.createIndex({
+        createRequest: {
+          name: this.blogMongoID,
+          dimension: 768,
+          metric: "dotproduct"
+        },
+      });
+    }
+
+    const index = pinecone.Index(this.blogMongoID);
+
+    // while not ready, wait
+    while (!(await pinecone.describeIndex({indexName: this.blogMongoID}).ready)){
+
+    }
+
+    const queryResponse = await index.query({
+      queryRequest: {
+        vector: [blueprint.blogTitle, blueprint.lsiKeywords, blueprint.keyword, blueprint.headers],
+        topK: 1,
+      },
+    });
+
+    if(!queryResponse.matches[0] || (Math.abs(queryResponse.matches[0].score)) > 0){
+      return true;
+    }
+    return false;
+  }
 }
 
 module.exports = { Agent };
