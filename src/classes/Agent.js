@@ -4,6 +4,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 const Wordpress = require("./Wordpress");
 const Blogger = require("./Blogger");
+const Html = require("./Html");
 const { LongTailResearcher } = require("./LongTailResearcher");
 const BlogDB = require("../mongo/blog");
 const DemoBlogDB = require("../mongo/demoBlog");;
@@ -52,9 +53,8 @@ class Agent {
             await this.sendData({ type: "ending", config: "Ran out of keywords" });
             return;
           }
-          const blogSite = this.version === "blogger" ? 
-          new Blogger(this.config, outline, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i) : 
-          new Wordpress(this.config, outline, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, draft);
+          const BlogSite = this.version === "blogger" ? Blogger : this.version === "html" ? Html : Wordpress;
+          const blogSite = new BlogSite(this.config, outline, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, this.draft);
 
           var result = await blogSite.run();
           this.summaries.push({summary: outline.headers, url: result.url});          

@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./home.css";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import constants, { defualtPills, sampleBlog } from "../../constants";
 import { getJwt, wordpressGetJwt, getUserAuthToken, isAuthenticatedResponse } from "../../utils/getJwt";
 import { scrollToBottom } from "../../utils/styles";
-import { setBannerMessage, setActiveBlogAgent, initializeBlogAgent, setVersion, signOut } from "../../store";
-import HtmlModal from "../htmlModal";
-import { useDispatch } from "react-redux";
+import { setBannerMessage, setActiveBlogAgent, initializeBlogAgent, setVersion, signOut, setHtmlModal } from "../../store";
 import StatusPill from "../statusPill";
 import Dropdown from "../uxcore/dropdown";
 import SparklesSvg from "../../assets/sparkles-outline.svg";
@@ -20,13 +18,13 @@ const typeToImageMap = {
   success: CheckMark,
 };
 
-const Home = ({joinRoom, payment}) => {
+const Home = ({joinRoom}) => {
     const dispatch = useDispatch();
     const activeBlogAgent = useSelector((state) => state.main.activeBlogAgent);
     const isLoggedIn = useSelector((state) => state.main.isLoggedIn);
     const blogAgents = useSelector((state) => state.main.blogAgents);
     const currentBlog = blogAgents[activeBlogAgent];
-    const [version, setActiveVersion] = useState("wordpress");
+    const [version, setActiveVersion] = useState("html");
     const [loops, setLoops] = useState("");
     const [daysLeft, setDaysToRun] = useState("");
     const [jwt, setJwt] = useState("");
@@ -52,7 +50,7 @@ const Home = ({joinRoom, payment}) => {
       setHasStarted(currentBlog.hasStarted || false);
       setUsedBlogPosts(currentBlog.postsLeftToday || 0);
       setMaxBlogPosts((currentBlog.maxNumberOfPosts) ? currentBlog.maxNumberOfPosts : constants.maxPosts);
-    }, [activeBlogAgent, currentBlog, currentBlog.data]);
+    }, [activeBlogAgent, currentBlog.data]);
 
     useEffect(() => {
       scrollToBottom(messagesEndRef.current);
@@ -119,14 +117,6 @@ const Home = ({joinRoom, payment}) => {
       }
     };
 
-    const selectChangeDropdown = (target) => {
-      if (target === "AddNewAgent") {
-        payment();
-      } else if (target !== activeBlogAgent) {
-        dispatch(setActiveBlogAgent(target));
-      }
-    }
-
     const versionToggler = (version) => {
       setActiveVersion(version);
       dispatch(setVersion({activeBlogAgent, version}))
@@ -137,22 +127,10 @@ const Home = ({joinRoom, payment}) => {
     const canStart = ((version === "html") || (blogID && jwt)) !== "" && subject && loops;
 
 
-    var dropDownOptions = [];
-    const agentsKeys = Object.keys(blogAgents);
-    for (let i = 0; i < agentsKeys.length; i++) {
-      var text = blogAgents[agentsKeys[i]].subject;
-      if (agentsKeys[i] === "default"){
-        text = "Demo Agent"
-      }
-      dropDownOptions.push({id: agentsKeys[i], text});
-    }
-    dropDownOptions = [...dropDownOptions, {id: "AddNewAgent", text: "Add New Agent +"}];
-
     const versionSelectorOptions = [{id: "html", text: "Raw HTML"}, {id: "wordpress", text: "Post to Wordpress"}, {id: "blogger", text: "Post to Blogger.com"}];
-
+    console.log(data);
   return (
     <div className="Home">
-      {/* {isLoggedIn && <Dropdown options={dropDownOptions} selected={activeBlogAgent} onSelectedChange={selectChangeDropdown}/>}  */}
       <div className="row align-center justify-start wrap">
         
         <h1 style={{marginRight: "15px"}}>BloggerGPT</h1>
@@ -167,9 +145,6 @@ const Home = ({joinRoom, payment}) => {
         <div className="home-results-container">
         <div className="home-input-top-row">
           <p>Daily Articles Used: {maxNumberOfPosts - postsLeftToday} / {maxNumberOfPosts}</p>
-          {(!jwt && !blogID) && <p className="hover" onClick={versionToggler}>
-            Switch to {(version === "wordpress") ? "Blogger.com" : "Wordpress.com"}
-          </p>}
         </div>
         <div className="home-data-body" ref={messagesEndRef}>
           {(!hasStarted && data.length === 0) &&
@@ -196,6 +171,10 @@ const Home = ({joinRoom, payment}) => {
               img={typeToImageMap[pill.type] || false}
               config={pill.config}
               url={pill.url}
+              html={pill.html}
+              onClick={
+                (pill.html === "html") ? () => {dispatch(setHtmlModal(pill.html))} : false
+              }
             />
           ))}
         </div>

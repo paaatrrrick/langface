@@ -102,7 +102,7 @@ const App = () => {
                 <div className="flex-grow-1"/>
                 <div className="body">
                     {bannerMessage && <BannerMessage messageObject={bannerMessage} close={() => dispatch(clearBannerMessage())} />}
-                    <Component joinRoom={joinRoom} payment={payment}/>
+                    <Component joinRoom={joinRoom} />
                 </div>
                 <div className="flex-grow-1"/>
             </div>

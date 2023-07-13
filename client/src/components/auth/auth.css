@@ -19,7 +19,7 @@
 }
 
 .login-with-google-btn:hover {
-    background-color: #f2f8ff;
+    background-color:#e0e1f7;
     cursor: pointer;
 }
 
@@ -44,7 +44,7 @@
 }
 
 .Auth-loggedIn:hover{
-    background-color: #f2f8ff;
+    background-color:#e0e1f7;
     cursor: pointer;
 }
 

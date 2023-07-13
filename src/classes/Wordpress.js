@@ -7,7 +7,7 @@ const { ChatOpenAI } = require("langchain/chat_models/openai");
 const { HumanChatMessage, } = require("langchain/schema");
 const Photos = require("./Photos");
 const { dummyblog } = require("../constants/dummyData");
-const { blogPost, SystemChatMessageForBlog } = require("../constants/prompts");  
+const { blogPost } = require("../constants/prompts");  
 
 class Wordpress {
     constructor(config, outline, jwt, blogID, sendData, openaiKey, loops, summaries, currentIteration, draft) {

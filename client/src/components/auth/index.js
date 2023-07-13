@@ -65,7 +65,7 @@ const Auth = ({ launch, mask, payment }) => {
             <div className="Auth">
                 <button className={`navController-pill`} onClick={handleGoogle}>
                     <img src={RobotSvg} />
-                    <h6>Hire Agent</h6>
+                    <h6>Add Agent +</h6>
                 </button>
             </div>
         )

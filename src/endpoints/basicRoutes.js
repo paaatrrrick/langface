@@ -46,9 +46,10 @@ basicRoutes.get("/user", isLoggedInMiddleware, asyncMiddleware(async (req, res) 
 basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
     var {openaiKey, blogID, subject, config, version, loops, daysLeft, userAuthToken, demo, blogMongoID, draft} = req.body;
     const blogJwt = req.body.jwt;
-    if (version !== "blogger") {
+    if (version !== "blogger" && version !== "html") {
       version = "wordpress";
     }
+    console.log(req.body);
     var userID;
     var blog;
     if (!demo) {

@@ -1,14 +1,7 @@
 import React, { useState } from "react";
 import "./dropdown.css";
 import TriangleSvg from "../../assets/triangle.svg";
-
-const trimStringTo15Chars = (str) => {
-    if (str.length > 25) {
-        return str.substring(0, 22) + "...";
-    } else {
-        return str;
-    }
-}
+import { trimStringToChars } from "../../utils/helpers";
 
 const Dropdown = ({ options, selected, onSelectedChange }) => {
     const [open, setOpen] = useState(false);
@@ -25,7 +18,7 @@ const Dropdown = ({ options, selected, onSelectedChange }) => {
     if (!open){
         return (
             <div key={-1} className="Dropdown-parent Dropdown-pill Dropdown-row-hover" onClick={() => setOpen(!open)}>
-                <p>{trimStringTo15Chars(active.text)}</p>
+                <p>{trimStringToChars(active.text, 25)}</p>
                 <img src={TriangleSvg} className={`rotate180`}/>
             </div>
         )
@@ -35,7 +28,7 @@ const Dropdown = ({ options, selected, onSelectedChange }) => {
     return (
     <div className="Dropdown-parent Dropdown">
         <div key={-1} className="Dropdown-row Dropdown-row-hover" onClick={() => setOpen(!open)}>
-            <p>{trimStringTo15Chars(active.text)}</p>
+            <p>{trimStringToChars(active.text, 25)}</p>
             <img src={TriangleSvg}/>
         </div>
         {open && (
@@ -43,7 +36,7 @@ const Dropdown = ({ options, selected, onSelectedChange }) => {
             {optionsWithoutSelected.map((option, index) => {
                 return (
                     <div className="Dropdown-row Dropdown-row-hover" key={index} onClick={() => {onSelectedChange(option.id); setOpen(false);}}>
-                        <p>{trimStringTo15Chars(option.text)}</p>
+                        <p>{trimStringToChars(option.text, 25)}</p>
                     </div>
             )})}
             </>

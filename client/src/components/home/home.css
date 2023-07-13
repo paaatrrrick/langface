@@ -153,7 +153,7 @@
   }
 
 .home-tinyInputs .article-count * {
-    color: #fff;
+    color: var(--mainDark);
 }
 
 .home-tinyInputs .article-count label {

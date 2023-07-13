@@ -28,12 +28,12 @@ const slice = createSlice({
     tabId: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
     bannerMessage: null,
     currentView: "home",
-    htmlModal: "<h1>yo</h1>",
+    htmlModal: "",
     isLoggedIn: false,
     blogIds: [],
     user: {},
     activeBlogAgent: "default",
-    colorScheme: localStorage.getItem("bloggerGPT-colorScheme") ? localStorage.getItem("bloggerGPT-colorScheme") : "dark",
+    colorScheme: localStorage.getItem("bloggerGPT-colorScheme") ? localStorage.getItem("bloggerGPT-colorScheme") : "light",
     blogAgents: defaultBlogAgent
   },
   reducers: {
@@ -115,9 +115,9 @@ const slice = createSlice({
       state.colorScheme = action.payload;
     },
     updateBlogAgentData: (state, action) => {
-      const { blogId, type, title, url, config, postsLeftToday, maxNumberOfPosts, hasStarted } = action.payload;
+      const { blogId, type, title, url, html, config, postsLeftToday, maxNumberOfPosts, hasStarted } = action.payload;
       console.log("updateBlogAgentData", action.payload)
-      const data = { type, title, url, config };
+      const data = { type, title, url, config, html };
     
       state.blogAgents[blogId].hasStarted = hasStarted;
       if (state.blogAgents[blogId].data.length > 0 && state.blogAgents[blogId].data[state.blogAgents[blogId].data.length - 1].type === "updating") {
@@ -145,7 +145,7 @@ const slice = createSlice({
 // Now we configure the store
 const store = configureStore({ reducer: { main: slice.reducer } });
 export default store;
+export const actions = { ...slice.actions};
 export const { setBannerMessage, setBlogIds, clearBannerMessage, setVersion, setCurrentView, setColorScheme, updateBlogAgentData, login, signOut, setActiveBlogAgent, initializeBlogAgent, runAgent, addBlogAgent, setHtmlModal } = slice.actions;
-// export const actions = { ...slice.actions};
 
 

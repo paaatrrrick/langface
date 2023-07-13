@@ -22,7 +22,7 @@ const BannerMessage = ({ messageObject, close }) => {
     return (
         <div className={`${classes}`}>
             <p>{message}</p>
-            <button onClick={close}>X</button>
+            <button onClick={close}>&times;</button>
         </div >
     );
 }

@@ -18,7 +18,7 @@ const initSendData = (blogMongoID, demo = false) => {
     
         if (dataForClient.type !== "updating") {
           const currAgent = demo ? DemoBlog : BlogDB;
-          const postsLeft = await currAgent.addPost(blogMongoID, { url: dataForClient?.url || "", config: dataForClient?.config || "", title: dataForClient?.title || "", type: dataForClient?.type || "error" });
+          const postsLeft = await currAgent.addPost(blogMongoID, { url: dataForClient?.url || "", config: dataForClient?.config || "", title: dataForClient?.title || "", type: dataForClient?.type || "error", html: dataForClient?.html || "" });
           dataForClient = { ...dataForClient, ...postsLeft };
         }
         dataForClient.blogId = blogMongoID;

@@ -19,13 +19,13 @@ const HtmlModal = ({html, close}) => {
                     <button className={`HtmlModal-html-button ${raw ? 'HtmlModal-html-button-active' : ''}`}
                         onClick={() => setRaw(!raw)}
                     >
-                        Raw
+                        Text
                     </button>
                 </div>
 
             </div>
             <div className="HtmlModal-content">
-            {!raw ? parse(html) : <p>{html}</p>}
+                {!raw ? parse(html) : <p>{html}</p>}
             </div>
         </div>
     </div>

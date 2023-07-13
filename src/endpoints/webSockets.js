@@ -19,17 +19,21 @@ const leaveRoom = (tabId) => {
 
 const sendDataToClient = (dataForClient, blogIdToSocketMap) => {
   try{
+    console.log('final send data to client:');
+    console.log(dataForClient);
+    console.log(blogIdToSocketMap);
     const io = getIO();
     const blogId = dataForClient.blogId;
     if (!blogIdToSocketMap[blogId]){
       return;
     }
+    if (dataForClient.type !== "updating"){
+      SuccesfulPostsCount += 1;
+      console.log(`sending data to client: ${SuccesfulPostsCount}:`);
+      console.log(dataForClient);
+    }
     for (let tabId of blogIdToSocketMap[blogId]){
-      if (dataForClient.type !== "updating"){
-        SuccesfulPostsCount += 1;
-        console.log(`sending data to client: ${SuccesfulPostsCount}:`);
-        console.log(dataForClient);
-      }
+      console.log('tabId: ', tabId);
       io.to(tabId).emit('updateData', dataForClient);
     }
   } catch(e) {

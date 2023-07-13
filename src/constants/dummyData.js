@@ -1,4 +1,7 @@
-const dummyblog = `  <p>
+const dummyblog = `
+<article>
+<h1>Marvel Characters</h1>
+<p>
 Marvel has taken the world by storm with its incredible cinematic universe and beloved comic book characters. From Iron Man to Spider-Man, the Marvel universe has captured the hearts of fans young and old. In this blog post, we'll take a closer look at some of the most iconic Marvel characters and their impact on popular culture.
 </p>
 <h2>Iron Man</h2>
@@ -38,7 +41,7 @@ The X-Men are a group of mutants who fight for justice and equality in a world t
 Marvel has created a universe that has captured the hearts and imaginations of fans around the world. With iconic characters, thrilling storylines, and incredible special effects, it's no wonder that Marvel has become a cultural phenomenon. Whether you're a die-hard fan or a casual viewer, there's something for everyone in the Marvel universe.
 </p>
 <img src="image2.png" alt="Marvel Characters">
-</div>`;
+</article>`;
 
 const summarizeImages = [
     {

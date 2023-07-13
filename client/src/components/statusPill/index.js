@@ -1,8 +1,14 @@
 import React from "react";
 import "./statusPill.css";
 import Loader from "../loader";
+import { setHtmlModal } from '../../store';
+import { useSelector, useDispatch } from "react-redux";
 
-const StatusPill = ({ version, title, config, img, url  }) => {
+
+
+const StatusPill = ({ version, title, config, img, url, html, onClick  }) => {
+    const dispatch = useDispatch();
+    console.log("StatusPill", version, title, config, img, url, html, onClick)
     if (!title && !config) return null;
     return (
         <div className={`status-pill ${version}`}>
@@ -12,7 +18,10 @@ const StatusPill = ({ version, title, config, img, url  }) => {
                 {version === "updating" && <Loader />}
             </div>
             <p>{config}</p>
-            {url && <a href={url} target="_blank">View Post</a>}
+            <div className="row">
+                {url && <a href={url} target="_blank">View Post</a>}
+                {html && <a onClick={() => {dispatch(setHtmlModal(html))}} >View HTML</a>}
+            </div>
         </div>
     )
 };
