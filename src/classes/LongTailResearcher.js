@@ -99,6 +99,25 @@ class LongTailResearcher {
         console.log(parsed);
         return { blogTitle, lsiKeywords, keyword, headers };
       };
+
+      rewriteBlueprint = async(blueprint) => {
+        const parserFromZod = StructuredOutputParser.fromZodSchema(z.object({
+          blogTitle: z.string().describe(`Write an SEO optimized title for a blog post which contains the keyword and is relevant to the config provided. Your title should not be similar to ${blueprint.blogTitle}.`),
+          lsiKeywords: z.string().describe(`What are 5 other comma separated keywords that are semantically relevant to the keyword provided. For example, the keyword 'credit cards' should return: money, credit score, credit limit, loans, interest rate. Your LSI keywords should not be similar to ${blueprint.lsiKeywords}.`),
+          headers: z.string().describe(`What are ten comma seperated headers that act as a blueprint for a blog post designed to rank highlighy for this keyword. This should leverage the keywords, config provided, and your knowledge of the subject. Your headers should not be similar to ${blueprint.headers}`)
+        }));
+        const formatInstructions = parserFromZod.getFormatInstructions()
+        const template = `You are worldclass SEO expert. You have been hired by a company to write a blog. The company wants to rank for the keyword "${keyword}". The blog is about "${this.subject}"${(this.config) && ` and has the following specifications: "${this.config}"`}. \n\n{format_instructions}`;
+        const prompt = new PromptTemplate({template: template, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
+        const input = await prompt.format();
+        const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openaiKey});
+        const response = await model.call([new HumanChatMessage(input)]);
+        const parsed = await parserFromZod.parse(response.text)   
+        const { blogTitle, lsiKeywords, headers } = parsed;
+        console.log(parsed);
+        const keyword = blueprint.keyword;
+        return { blogTitle, lsiKeywords, keyword, headers };
+      }
 }
 
 module.exports = { LongTailResearcher };
