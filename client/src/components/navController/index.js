@@ -79,7 +79,7 @@ const NavController = ({launch, payment}) => {
                                         className={`navController-pill ${activeBlogAgent === option.id ? "selected" : ""}`}
                                         onClick={() => dispatch(setActiveBlogAgent(option.id))}
                                     >
-                                    <h6>- {option.text}</h6>
+                                    <h6>{option.text}</h6>
                                 </div>
                                 )
                             })

@@ -15,7 +15,7 @@ const { OpenAIEmbeddings } = require("langchain/embeddings/openai");
 const weaviate = require('weaviate-ts-client');
 
 class Agent {
-  constructor(openaiKey, sendData, jwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, demo = false, uid = null, draft=false) {
+  constructor(openaiKey, sendData, jwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, demo = false, uid = null, draft) {
     // AGENT
     this.demo = demo;
     this.AgentDB = demo ? DemoBlogDB : BlogDB;
@@ -71,7 +71,7 @@ class Agent {
           await this.postToPincecone(i, blueprint);
           
           const BlogAgent = this.version === "blogger" ? Blogger : this.version === "html" ? Html : Wordpress;
-          const blogSite = BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, draft);
+          const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, this.draft);
 
           var result = await blogSite.run();
           this.summaries.push({summary: blueprint.headers, url: result.url});          
