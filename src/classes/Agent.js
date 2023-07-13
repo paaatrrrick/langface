@@ -9,7 +9,7 @@ const BlogDB = require("../mongo/blog");
 const DemoBlogDB = require("../mongo/demoBlog");;
 
 class Agent {
-  constructor(openaiKey, sendData, jwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, demo = false, uid = null) {
+  constructor(openaiKey, sendData, jwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, demo = false, uid = null, draft=false) {
     // AGENT
     this.demo = demo;
     this.AgentDB = demo ? DemoBlogDB : BlogDB;
@@ -28,6 +28,7 @@ class Agent {
     this.daysLeft = daysLeft;
     this.summaries = [];    
     this.blogOutlines = [];
+    this.draft = draft;
     
     // TOOLS
     // this.researcher = new Researcher(subject, this.openaiKey);
@@ -53,7 +54,7 @@ class Agent {
           }
           const blogSite = this.version === "blogger" ? 
           new Blogger(this.config, outline, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i) : 
-          new Wordpress(this.config, outline, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i);
+          new Wordpress(this.config, outline, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, draft);
 
           var result = await blogSite.run();
           this.summaries.push({summary: outline.headers, url: result.url});          

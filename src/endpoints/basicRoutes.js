@@ -44,7 +44,7 @@ basicRoutes.get("/user", isLoggedInMiddleware, asyncMiddleware(async (req, res) 
 }));
 
 basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
-    var {openaiKey, blogID, subject, config, version, loops, daysLeft, userAuthToken, demo, blogMongoID } = req.body;
+    var {openaiKey, blogID, subject, config, version, loops, daysLeft, userAuthToken, demo, blogMongoID, draft} = req.body;
     const blogJwt = req.body.jwt;
     if (version !== "blogger") {
       version = "wordpress";
@@ -63,7 +63,7 @@ basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
         blogMongoID = blog?._id?.toString();
     }
     const sendData = initSendData(blogMongoID, demo);
-    const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft - 1, blogMongoID, demo, userID);
+    const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft - 1, blogMongoID, demo, userID, draft);
     agent.run();
     blog._id = blogMongoID;
     return res.json(blog);
@@ -114,7 +114,8 @@ basicRoutes.post('/create-checkout-session', isLoggedInMiddleware, asyncMiddlewa
       mode: 'subscription',
       success_url: `${process.env.WORDPRESS_REDIRECT_URI}/?success=true`,
       cancel_url: `${process.env.WORDPRESS_REDIRECT_URI}/?canceled=true`,
-      metadata: {userId}
+      metadata: {userId},
+      client_reference_id: req.headers['referral-id'] || "checkout-#{SecureRandom.uuid}"
     });
     res.json({url: session.url});
 }));

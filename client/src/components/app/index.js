@@ -83,6 +83,16 @@ const App = () => {
           socket.disconnect();
         };
     }, []);
+
+    useEffect(() => {
+        window.rewardful('ready', function() {
+            if(window.Rewardful.referral) {
+                console.log("referral: " + window.Rewardful.referral);
+                window.localStorage.setItem("referral-id", window.Rewardful.referral);
+            }
+        });
+    });      
+
     const Component = templateMap[currentView] || Home;
     return (
         <div className="App">

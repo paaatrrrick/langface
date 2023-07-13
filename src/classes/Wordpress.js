@@ -10,7 +10,7 @@ const { dummyblog } = require("../constants/dummyData");
 const { blogPost, SystemChatMessageForBlog } = require("../constants/prompts");  
 
 class Wordpress {
-    constructor(config, outline, jwt, blogID, sendData, openaiKey, loops, summaries, currentIteration) {
+    constructor(config, outline, jwt, blogID, sendData, openaiKey, loops, summaries, currentIteration, draft) {
         this.config = config;
         this.outline = outline;
         this.jwt = jwt;
@@ -22,6 +22,7 @@ class Wordpress {
         this.sendData = sendData;
         this.currentIteration = currentIteration;
         this.imageNames = ["image1.png", "image2.png"];
+        this.draft = draft;
     }
 
     //return { blogTitle, lsiKeywords, keyword };
@@ -91,7 +92,24 @@ class Wordpress {
         for (let i in imageUrls) {
             post = replaceStringInsideStringWithNewString(post, this.imageNames[i], imageUrls[i]);
         }
-        const response = await fetch(`https://public-api.wordpress.com/rest/v1/sites/${this.blogID}/posts/new`,
+        var response;
+        if (this.draft){
+          response = await fetch(`https://public-api.wordpress.com/rest/v1/sites/${this.blogID}/posts/new`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${this.jwt}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              status: "draft",
+              title: this.outline.blogTitle,
+              content: post,
+            }),
+          }
+        );
+        } else {
+          response = await fetch(`https://public-api.wordpress.com/rest/v1/sites/${this.blogID}/posts/new`,
           {
             method: "POST",
             headers: {
@@ -104,6 +122,7 @@ class Wordpress {
             }),
           }
         );
+        }
         if (!response.ok) {
           const error = await response.text();
           console.log('error posting to wordpress');
