@@ -10,7 +10,7 @@ const { dummyblog } = require("../constants/dummyData");
 const { blogPost } = require("../constants/prompts");  
 
 class Blogger {
-  constructor(config, outline, jwt, blogID, sendData, openaiKey, loops, summaries, currentIteration) {
+  constructor(config, outline, jwt, blogID, sendData, openaiKey, loops, summaries, currentIteration, blogMongoID) {
         this.config = config;
         this.outline = outline;
         this.jwt = jwt;
@@ -22,6 +22,7 @@ class Blogger {
         this.sendData = sendData;
         this.currentIteration = currentIteration;
         this.imageNames = ["image1.png", "image2.png"];
+        this.blogMongoID = blogMongoID;
     }
 
     run = async () => {

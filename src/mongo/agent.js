@@ -74,6 +74,14 @@ const AgentSchema = new Schema({
       type: String,
       required: false,
     },
+    BFSOrderedArrayOfPostMongoID: {
+      type: [String],
+      default: []
+    },
+    nextPostIndex: {
+      type: Number,
+      default: 0
+    }
   });
 
 

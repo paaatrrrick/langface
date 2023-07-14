@@ -12,7 +12,7 @@ const nLengthArray = (n, array) => {
 };
 
 
-const blogPost = (keyword, lsiKeyword, title, headers, config, previousArticles, imageNames) => {
+const blogPost = (keyword, lsiKeyword, title, headers, config, previousArticles, imageNames, childrenTitles=undefined) => {
   var previousArticlesString = `-Add a tags throughout the blog to reference these blog articles you previously wrote: ${arrayToString(nLengthArray(3, previousArticles))}.\n`;
   if (previousArticles.length === 0) { 
     previousArticlesString = ``;

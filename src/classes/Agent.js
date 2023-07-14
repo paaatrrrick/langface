@@ -9,13 +9,14 @@ const Html = require("./Html");
 const {LongTailResearcher} = require("./LongTailResearcher");
 const AgentDB = require("../mongo/agent");
 const DemoAgentDB = require("../mongo/demoAgent");;
+const PostDB = require("../mongo/post");
 const {PineconeClient} = require("@pinecone-database/pinecone");
 const {WeaviateStore} = require("langchain/vectorstores/weaviate");
 const {OpenAIEmbeddings} = require("langchain/embeddings/openai");
 const weaviate = require('weaviate-ts-client');
 
 class Agent {
-    constructor(openaiKey, sendData, jwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, demo = false, uid = null, draft = false) { // AGENT
+    constructor(openaiKey, sendData, jwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, demo = false, uid = null, draft = false, nextPostIndex, BFSOrderedArrayOfPostMongoID) { // AGENT
         this.demo = demo;
         this.AgentDB = demo ? DemoAgentDB : AgentDB;
         this.uid = uid;
@@ -32,43 +33,59 @@ class Agent {
         this.loops = loops;
         this.daysLeft = daysLeft;
         this.summaries = [];
-        this.blogOutlines = [];
+        this.BFSOrderedArrayOfPostMongoID = BFSOrderedArrayOfPostMongoID;
+        this.nextPostIndex = nextPostIndex;
         this.draft = draft;
         // TOOLS
         // this.researcher = new Researcher(subject, this.openaiKey);
-        this.researcher = new LongTailResearcher(subject, loops, config, this.openaiKey);
+        this.researcher = new LongTailResearcher(subject, /** monthlyRateLimit=*/ 450, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID, this.demo);
     }
     run = async () => {
         try {
+        await this.researcher.generatePostsTree();
+        const agent = await AgentDB.getBlog(this.blogMongoID);
+        this.BFSOrderedArrayOfPostMongoID = agent.BFSOrderedArrayOfPostMongoID;
+
         if (!this.demo) await this.AgentDB.setHasStarted(this.blogMongoID, true);
         var errors = 0;
-        for (let i = 0; i < this.loops; i++) {
+        // For NextIndex in BFSOrderedArrayOfPostMongoIDs:
+        //    if reached amount user wanted per day, then update NextIndex in DB and break
+        //    generate + post (prompt should include outlines of children post and fake links guidance)
+        //    update rawHTML + url in DB
+        //    done if top post, else:
+        //    update parent rawHTML (switch out fake internal links) using parent ID
+        for (let i = this.nextPostIndex; i < this.BFSOrderedArrayOfPostMongoID.length; i++) {
             try {
             const { postsLeftToday } = await this.AgentDB.checkRemainingPosts(this.blogMongoID);
             if (postsLeftToday <= 0) {
                 await this.sendData({ type: "ending", config: "Ending: You have reached your daily post limit" });
+                // update nextPostIndex to resume in next run
+                await AgentDB.updateBlog(this.blogMongoID, {nextPostIndex: this.nextPostIndex});
                 return;
             }
             await this.sendData({ type: "updating", config: `Step 1 of 3: Finding best longtail keywords`, title: `Loading... Article ${i + 1} / ${this.loops}` });
-            var blueprint = await this.researcher.getNextBlueprint();
+            const post = await PostDB.getPostById(BFSOrderedArrayOfPostMongoID[i]);
+            var blueprint = post.blueprint;
             if (!blueprint) {
                 await this.sendData({ type: "ending", config: "Ran out of keywords" });
                 return;
             }
             
-            var rewriteAttempts = 0;
-            while (!this.isUnique(blueprint) && (rewriteAttempts < 3)){
-                blueprint = await this.researcher.rewriteBlueprint(blueprint);
-                if (!blueprint) { 
-                await this.sendData({type:"ending", config:"ran out of keywords"}); 
-                return;
-                }
-                rewriteAttempts++;
-            }
-            await this.postToPincecone(i, blueprint);
+            // Uniqueness, issue for when move away from 450 outlines.
+            // var rewriteAttempts = 0;
+            // while (!this.isUnique(blueprint) && (rewriteAttempts < 3)){
+            //     blueprint = await this.researcher.rewriteBlueprint(blueprint);
+            //     if (!blueprint) { 
+            //     await this.sendData({type:"ending", config:"ran out of keywords"}); 
+            //     return;
+            //     }
+            //     rewriteAttempts++;
+            // }
+            // await this.postToPincecone(i, blueprint);
+
             
             const BlogAgent = this.version === "blogger" ? Blogger : this.version === "html" ? Html : Wordpress;
-            const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, this.draft);
+            const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, this.draft, BFSOrderedArrayOfPostMongoID[i]);
 
             var result = await blogSite.run();
             this.summaries.push({summary: blueprint.headers, url: result.url});

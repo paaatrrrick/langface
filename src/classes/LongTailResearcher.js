@@ -5,20 +5,75 @@ const { z } = require("zod");
 const { StructuredOutputParser, CustomListOutputParser } = require("langchain/output_parsers");
 const { parse } = require("path");
 const { dummyBlueprint } = require("../constants/dummyData");
-
-
-
+const AgentDB = require("../mongo/agent");
+const PostDB = require("../mongo/post");
 class LongTailResearcher {
-    constructor(subject, loops, config, openAIApiKey) {
+    constructor(subject, loops=450, config, openAIApiKey, blogMongoID, BFSOrderedArrayOfPostMongoID, demo) {
         this.subject = subject;
-        this.loops = loops;
+        if(demo){
+        this.loops = 3;
+        }
+        else{
+          this.loops = loops;
+        }
         this.config = config;
         this.openAIApiKey = openAIApiKey;
         this.hasInitialized = false;
         this.LongTailKeywords = [];
+        this.blogMongoID = blogMongoID;
+        this.BFSOrderedArrayOfPostMongoID = BFSOrderedArrayOfPostMongoID;
     }
 
-    writeTitles = async () => {
+
+    generatePostsTree = async () => {
+      await this.generateKeywords();      
+      // Put 1 blog post in posts DB with blueprint (no parent because it's the top post), push mongoID to parents queue
+      // store mongoID in agent.BFS ordered array of mongoIDs + 
+      // set "topPostID" property of agent in DB to top mongoID 
+      //
+      // While queue not empty:
+      //    parentMongoID = pop
+      //    For # of children:
+      //        put blog post in DB with blueprint + parent ID 
+      //        push mongoID to queue 
+      //        store mongoID in agent.BFS ordered array of mongIDs
+      //        update .children of the parent
+      // 
+      let currBlueprint = this.getNextBlueprint();     
+      let currPost = await PostDB.createPost({blueprint: currBlueprint});
+      this.BFSOrderedArrayOfPostMongoID.push(currPost._id);
+      await AgentDB.updateBlog(this.blogMongoID, {topPostID: this.blogMongoID, BFSOrderedArrayOfPostMongoID: this.BFSOrderedArrayOfPostMongoID});
+      const parentsQ = [];
+      parentsQ.push(currPost._id);
+      while (parentsQ){
+        let parentMongoID = parentsQ.shift();
+        for (i = 0; i < 3 /** children count hard coded until consensus*/; i++){
+          let currBlueprint = this.getNextBlueprint();     
+          let currPost = await PostDB.createPost({parentMongoID: parentMongoID, blueprint: currBlueprint});
+          parentsQ.push(currPost._id);
+          this.BFSOrderedArrayOfPostMongoID.push(currPost._id);
+          await AgentDB.updateBlog(this.blogMongoID, {BFSOrderedArrayOfPostMongoID: this.BFSOrderedArrayOfPostMongoID});
+          parent = PostDB.getPostById(parentMongoID);
+          const childrenMongoID = parent.childrenMongoID;
+          childrenMongoID.push(currPost._id);
+          PostDB.updatePost(parentMongoID, {childrenMongoID: childrenMongoID});
+        }
+      }
+      // Have all posts posted here.
+
+      // Work Left: Generate posts, update rawHTML + url properties, go back and update internal links
+      // 
+      // For NextIndex in BFSOrderedArrayOfPostMongoIDs:
+      //    if reached amount user wanted per day, then update NextIndex in DB and break
+      //    generate top post
+      //    prompt should include outlines of children post and fake links guidance
+      //    update rawHTML + url in DB
+      //    update parent rawHTML (switch out fake internal links) using parent ID
+      // 
+    }
+
+    // TODO (Gautam): switch to getKeywords() to get keywords for Ads keyword planner OR SERP API
+    generateKeywords = async () => {
         console.log("Writing titles...");
         const parser = new CustomListOutputParser({
           length: this.loops,
@@ -60,15 +115,11 @@ class LongTailResearcher {
     getNextBlueprint = async () => {
         if (process.env.MOCK_RESEARCH === 'true') return dummyBlueprint[0];
         try {
-            if (!this.hasInitialized) {
-                await this.writeTitles();
-                this.hasInitialized = true;
-            }
             if (this.LongTailKeywords.length === 0) {
                 return false;
             }
-            const nextKeyword = this.LongTailKeywords.pop();
-            return await this.validate(nextKeyword);
+            const nextKeyword = this.LongTailKeywords.shift(); // get first thing by shifting left
+            return await this.generateBlueprint(nextKeyword);
         } catch (error) {
             console.log(error);
             throw new Error('Error finding the best longtail keyword');
@@ -76,7 +127,7 @@ class LongTailResearcher {
     }
 
 
-    validate = async (keyword) => {
+    generateBlueprint = async (keyword) => {
         // const parserFromZod = StructuredOutputParser.fromZodSchema(z.object({
         //       usableKeyword: z.string().describe("A boolean, true if the keyword could be used in a title of a blog post for the config provided. Otherwise false"),
         //       blogTitle: z.number().describe("If usableKeyword is false, write NA. Otherwise, write an SEO optimized title for a blog post which contains the keyword and is relevant to the config provided"),
