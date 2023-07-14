@@ -24,7 +24,8 @@ function replaceStringInsideStringWithNewString(
   }
   const firstHalf = string.slice(0, index);
   const secondHalf = string.slice(index + stringToReplace.length);
-  return firstHalf + newString + secondHalf;
+  // check if there are more occurnces
+  return replaceStringInsideStringWithNewString(firstHalf + newString + secondHalf, stringToReplace, newString);
 }
 
 function arrayToString (array) {

@@ -12,7 +12,7 @@ const nLengthArray = (n, array) => {
 };
 
 
-const blogPost = (keyword, lsiKeyword, title, headers, config, previousArticles, imageNames, childrenTitles=undefined) => {
+const blogPost = (keyword, lsiKeyword, title, headers, config, previousArticles, imageNames, parent, childrenTitles=undefined) => {
   var previousArticlesString = `-Add a tags throughout the blog to reference these blog articles you previously wrote: ${arrayToString(previousArticles)}.\n`;
   if (previousArticles.length === 0) { 
     previousArticlesString = ``;
@@ -28,7 +28,8 @@ const blogPost = (keyword, lsiKeyword, title, headers, config, previousArticles,
   ${(config) && `-${config}\n`}
   ${(imageNames.length > 0) && `-Include exactly ${imageNames.length} img tag in the blog. They should have the following src's respsectively: ${arrayToString(imageNames)}. Each img should have inline styles for a width and height, which are between 256px and 1280px.\n`}
   -Output only valid HTML. Add inline styles of margin and padding to headers and paragraphs to add elegant spacing. DO NOT STATE THE TITLE. Start with an article tag and then an h2 tag. \n
-  ${(childrenTitles) && `-YOU MUST include exactly ${childrenTitles.length} a tags with the following as href: ${arrayToString(childrenTitles)}. The <a> tags should be in context and naturally placed.`}
+  ${(parent) && (parent.url) && (parent.blueprint.blogTitle) && `-You MUST include the following <a> tag as an in-context reference in your blog: <a href=${parent.url}>${parent.blueprint.blogTitle}</a>. In-context means naturally placed in the middle of a sentence under a relevant header.\n`}
+  ${(childrenTitles) && `-You MUST include exactly ${childrenTitles.length} additional <a> tags with the following as href: ${arrayToString(childrenTitles)}. The <a> tags should be dispersed throughout the blog in-context. The tags should not just be crammed in at the end. DO NOT INCLUDE ANY MORE THAN  ${childrenTitles.length} ADDTIONAL TAGS.`}
   `
 };
 

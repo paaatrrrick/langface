@@ -50,10 +50,9 @@ class Agent {
           this.demoRun();
           return;
         }
-        await this.researcher.generatePostsTree();
-        const agent = await AgentDB.getBlog(this.blogMongoID);
-        console.log(agent.BFSOrderedArrayOfPostMongoID);
-        this.BFSOrderedArrayOfPostMongoID = agent.BFSOrderedArrayOfPostMongoID;
+        if (this.nextPostIndex == 0)  {
+          await this.researcher.generatePostsTree();
+        }
         await AgentDB.updateBlogSpecParam(this.blogMongoID, {postsLeftToday: this.loops});
 
         if (!this.demo) await this.AgentDB.setHasStarted(this.blogMongoID, true);

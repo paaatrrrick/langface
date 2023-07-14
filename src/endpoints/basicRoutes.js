@@ -44,21 +44,19 @@ basicRoutes.get("/user", isLoggedInMiddleware, asyncMiddleware(async (req, res) 
 }));
 
 basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
+    // get agent data
     var {openaiKey, blogID, subject, config, version, loops, daysLeft, userAuthToken, demo, blogMongoID, draft = false} = req.body;
     const blogJwt = req.body.jwt;
-    console.log(blogJwt);
     if (version !== "blogger" && version !== "html") {
       version = "wordpress";
     }
     var userID;
     var blog;
-    let agent_ = await AgentDB.getBlog(blogMongoID);
-    const nextPostIndex = agent_.nextPostIndex;
-    const BFSOrderedArrayOfPostMongoID = agent_.BFSOrderedArrayOfPostMongoID;
+    // update agent data if it exists
     if (!demo) {
         const user = await User.getUserByID(jwt.verify(userAuthToken, process.env.JWT_PRIVATE_KEY));
         userID = user._id.toString();
-        blog = await AgentDB.updateBlog(blogMongoID, {blogID, version, userID, openaiKey: openaiKey, blogJwt, subject, config, loops, daysLeft, nextPostIndex, BFSOrderedArrayOfPostMongoID});
+        blog = await AgentDB.updateBlog(blogMongoID, {blogID, version, userID, openaiKey: openaiKey, blogJwt, subject, config, loops, daysLeft});
         if (blog.hasStarted) return res.status(400).json({error: "Blog has already started"});
         await User.addBlog(userID, blogMongoID);
         await AgentDB.deleteAllMessages(blogMongoID);
@@ -71,10 +69,10 @@ basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
         blog = await DemoAgent.createBlog({ip});
         blogMongoID = blog?._id?.toString();
     }
+    // use new agent data to run
     const sendData = initSendData(blogMongoID, demo);
-    const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft - 1, blogMongoID, demo, userID, draft, nextPostIndex, BFSOrderedArrayOfPostMongoID);
+    const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft - 1, blogMongoID, demo, userID, draft, blog.nextPostIndex, blog.BFSOrderedArrayOfPostMongoID);
     agent.run();
-    blog._id = blogMongoID;
     return res.json(blog);
 }));
 
