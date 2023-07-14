@@ -34,77 +34,65 @@ class Agent {
         this.summaries = [];
         this.blogOutlines = [];
         this.draft = draft;
-
         // TOOLS
         // this.researcher = new Researcher(subject, this.openaiKey);
         this.researcher = new LongTailResearcher(subject, loops, config, this.openaiKey);
     }
-
     run = async () => {
         try {
-            if (!this.demo) 
-                await this.AgentDB.setHasStarted(this.blogMongoID, true);
+        if (!this.demo) await this.AgentDB.setHasStarted(this.blogMongoID, true);
+        var errors = 0;
+        for (let i = 0; i < this.loops; i++) {
+            try {
+            const { postsLeftToday } = await this.AgentDB.checkRemainingPosts(this.blogMongoID);
+            if (postsLeftToday <= 0) {
+                await this.sendData({ type: "ending", config: "Ending: You have reached your daily post limit" });
+                return;
+            }
+            await this.sendData({ type: "updating", config: `Step 1 of 3: Finding best longtail keywords`, title: `Loading... Article ${i + 1} / ${this.loops}` });
+            var blueprint = await this.researcher.getNextBlueprint();
+            if (!blueprint) {
+                await this.sendData({ type: "ending", config: "Ran out of keywords" });
+                return;
+            }
             
-            var errors = 0;
-            for (let i = 0; i < this.loops; i++) {
-                try {
-                    const {postsLeftToday} = await this.AgentDB.checkRemainingPosts(this.blogMongoID);
-                    if (postsLeftToday <= 0) {
-                        await this.sendData({type: "ending", config: "Ending: You have reached your daily post limit"});
-                        return;
-                    }
-                    await this.sendData({
-                            type: "updating",
-                            config: `Step 1 of 3: Finding best longtail keywords`,
-                            title: `Loading... Article ${
-                            i + 1
-                        } / ${
-                            this.loops
-                        }`
-                    });
-                    var blueprint = await this.researcher.getNextBlueprint();
-                    if (! blueprint) {
-                        await this.sendData({type: "ending", config: "Ran out of keywords"});
-                        return;
-                    }
-
-                    var rewriteAttempts = 0;
-                    while (!this.isUnique(blueprint) && (rewriteAttempts < 3)) {
-                        blueprint = await this.researcher.rewriteBlueprint(blueprint);
-                        if (! blueprint) {
-                            await this.sendData({type: "ending", config: "ran out of keywords"});
-                            return;
-                        }
-                        rewriteAttempts++;
-                    }
-                    // await this.postToPincecone(i, blueprint);
-
-                    const BlogAgent = this.version === "blogger" ? Blogger : this.version === "html" ? Html : Wordpress;
-                    const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, this.draft);
-
-                    var result = await blogSite.run();
-                    this.summaries.push({summary: blueprint.headers, url: result.url});
-                    await this.sendData({
-                        ... result,
-                        type: 'success',
-                        config: blueprint.headers
-                    });
-                } catch (e) {
-                    errors++;
-                    if (errors >= 5) {
-                        await this.sendData({type: "ending", title: "Too many errors, stopping process"});
-                        return;
-                    }
-                    console.log('error from loops')
-                    console.log(e);
-                    await this.sendData({type: "error", title: e.message});
+            var rewriteAttempts = 0;
+            while (!this.isUnique(blueprint) && (rewriteAttempts < 3)){
+                blueprint = await this.researcher.rewriteBlueprint(blueprint);
+                if (!blueprint) { 
+                await this.sendData({type:"ending", config:"ran out of keywords"}); 
+                return;
                 }
+                rewriteAttempts++;
             }
-            if (this.daysLeft > 0) {
-                await this.sendData({type: "ending", title: "Process Complete. Next run scheduled for tomorrow."});
-            } else {
-                await this.sendData({type: "ending", title: "Process Complete."});
+            await this.postToPincecone(i, blueprint);
+            
+            const BlogAgent = this.version === "blogger" ? Blogger : this.version === "html" ? Html : Wordpress;
+            const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, this.draft);
+
+            var result = await blogSite.run();
+            this.summaries.push({summary: blueprint.headers, url: result.url});
+            await this.sendData({
+                ... result,
+                type: 'success',
+                config: blueprint.headers
+            });
+        } catch (e) {
+            errors++;
+            if (errors >= 5) {
+                await this.sendData({type: "ending", title: "Too many errors, stopping process"});
+                return;
             }
+            console.log('error from loops')
+            console.log(e);
+            await this.sendData({type: "error", title: e.message});
+        }
+        }
+        if (this.daysLeft > 0) {
+            await this.sendData({type: "ending", title: "Process Complete. Next run scheduled for tomorrow."});
+        } else {
+            await this.sendData({type: "ending", title: "Process Complete."});
+        }
         } catch (e) {
             console.log('error from agent')
             console.log(e);
