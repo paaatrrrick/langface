@@ -6,7 +6,7 @@ const defaultBlogAgent = {
   default: {
     config: "",
     postsLeftToday: constants.maxPosts,
-    daysLeft: 1,
+    daysLeft: 0,
     loops: 1,
     jwt: "",
     blogID: "",
@@ -115,11 +115,16 @@ const slice = createSlice({
       state.colorScheme = action.payload;
     },
     updateBlogAgentData: (state, action) => {
-      const { blogId, type, title, url, html, config, postsLeftToday, maxNumberOfPosts, hasStarted } = action.payload;
+      const { blogId, type, title, url, html, config, postsLeftToday, maxNumberOfPosts, hasStarted, daysLeft } = action.payload;
       console.log("updateBlogAgentData", action.payload)
       const data = { type, title, url, config, html };
     
       state.blogAgents[blogId].hasStarted = hasStarted;
+      if (daysLeft === 0) {
+        state.blogAgents[blogId].daysLeft = 0
+      } else {
+        state.blogAgents[blogId].daysLeft = daysLeft || state.blogAgents[blogId].daysLeft;
+      }
       if (state.blogAgents[blogId].data.length > 0 && state.blogAgents[blogId].data[state.blogAgents[blogId].data.length - 1].type === "updating") {
         state.blogAgents[blogId].data.pop();
       }

@@ -49,7 +49,6 @@ basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
     if (version !== "blogger" && version !== "html") {
       version = "wordpress";
     }
-    console.log(req.body);
     var userID;
     var blog;
     if (!demo) {

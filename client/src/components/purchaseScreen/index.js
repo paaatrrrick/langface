@@ -21,7 +21,7 @@ const PurchaseScreen = () => {
 
     return (<div className="PurchaseScreen">
         <div className="w-100 column align-center justify-center">
-            <h1>Supercharge web traffic</h1>
+            <h1>Supercharge your web traffic</h1>
             <h6 style={
                 {
                     marginTop: '10px',
@@ -34,10 +34,10 @@ const PurchaseScreen = () => {
                 {marginTop: '60px'}
         }>
             <div className="PurchaseScreen-mostPopular">
-                Recommend
+                Recommended
             </div>
         </div>
-        <div className="row w-100 align-center justify-center">
+        <div className="row PurchaseScreen-card-holder align-center justify-center">
             <div className="PurchaseScreen-card">
                 <div className="column w-100 align-start justify-start">
                     <h3 style={
@@ -49,12 +49,12 @@ const PurchaseScreen = () => {
                     <p style={
                             {fontSize: '14px'}
                         }
-                        className="PurchaseScreen-list-black">Quick generate basic articles</p>
+                        className="PurchaseScreen-list-black">Quickly generate articles</p>
                     <div className="PurchaseScreen-list">
                         <div className="PurchaseScreen-list-item">
-                            <p>&#10003; 3 Articles / Day</p>
-                            <p>&#10003; Post directly to Wordpress</p>
-                            <p>&#10003; AI Photos</p>
+                            <p><span className="green">&#10003;</span> 3 Articles / Day</p>
+                            <p><span className="green">&#10003;</span> Post directly to Wordpress</p>
+                            <p><span className="green">&#10003;</span> AI Photos</p>
                         </div>
                     </div>
                 </div>
@@ -92,13 +92,14 @@ const PurchaseScreen = () => {
                     <p style={
                             {fontSize: '14px'}
                         }
-                        className="PurchaseScreen-list-black">Quick generate basic articles</p>
+                        className="PurchaseScreen-list-black">Scale your business's traffic</p>
                     <div className="PurchaseScreen-list">
                         <div className="PurchaseScreen-list-item">
-                            <p>&#10003; 15 Articles / Day</p>
-                            <p>&#10003; Run continuously for extended periods of time</p>
-                            <p>&#10003; SEO sitemaps that link between posts</p>
-                            <p>&#10003; Everything in Hobbiest</p>
+                            <p><span className="green">&#10003;</span> 450 Articles / Month</p>
+                            <p><span className="green">&#10003;</span> Run for weeks on end</p>
+                            <p><span className="green">&#10003;</span> SEO sitemaps that link posts</p>
+                            <p><span className="green">&#10003;</span> Keyword research</p>
+                            <p><span className="green">&#10003;</span> Everything in Hobbiest</p>
                         </div>
                     </div>
                 </div>
@@ -138,13 +139,13 @@ const PurchaseScreen = () => {
                     <p style={
                             {fontSize: '14px'}
                         }
-                        className="PurchaseScreen-list-black">Quick generate basic articles</p>
+                        className="PurchaseScreen-list-black">Blanket a whole niche</p>
                     <div className="PurchaseScreen-list">
                         <div className="PurchaseScreen-list-item">
-                            <p>&#10003; Pay on per Article basis</p>
-                            <p>&#10003; Custom workflow for your business</p>
-                            <p>&#10003; 1-1 support</p>
-                            <p>&#10003; Everything in Professional</p>
+                            <p><span className="green">&#10003;</span> Pay on per Article basis</p>
+                            <p><span className="green">&#10003;</span> Tailored workflow for your business</p>
+                            <p><span className="green">&#10003;</span> 1-1 customer support</p>
+                            <p><span className="green">&#10003;</span> Everything in Professional</p>
                         </div>
                     </div>
                 </div>

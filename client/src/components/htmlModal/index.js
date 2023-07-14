@@ -1,6 +1,6 @@
 import "./htmlModal.css";
 import parse from 'html-react-parser';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const HtmlModal = ({html, close}) => {
     const [raw, setRaw] = useState(false);
