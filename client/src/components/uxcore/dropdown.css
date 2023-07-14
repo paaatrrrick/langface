@@ -17,7 +17,7 @@
     top: 0;
     right: 0;
     width: 100%;
-    border: 2px solid var(--mainDark);
+    border: 2px solid var(--lightDark);
     border-radius: 20px;
     padding: 0px;
     background-color: var(--lighterBackground);

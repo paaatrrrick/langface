@@ -131,26 +131,26 @@ AgentSchema.statics.updateBlog = async function(id, params) {
   return await blog.save();
 }
 
-// Method to check remaining posts
+
+
 AgentSchema.statics.checkRemainingPosts = async function(id) {
   id = convertToObjectId(id);
-  const today = new Date().setHours(0, 0, 0, 0);
   let blog = await this.findById(id);
-  if (blog.dateRecentlyPosted.setHours(0, 0, 0, 0) < today) {
-    blog.postsLeftToday = blog.maxNumberOfPosts;
-    await blog.save();
-  }
+  //  const today = new Date().setHours(0, 0, 0, 0);
+  // if (blog.dateRecentlyPosted.setHours(0, 0, 0, 0) < today) {
+  //   blog.postsLeftToday = blog.maxNumberOfPosts;
+  //   await blog.save();
+  // }
   return {postsLeftToday: blog.postsLeftToday, maxNumberOfPosts: blog.maxNumberOfPosts};
 };
 
-// Method to add post
 AgentSchema.statics.addPost = async function(id, postContent) {
   id = convertToObjectId(id);
-  const today = new Date().setHours(0, 0, 0, 0);
   let blog = await this.findById(id);
-  if (blog.dateRecentlyPosted.setHours(0, 0, 0, 0) < today) {
-    blog.postsLeftToday = blog.maxNumberOfPosts;
-  }
+  // const today = new Date().setHours(0, 0, 0, 0);
+  // if (blog.dateRecentlyPosted.setHours(0, 0, 0, 0) < today) {
+  //   blog.postsLeftToday = blog.maxNumberOfPosts;
+  // }
   blog.messages.push(postContent);
   if (postContent.type === 'success' && blog.postsLeftToday > 0) {
     blog.postsLeftToday--;
@@ -186,6 +186,7 @@ AgentSchema.statics.deleteAllMessages = async function(id) {
   await blog.save();
   return blog;
 }
+
 
 // Create and export Blog Model
 const AgentDB = mongoose.model('Agent', AgentSchema);

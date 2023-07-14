@@ -6,17 +6,29 @@
     align-items: flex-start;
     justify-content: flex-start;
     padding-top: var(--paddingTopForScreens);
+    overflow-y: scroll;
   }
 
   .Tutorial h1{
     margin-bottom: 20px;
   }
+
+  .Tutorial hr{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: min(100%, 900px);
+  }
+
+  .Tutorial h6{
+    width: min(100%, 900px);
+  }
+
   
   .Tutorial p{
     margin-bottom: 20px;
     color: var(--mainDark);
     font-size: 18px;
-    width: min(100%, 700px);
+    width: min(100%, 900px);
   }
 
   .Tutorial a{
