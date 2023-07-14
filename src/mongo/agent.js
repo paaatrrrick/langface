@@ -139,6 +139,12 @@ AgentSchema.statics.updateBlog = async function(id, params) {
   return await blog.save();
 }
 
+AgentSchema.statics.updateBlogSpecParam = async function(id, params) {
+  id = convertToObjectId(id);
+  const blog = await this.findById(id);
+  blog.set(params)
+  return await blog.save();
+}
 
 
 AgentSchema.statics.checkRemainingPosts = async function(id) {

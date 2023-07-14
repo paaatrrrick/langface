@@ -8,14 +8,9 @@ const { dummyBlueprint } = require("../constants/dummyData");
 const AgentDB = require("../mongo/agent");
 const PostDB = require("../mongo/post");
 class LongTailResearcher {
-    constructor(subject, loops=450, config, openAIApiKey, blogMongoID, BFSOrderedArrayOfPostMongoID, demo) {
+    constructor(subject, loops=450, config, openAIApiKey, blogMongoID, BFSOrderedArrayOfPostMongoID) {
         this.subject = subject;
-        if(demo){
-        this.loops = 3;
-        }
-        else{
-          this.loops = loops;
-        }
+        this.loops = loops;
         this.config = config;
         this.openAIApiKey = openAIApiKey;
         this.hasInitialized = false;
@@ -26,7 +21,7 @@ class LongTailResearcher {
 
 
     generatePostsTree = async () => {
-      await this.generateKeywords();      
+      await this.generateKeywords();
       // Put 1 blog post in posts DB with blueprint (no parent because it's the top post), push mongoID to parents queue
       // store mongoID in agent.BFS ordered array of mongoIDs + 
       // set "topPostID" property of agent in DB to top mongoID 
@@ -39,25 +34,28 @@ class LongTailResearcher {
       //        store mongoID in agent.BFS ordered array of mongIDs
       //        update .children of the parent
       // 
-      let currBlueprint = this.getNextBlueprint();     
+      let currBlueprint = await this.getNextBlueprint();     
       let currPost = await PostDB.createPost({blueprint: currBlueprint});
       this.BFSOrderedArrayOfPostMongoID.push(currPost._id);
-      await AgentDB.updateBlog(this.blogMongoID, {topPostID: this.blogMongoID, BFSOrderedArrayOfPostMongoID: this.BFSOrderedArrayOfPostMongoID});
+      await AgentDB.updateBlogSpecParam(this.blogMongoID, {topPostID: this.blogMongoID, BFSOrderedArrayOfPostMongoID: this.BFSOrderedArrayOfPostMongoID});
       const parentsQ = [];
       parentsQ.push(currPost._id);
-      while (parentsQ){
+      let postCount = 1;
+      while (postCount < this.loops){
         let parentMongoID = parentsQ.shift();
-        for (i = 0; i < 3 /** children count hard coded until consensus*/; i++){
-          let currBlueprint = this.getNextBlueprint();     
+        for (let i = 0; i < 3 /** children count hard coded until consensus*/; i++){
+          let currBlueprint = await this.getNextBlueprint();     
           let currPost = await PostDB.createPost({parentMongoID: parentMongoID, blueprint: currBlueprint});
           parentsQ.push(currPost._id);
           this.BFSOrderedArrayOfPostMongoID.push(currPost._id);
-          await AgentDB.updateBlog(this.blogMongoID, {BFSOrderedArrayOfPostMongoID: this.BFSOrderedArrayOfPostMongoID});
-          parent = PostDB.getPostById(parentMongoID);
+          await AgentDB.updateBlogSpecParam(this.blogMongoID, {BFSOrderedArrayOfPostMongoID: this.BFSOrderedArrayOfPostMongoID});
+          let parent = await PostDB.getPostById(parentMongoID);
           const childrenMongoID = parent.childrenMongoID;
           childrenMongoID.push(currPost._id);
-          PostDB.updatePost(parentMongoID, {childrenMongoID: childrenMongoID});
+          await PostDB.updatePost(parentMongoID, {childrenMongoID: childrenMongoID});
         }
+        postCount += 3;
+        console.log(postCount, this.loops);
       }
       // Have all posts posted here.
 
@@ -115,10 +113,15 @@ class LongTailResearcher {
     getNextBlueprint = async () => {
         if (process.env.MOCK_RESEARCH === 'true') return dummyBlueprint[0];
         try {
+            if (this.demo && !this.hasInitialized) {
+              await this.generateKeywords();
+              this.hasInitialized = true;
+            } 
             if (this.LongTailKeywords.length === 0) {
                 return false;
             }
             const nextKeyword = this.LongTailKeywords.shift(); // get first thing by shifting left
+            console.log("kw" + nextKeyword);
             return await this.generateBlueprint(nextKeyword);
         } catch (error) {
             console.log(error);
@@ -144,11 +147,16 @@ class LongTailResearcher {
         const prompt = new PromptTemplate({template: template, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const input = await prompt.format();
         const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openaiKey});
+        try{
         const response = await model.call([new HumanChatMessage(input)]);
         const parsed = await parserFromZod.parse(response.text)   
         const { blogTitle, lsiKeywords, headers } = parsed;
         console.log(parsed);
         return { blogTitle, lsiKeywords, keyword, headers };
+        }catch(e){
+          console.log(e);
+          return {blogTitle:"BPerror", lsiKeywords:"BPerror", keyword:"BPerror", headers:"BPerror"};
+        }
       };
 
       rewriteBlueprint = async(blueprint) => {

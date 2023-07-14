@@ -10,7 +10,7 @@ const { dummyblog } = require("../constants/dummyData");
 const { blogPost } = require("../constants/prompts");  
 const PostDB = require("../mongo/post");
 class Wordpress {
-    constructor(config, outline, jwt, blogID, sendData, openaiKey, loops, summaries, currentIteration, draft, blogMongoID) {
+    constructor(config, outline, jwt, blogID, sendData, openaiKey, loops, summaries, currentIteration, draft, postMongoID, demo) {
         this.config = config;
         this.outline = outline;
         this.jwt = jwt;
@@ -23,7 +23,8 @@ class Wordpress {
         this.currentIteration = currentIteration;
         this.imageNames = ["image1.png", "image2.png"];
         this.draft = draft;
-        this.blogMongoID = blogMongoID;
+        this.postMongoID = postMongoID;
+        this.demo = demo;
     }
 
     run = async () => {
@@ -48,14 +49,19 @@ class Wordpress {
         try {
           const modelType = process.env.CHEAP_GPT === 'true' ? "gpt-3.5-turbo-16k" : "gpt-4";
           const model = new ChatOpenAI({ modelName: modelType, temperature: 0, openAIApiKey: this.openaiKey});
+          var childrenTitles = [];
+          if (!this.demo){
           // modify prompts to tell llm to naturally and contextually include title of children
-          const blogPost = await PostDB.getPostById(this.blogMongoID);
-          childrenTitles = []
+          const blogPost = await PostDB.getPostById(this.postMongoID);
+          console.log(blogPost);
           for (let id of blogPost.childrenMongoID){
             const child = await PostDB.getPostById(id);
-            childrenTitles.push(child.blueprint.blogTitle);
+            console.log(child);
+            childrenTitles.push(this.getFakeURL(child.blueprint.blogTitle));
           };
           // ^^
+        }
+          console.log(childrenTitles);
           const template = blogPost(this.outline.keyword, this.outline.lsiKeywords, this.outline.blogTitle, this.outline.headers, this.config, this.summaries, this.imageNames, childrenTitles);
           const response = await model.call([new HumanChatMessage(template)]);
           const text = response.text;
@@ -144,8 +150,9 @@ class Wordpress {
         } else {
           const result = await response.json();
           console.log(result);
-          await PostDB.updatePost(this.blogMongoID, {url: result.URL, rawHTML: post});
-          if (!this.draft){
+          console.log(result.ID);
+          await PostDB.updatePost(this.postMongoID.topPostID, {url: result.URL, rawHTML: post, postID: result.ID});
+          if (!this.draft && !this.demo){
             this.updateParent();
           }
           return {title: this.outline.blogTitle, config: post, url: result.URL};
@@ -154,16 +161,19 @@ class Wordpress {
 
   updateParent = async() => {
     // optimization: probably should call this on the LAST child not EVERY child but not going to track that right now.
-    const child = await PostDB.getPostById(this.blogMongoID);
+    const child = await PostDB.getPostById(this.postMongoID);
     if (!child.parentMongoID){
       return;
     }
     const parent = await PostDB.getPostById(child.parentMongoID);
-    const rawHTML = parent.rawHTML; // is this a string?
+    const rawHTML = parent.rawHTML;
+    const fakeURL = this.getFakeURL(child.blueprint.blogTitle);
 
-    newHTML = replaceStringInsideStringWithNewString(rawHTML, child.blueprint.blogTitle, child.URL);
-    const update = "new" //extract last part of parent post URL
-    response = await fetch(`https://public-api.wordpress.com/rest/v1/sites/${this.blogID}/posts/${update}`,
+    console.log("updateURLS: ", fakeURL, child.URL);
+    let newHTML = replaceStringInsideStringWithNewString(rawHTML, fakeURL, child.url);
+    const update = await parent.postID;
+    console.log(update);
+    let response = await fetch(`https://public-api.wordpress.com/rest/v1/sites/${this.blogID}/posts/${update}`,
       {
         method: "POST",
         headers: {
@@ -172,11 +182,17 @@ class Wordpress {
         },
         body: JSON.stringify({
           title: this.outline.blogTitle,
-          content: post,
+          content: newHTML,
         }),
       }
     );
-    PostDB.updatePost(post.parentMongoID, {rawHTML: newHTML});
+    console.log(await response.json());
+    PostDB.updatePost(child.parentMongoID, {rawHTML: newHTML});
+  }
+
+  getFakeURL = (title) => {
+    const allSpacesRemoved = title.replaceAll(' ', '');
+    return `www.${allSpacesRemoved}.com`;
   }
 }
 

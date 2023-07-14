@@ -37,13 +37,24 @@ class Agent {
         this.draft = draft;
         // TOOLS
         // this.researcher = new Researcher(subject, this.openaiKey);
-        this.researcher = new LongTailResearcher(subject, /** monthlyRateLimit=*/ 450, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID, this.demo);
+        if (this.demo){
+          this.researcher = new LongTailResearcher(subject, /** monthlyRateLimit=*/ this.loops, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
+        }
+        else{
+          this.researcher = new LongTailResearcher(subject, /** monthlyRateLimit=*/ 10, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
+        }
     }
     run = async () => {
         try {
+        if (this.demo){
+          this.demoRun();
+          return;
+        }
         await this.researcher.generatePostsTree();
         const agent = await AgentDB.getBlog(this.blogMongoID);
+        console.log(agent.BFSOrderedArrayOfPostMongoID);
         this.BFSOrderedArrayOfPostMongoID = agent.BFSOrderedArrayOfPostMongoID;
+        await AgentDB.updateBlogSpecParam(this.blogMongoID, {postsLeftToday: this.loops});
 
         if (!this.demo) await this.AgentDB.setHasStarted(this.blogMongoID, true);
         var errors = 0;
@@ -59,11 +70,11 @@ class Agent {
             if (postsLeftToday <= 0) {
                 await this.sendData({ type: "ending", config: "Ending: You have reached your daily post limit" });
                 // update nextPostIndex to resume in next run
-                await AgentDB.updateBlog(this.blogMongoID, {nextPostIndex: this.nextPostIndex});
+                await AgentDB.updateBlogSpecParam(this.blogMongoID, {nextPostIndex: this.nextPostIndex});
                 return;
             }
             await this.sendData({ type: "updating", config: `Step 1 of 3: Finding best longtail keywords`, title: `Loading... Article ${i + 1} / ${this.loops}` });
-            const post = await PostDB.getPostById(BFSOrderedArrayOfPostMongoID[i]);
+            const post = await PostDB.getPostById(this.BFSOrderedArrayOfPostMongoID[i]);
             var blueprint = post.blueprint;
             if (!blueprint) {
                 await this.sendData({ type: "ending", config: "Ran out of keywords" });
@@ -84,7 +95,7 @@ class Agent {
 
             
             const BlogAgent = this.version === "blogger" ? Blogger : this.version === "html" ? Html : Wordpress;
-            const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, this.draft, BFSOrderedArrayOfPostMongoID[i]);
+            const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, this.draft, this.BFSOrderedArrayOfPostMongoID[i], this.demo);
 
             var result = await blogSite.run();
             this.summaries.push({summary: blueprint.headers, url: result.url});
@@ -115,7 +126,51 @@ class Agent {
         }
     };
 
+    demoRun = async() => {
+      var errors = 0;
+      for (let i = 0; i < this.loops; i++) {
+        try {
+        const { postsLeftToday } = await this.AgentDB.checkRemainingPosts(this.blogMongoID);
+        if (postsLeftToday <= 0) {
+            await this.sendData({ type: "ending", config: "Ending: You have reached your daily post limit" });
+            // update nextPostIndex to resume in next run
+            await AgentDB.updateBlogSpecParam(this.blogMongoID, {nextPostIndex: this.nextPostIndex});
+            return;
+        }
+        await this.sendData({ type: "updating", config: `Step 1 of 3: Finding best longtail keywords`, title: `Loading... Article ${i + 1} / ${this.loops}` });
+        var blueprint = await this.researcher.getNextBlueprint();
+        if (!blueprint) {
+            await this.sendData({ type: "ending", config: "Ran out of keywords" });
+            return;
+        }
+        
+        const BlogAgent = this.version === "blogger" ? Blogger : this.version === "html" ? Html : Wordpress;
+        const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, this.draft, undefined, this.demo);
 
+        var result = await blogSite.run();
+        this.summaries.push({summary: blueprint.headers, url: result.url});
+        await this.sendData({
+            ... result,
+            type: 'success',
+            config: blueprint.headers
+        });
+    } catch (e) {
+        errors++;
+        if (errors >= 5) {
+            await this.sendData({type: "ending", title: "Too many errors, stopping process"});
+            return;
+        }
+        console.log('error from loops')
+        console.log(e);
+        await this.sendData({type: "error", title: e.message});
+    }
+    }
+    if (this.daysLeft > 0) {
+        await this.sendData({type: "ending", title: "Process Complete. Next run scheduled for tomorrow."});
+    } else {
+        await this.sendData({type: "ending", title: "Process Complete."});
+    }
+  } 
     postToPincecone = async (id, blueprint) => {
         return;
         const pinecone = new PineconeClient();

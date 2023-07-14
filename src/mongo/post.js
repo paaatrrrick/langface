@@ -31,6 +31,10 @@ const PostSchema = new Schema({
     type: String,
     default: "",
   },
+  postID: {
+    type: String,
+    default: "new",
+  }
 });
 
 //get Post by ID
