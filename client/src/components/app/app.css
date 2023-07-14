@@ -11,6 +11,7 @@
 
 :root {
     --brandColor: #625df4;
+    --alwaysDark: #212121;
     --brandOffColor: #fff;
     --mainDark: #fff;
     --lightDark: #f7f7f8;
@@ -41,6 +42,9 @@
     flex-direction: row;
 }
 
+.w-100 {
+    width: 100%;
+}
 .row {
     display: flex;
     flex-direction: row;

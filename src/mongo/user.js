@@ -1,7 +1,6 @@
 const { convertToObjectId } = require('../utils/helpers');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const BlogDB = require('./blog');
 
 const userSchema = new Schema({
     blogs: {

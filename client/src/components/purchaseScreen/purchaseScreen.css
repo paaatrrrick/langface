@@ -1,0 +1,93 @@
+.PurchaseScreen{
+    width: 100%;
+    height: 100%;
+    padding-top: var(--paddingTopForScreens);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.PurchaseScreen-card{
+    width: min(33%, 300px);
+    height: 365px;
+    border: 1px solid var(--lightDark);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.PurchaseScreen-card:first-child{
+    border-radius: 10px 0px 0px 10px;
+    border-width: 1px 0px 1px 1px;
+}
+.PurchaseScreen-card:nth-child(2){
+    border-radius: 0px 0px 0px 0px;
+    border-width: 4px;
+    border-color: var(--brandOffColor);
+    border-top: 0px solid var(--lightDark);
+    border-radius: 0px;
+}
+.PurchaseScreen-card:last-child{
+    border-radius: 0px 10px 10px 0px;
+    border-width: 1px 1px 1px 0px;
+}
+
+.PurchaseScreen-list-item{
+    margin-top: 20px;
+    padding-left: 10px;
+}
+.PurchaseScreen-list-item p{
+    margin-bottom: 10px;
+    font-size: 13px;
+}
+.PurchaseScreen-list-black{
+    color: var(--mainDark) !important;
+}
+
+.PurchaseScreen-mostPopular{
+    width: min(33%, 300px);
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--brandOffColor);
+    margin-bottom: -1px;
+    color: var(--alwaysDark);
+    font-weight: 500;
+    font-size: 12px;
+    border-radius: 10px 10px 0px 0px;
+}
+
+.PurchaseScreen-card button{
+    width: min(150px, 70%);
+    height: 100%;
+    border-radius: 20px;
+    background-color: var(--brandColor);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.PurchaseScreen-card button:hover{
+    background-color: var(--brandOffColor);
+    color: var(--brandColor);
+}
+
+#PurchaseScreen-button-contact{
+    background-color: var(--lighterBackground);
+    border: 1px solid var(--mainDark);
+    color: var(--mainDark);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+#PurchaseScreen-button-contact:hover{
+    background-color: var(--darkerBackground);
+}
+
+@media screen and (max-width: 768px) {
+    
+}

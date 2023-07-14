@@ -19,9 +19,6 @@ const leaveRoom = (tabId) => {
 
 const sendDataToClient = (dataForClient, blogIdToSocketMap) => {
   try{
-    console.log('final send data to client:');
-    console.log(dataForClient);
-    console.log(blogIdToSocketMap);
     const io = getIO();
     const blogId = dataForClient.blogId;
     if (!blogIdToSocketMap[blogId]){
@@ -33,7 +30,6 @@ const sendDataToClient = (dataForClient, blogIdToSocketMap) => {
       console.log(dataForClient);
     }
     for (let tabId of blogIdToSocketMap[blogId]){
-      console.log('tabId: ', tabId);
       io.to(tabId).emit('updateData', dataForClient);
     }
   } catch(e) {

@@ -10,9 +10,9 @@ import BookSvg from '../../assets/book-outline.svg';
 import Auth from "../auth"
 import RobotSvg from '../../assets/robot-outline.svg'
 import { trimStringToChars } from "../../utils/helpers";
+import constants from '../../constants';
 
-
-const NavController = ({launch, payment}) => {
+const NavController = ({launch}) => {
     const dispatch = useDispatch();
     const { currentView, blogAgents, isLoggedIn, activeBlogAgent } = useSelector(state => state.main);
     const blogKeys = Object.keys(blogAgents);
@@ -30,6 +30,10 @@ const NavController = ({launch, payment}) => {
         text = `New Agent ${newAgentCount}`;
       }
       dropDownOptions.push({id: agentsKeys[i], text: trimStringToChars(text, 25)});
+    }
+
+    const payment = () => {
+        dispatch(setCurrentView("purchase"));
     }
 
     return (
@@ -59,7 +63,7 @@ const NavController = ({launch, payment}) => {
                         <img src={RocketSvg} />
                         <h6>Tutorial</h6>
                     </div>
-                    {isLoggedIn && <div className={`navController-pill`} onClick={payment}>
+                    {isLoggedIn && <div className={`navController-pill ${currentView === "purchase" ? "selected" : ""}`} onClick={payment}>
                             <img src={RobotSvg} />
                             <h6>Add Agent +</h6>
                     </div>}
@@ -97,7 +101,7 @@ const NavController = ({launch, payment}) => {
                 <div className="navController-pageSelectors">
                     <a 
                         className={`navController-pill`}
-                        href="https://discord.gg/HCkHcrh3U" target='_blank'>
+                        href={constants.discordUrl} target='_blank'>
                             <img src={DiscordSvg} />
                             <h6>Discord</h6>
                     </a>

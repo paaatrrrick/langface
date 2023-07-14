@@ -5,8 +5,8 @@ const express = require("express");
 const FormData = require("form-data");
 const fetch = require("node-fetch");
 const User = require("../mongo/user");
-const BlogDB = require("../mongo/blog");
-const DemoBlog = require("../mongo/demoBlog");
+const AgentDB = require("../mongo/agent");
+const DemoAgent = require("../mongo/demoAgent");
 const { Agent } = require("../classes/Agent");
 const { isLoggedInMiddleware, asyncMiddleware } = require("./middleware");
 const initSendData = require("../utils/sendData");
@@ -34,7 +34,7 @@ basicRoutes.get("/user", isLoggedInMiddleware, asyncMiddleware(async (req, res) 
     const blogIDs = req.user.blogs;
     const blogs = []
     for (let id of blogIDs) {
-        const blog = await BlogDB.getBlog(id);
+        const blog = await AgentDB.getBlog(id);
         if (blog){
             blog._id = blog._id.toString();
             blogs.push(blog);
@@ -55,12 +55,17 @@ basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
     if (!demo) {
         const user = await User.getUserByID(jwt.verify(userAuthToken, process.env.JWT_PRIVATE_KEY));
         userID = user._id.toString();
-        blog = await BlogDB.updateBlog(blogMongoID, {blogID, version, userID, version, openaiKey: openaiKey, blogJwt, subject, config, loops, daysLeft});
+        blog = await AgentDB.updateBlog(blogMongoID, {blogID, version, userID, version, openaiKey: openaiKey, blogJwt, subject, config, loops, daysLeft});
         if (blog.hasStarted) return res.status(400).json({error: "Blog has already started"});
         await User.addBlog(userID, blogMongoID);
-        await BlogDB.deleteAllBlogPosts(blogMongoID);
+        await AgentDB.deleteAllMessages(blogMongoID);
     } else {
-        blog = await DemoBlog.createBlog({version, blogID});
+        console.log('at demo')
+        console.log(req.ip);
+        console.log(req.connection.remoteAddress)
+        const ip = req.ip || req.connection.remoteAddress;
+        console.log(ip);
+        blog = await DemoAgent.createBlog({ip});
         blogMongoID = blog?._id?.toString();
     }
     const sendData = initSendData(blogMongoID, demo);
@@ -91,7 +96,7 @@ basicRoutes.post("/wordpress", asyncMiddleware(async (req, res) => {
 
 basicRoutes.post("/dailyrun", asyncMiddleware(async (req) => {
     if (req.body.password === process.env.dailyRunPassword) {
-        const activeBlog = await BlogDB.getActive();
+        const activeBlog = await AgentDB.getActive();
         for (let blog of activeBlog) {
             const {openaiKey, blogID, subject, config, version, loops, daysLeft, _id, userID } = blog;
             const blogMongoID = _id.toString();
@@ -140,7 +145,7 @@ basicRoutes.post('/webhook', bodyParser.raw({type: 'application/json'}), asyncMi
             console.log('shucks we need to refund: ' + event.data.object.id);
             return 
         }
-        const blog = await BlogDB.createEmptyBlog(userId, event.data.object.id);
+        const blog = await AgentDB.createEmptyBlog(userId, event.data.object.id);
         await User.addBlog(userId, blog._id.toString());
     }
 
@@ -151,9 +156,9 @@ basicRoutes.post('/webhook', bodyParser.raw({type: 'application/json'}), asyncMi
 basicRoutes.get('/checkForNewBlog', isLoggedInMiddleware, asyncMiddleware(async(req, res) => {
     const user = await User.getUserByID(req.user._id);
     for (const blogID of user.blogs) {
-        const blogObj = await BlogDB.getBlog(blogID);
+        const blogObj = await AgentDB.getBlog(blogID);
         if (blogObj.newlyCreated) {
-            await BlogDB.removeNewlyCreated(blogID);
+            await AgentDB.removeNewlyCreated(blogID);
             return res.json(blogObj);
         }
     }

@@ -17,6 +17,10 @@
     height: 425px;
     border-radius: 20px;
     border: 2px solid var(--lightDark);
+    transition: all 1s ease-in-out;
+}
+.home-results-container.growLarge{
+    height: 80%;
 }
 
 

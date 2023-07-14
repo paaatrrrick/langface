@@ -28,6 +28,7 @@ db.once("open", () => {
     console.log("✅ Database connected");
 });
 
+app.set('trust proxy', true);
 app.use('/webhook', bodyParser.raw({type: "*/*"}));
 app.use(bodyParser.json(), bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());

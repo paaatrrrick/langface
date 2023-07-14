@@ -2,7 +2,7 @@ const { convertToObjectId } = require('../utils/helpers');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const postSchema = Schema({
+const messageSchema = Schema({
     title: String,
     config: String,
     url: String,
@@ -12,13 +12,16 @@ const postSchema = Schema({
 
 
 
-const BlogSchema = new Schema({
+const AgentSchema = new Schema({
     blogID: {
       type: String,
     },
-    blogPosts: {
-      type: [postSchema],
+    messages: {
+      type: [messageSchema],
       default: []
+    },
+    topPostID: {
+      type: String,
     },
     dateRecentlyPosted: {
       type: Date,
@@ -30,11 +33,11 @@ const BlogSchema = new Schema({
     },
     postsLeftToday: {
       type: Number,
-      default: 15
+      default: 450
     },
     maxNumberOfPosts: {
         type: Number,
-        default: 15,
+        default: 450,
     },
     userID: {
       type: String,
@@ -76,14 +79,14 @@ const BlogSchema = new Schema({
 
 
 //create a blog with default values
-BlogSchema.statics.createEmptyBlog = async function(userID, paymentID) {
+AgentSchema.statics.createEmptyBlog = async function(userID, paymentID) {
   const blog = new this({userID: userID, paymentID: paymentID});
   await blog.save();
   return blog;
 }
 
 //removeNewlyCreated
-BlogSchema.statics.removeNewlyCreated = async function(id) {
+AgentSchema.statics.removeNewlyCreated = async function(id) {
   id = convertToObjectId(id);
   const blog = await this.findById(id);
   blog.newlyCreated = false;
@@ -95,7 +98,7 @@ BlogSchema.statics.removeNewlyCreated = async function(id) {
 // create a newschema that doesn't have sstatics and then export it as Blog
 // setMaxNumberOfPosts
 //set HasStarted
-BlogSchema.statics.setHasStarted = async function(id, hasStarted) {
+AgentSchema.statics.setHasStarted = async function(id, hasStarted) {
     id = convertToObjectId(id);
     const blog = await this.findById(id);
     blog.hasStarted = hasStarted;
@@ -104,7 +107,7 @@ BlogSchema.statics.setHasStarted = async function(id, hasStarted) {
 };
 
 //subtract days left
-BlogSchema.statics.subtractDaysLeft = async function(id) {
+AgentSchema.statics.subtractDaysLeft = async function(id) {
   id = convertToObjectId(id);
   const blog = await this.findById(id);
   if (blog.daysLeft > 0) {
@@ -113,44 +116,23 @@ BlogSchema.statics.subtractDaysLeft = async function(id) {
   }
   return blog;
 };
-
-BlogSchema.statics.createNewBlog = async function(id) {
-  const existing = await this.findById(agent.blogID);
-  if (existing) {
-    existing.set({
-      blogID: agent.blogID,
-      version: agent.version,
-      userID: agent.uid,
-      openaiKey: agent.openaiKey,
-      jwt: agent.jwt,
-      subject: agent.subject,
-      config: agent.config,
-      loops: agent.loops,
-      daysLeft: agent.daysLeft
-    })
-    return await existing.save();
-  }
-  return existing;
-};
-
   
-BlogSchema.statics.getBlog = async function(id) {
+AgentSchema.statics.getBlog = async function(id) {
   id = convertToObjectId(id);
   return await this.findById(id);
 }
 
 //createBlog
-BlogSchema.statics.updateBlog = async function(id, params) {
+AgentSchema.statics.updateBlog = async function(id, params) {
   id = convertToObjectId(id);
-  const { blogID, version, userID, openaiKey, blogJwt, subject, config, loops, daysLeft } = params;
+  const { blogID, version, userID, openaiKey, blogJwt, subject, config, loops, daysLeft, topPostID } = params;
   const blog = await this.findById(id);
-  blog.set({blogID, version, userID, openaiKey,jwt: blogJwt,subject,config,loops,daysLeft})
+  blog.set({blogID, version, userID, openaiKey,jwt: blogJwt,subject,config,loops,daysLeft, topPostID})
   return await blog.save();
-
 }
 
 // Method to check remaining posts
-BlogSchema.statics.checkRemainingPosts = async function(id) {
+AgentSchema.statics.checkRemainingPosts = async function(id) {
   id = convertToObjectId(id);
   const today = new Date().setHours(0, 0, 0, 0);
   let blog = await this.findById(id);
@@ -162,14 +144,14 @@ BlogSchema.statics.checkRemainingPosts = async function(id) {
 };
 
 // Method to add post
-BlogSchema.statics.addPost = async function(id, postContent) {
+AgentSchema.statics.addPost = async function(id, postContent) {
   id = convertToObjectId(id);
   const today = new Date().setHours(0, 0, 0, 0);
   let blog = await this.findById(id);
   if (blog.dateRecentlyPosted.setHours(0, 0, 0, 0) < today) {
     blog.postsLeftToday = blog.maxNumberOfPosts;
   }
-  blog.blogPosts.push(postContent);
+  blog.messages.push(postContent);
   if (postContent.type === 'success' && blog.postsLeftToday > 0) {
     blog.postsLeftToday--;
   }
@@ -178,17 +160,17 @@ BlogSchema.statics.addPost = async function(id, postContent) {
   return {postsLeftToday: blog.postsLeftToday, maxNumberOfPosts: blog.maxNumberOfPosts };
 };
 
-BlogSchema.statics.getActive = async function() {
+AgentSchema.statics.getActive = async function() {
   return await mongoose.model('Blog').find({ daysLeft: { $gt: 0 }, hasStarted: false });
 }
 
-BlogSchema.statics.getOwner = async (id) => {
+AgentSchema.statics.getOwner = async (id) => {
   id = convertToObjectId(id);
   const blog = await this.findById(id);
   return blog.userID;
 }
 
-BlogSchema.statics.setUserId = async function(id, userID) {
+AgentSchema.statics.setUserId = async function(id, userID) {
   id = convertToObjectId(id);
   let blog = await this.findById(id);
   blog.userID = userID;
@@ -197,15 +179,15 @@ BlogSchema.statics.setUserId = async function(id, userID) {
 }
 
 //delete all blogPosts
-BlogSchema.statics.deleteAllBlogPosts = async function(id) {
+AgentSchema.statics.deleteAllMessages = async function(id) {
   id = convertToObjectId(id);
   let blog = await this.findById(id);
-  blog.blogPosts = [];
+  blog.messages = [];
   await blog.save();
   return blog;
 }
 
 // Create and export Blog Model
-const BlogDB = mongoose.model('Blog', BlogSchema);
-module.exports = BlogDB;
+const AgentDB = mongoose.model('Agent', AgentSchema);
+module.exports = AgentDB;
   

@@ -47,7 +47,7 @@ const slice = createSlice({
       state.blogIds = [...new Set(res)];
     },
     addBlogAgent: (state, action) => {
-      const { config, version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, subject, blogPosts, _id } = action.payload;
+      const { config, version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, subject, messages, _id } = action.payload;
       const tempBlog = {
         config: config || "",
         version: version || "wordpress",
@@ -58,7 +58,7 @@ const slice = createSlice({
         jwt: jwt || "",
         blogID: blogID || "",
         subject: subject || '',
-        data: blogPosts || [],
+        data: messages || [],
         hasStarted: false,
       }
       state.blogAgents[_id] = tempBlog;
@@ -74,7 +74,7 @@ const slice = createSlice({
       };
       const blogMap = {};
       for (let blog of blogs) {
-        const { config, version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, subject, blogPosts, hasStarted } = blog;
+        const { config, version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, subject, messages, hasStarted } = blog;
         const tempBlog = {
           config: config || "",
           version: version || "wordpress",
@@ -85,7 +85,7 @@ const slice = createSlice({
           jwt: jwt || "",
           blogID: blogID || "",
           subject: subject || ``,
-          data: blogPosts || [],
+          data: messages || [],
           hasStarted: hasStarted,
         }
         blogMap[blog._id] = tempBlog;

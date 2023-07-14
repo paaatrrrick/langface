@@ -12,6 +12,7 @@ const constants = {
   maxPosts: 3,
   GOOGLE_CLIENT_ID: "406198750695-i6p3k9r380io0tlre38j8jsvv2o4vmk7.apps.googleusercontent.com",
   authCookieName: "langface-token",
+  discordUrl: "https://discord.gg/HCkHcrh3U",
 };
 
 

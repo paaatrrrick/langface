@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 const HtmlModal = ({html, close}) => {
     const [raw, setRaw] = useState(false);
     return (
-    <div className="HtmlModal-overlay">
+    <div className="HtmlModal-overlay"> 
         
         <div className="HtmlModal">
         <button className="close-button" onClick={close}>&times;</button>

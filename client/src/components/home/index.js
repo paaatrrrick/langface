@@ -4,7 +4,8 @@ import { useSelector, useDispatch } from "react-redux";
 import constants, { defualtPills, sampleBlog } from "../../constants";
 import { getJwt, wordpressGetJwt, getUserAuthToken, isAuthenticatedResponse } from "../../utils/getJwt";
 import { scrollToBottom } from "../../utils/styles";
-import { setBannerMessage, setActiveBlogAgent, initializeBlogAgent, setVersion, signOut, setHtmlModal } from "../../store";
+import { trimStringToChars } from "../../utils/helpers";
+import { setBannerMessage, initializeBlogAgent, setVersion, signOut, setHtmlModal } from "../../store";
 import StatusPill from "../statusPill";
 import Dropdown from "../uxcore/dropdown";
 import SparklesSvg from "../../assets/sparkles-outline.svg";
@@ -21,7 +22,6 @@ const typeToImageMap = {
 const Home = ({joinRoom}) => {
     const dispatch = useDispatch();
     const activeBlogAgent = useSelector((state) => state.main.activeBlogAgent);
-    const isLoggedIn = useSelector((state) => state.main.isLoggedIn);
     const blogAgents = useSelector((state) => state.main.blogAgents);
     const currentBlog = blogAgents[activeBlogAgent];
     const [version, setActiveVersion] = useState("html");
@@ -124,11 +124,27 @@ const Home = ({joinRoom}) => {
       setBlogID("");
     };
 
+    const loopSetter = (e) => {
+      var tempLoops = e.target.value;
+      if (tempLoops * daysLeft > maxNumberOfPosts) {
+        dispatch(setBannerMessage({message: `You can only make ${maxNumberOfPosts} total posts with your current plan.`, type: "error", timeout: 10000}));
+      } else {
+        setLoops(tempLoops);
+      }
+    };
+    
+    const daysSetter = (e) => {
+      var tempDays = e.target.value;
+      if (tempDays * loops > maxNumberOfPosts) {
+        dispatch(setBannerMessage({message: `You can only make ${maxNumberOfPosts} total posts with your current plan.`, type: "error", timeout: 10000}));
+      } else {
+        setDaysToRun(tempDays);
+      }
+    };
+
     const canStart = ((version === "html") || (blogID && jwt)) !== "" && subject && loops;
-
-
     const versionSelectorOptions = [{id: "html", text: "Raw HTML"}, {id: "wordpress", text: "Post to Wordpress"}, {id: "blogger", text: "Post to Blogger.com"}];
-    console.log(data);
+
   return (
     <div className="Home">
       <div className="row align-center justify-start wrap">
@@ -136,17 +152,18 @@ const Home = ({joinRoom}) => {
         <h1 style={{marginRight: "15px"}}>BloggerGPT</h1>
         {(demo) 
         ? 
-        <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Demo</button>
+        <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Run Demo</button>
          : 
          <button className="runButton2 nohover" style={{margin: "0px"}}>Standard</button>
          }
       </div>
         <h6>Hire an AI agent that works autonomously to grow your blog</h6>
-        <div className="home-results-container">
+        <div className={`home-results-container ${hasStarted && 'growLarge'}`}>
         <div className="home-input-top-row">
-          <p>Daily Articles Used: {maxNumberOfPosts - postsLeftToday} / {maxNumberOfPosts}</p>
+          <p>{trimStringToChars(currentBlog.subject, 45)}</p>
+          <p>{demo ? 'Daily' : 'Monthly'} Articles Used: {maxNumberOfPosts - postsLeftToday} / {maxNumberOfPosts}</p>
         </div>
-        <div className="home-data-body" ref={messagesEndRef}>
+        <div className={`home-data-body`} ref={messagesEndRef}>
           {(!hasStarted && data.length === 0) &&
            defualtPills.map((pill, index) => (
             <StatusPill
@@ -179,7 +196,7 @@ const Home = ({joinRoom}) => {
           ))}
         </div>
         </div>
-        <div className="home-input-container">
+        {!hasStarted && <div className="home-input-container">
           <div className="home-firstInputRow">
             <div className="home-sectioned-input">
               <div className="left">
@@ -201,9 +218,9 @@ const Home = ({joinRoom}) => {
               value={config}
               onChange={(e) => setContent(e.target.value)}
               className="input" placeholder="Optinally, is there anything in particular you want the posts to have? For example, if you'd like to market a product, include it here: Sal's climbing, affordable rock climbing equipment at www.salsclimbing.com "/>
-            </div>
-        </div>
-        <div className="home-tinyInputs">
+          </div>
+        </div>}
+        {!hasStarted && <div className="home-tinyInputs">
           <div className="row align-center justify-start wrap">
           <div className="mock-container">
             <Dropdown options={versionSelectorOptions} selected={version} onSelectedChange={versionToggler}/>
@@ -218,7 +235,7 @@ const Home = ({joinRoom}) => {
                 value={loops} 
                 min={1}
                 max={postsLeftToday}
-                onChange={(e) => setLoops(e.target.value)}
+                onChange={loopSetter}
               />
           </div>
           {(!demo) &&
@@ -232,7 +249,7 @@ const Home = ({joinRoom}) => {
                 value={daysLeft} 
                 min={1}
                 max={14}
-                onChange={(e) => setDaysToRun(e.target.value)}
+                onChange={daysSetter}
               />
           </div>}
           {(version === "blogger") &&
@@ -255,13 +272,11 @@ const Home = ({joinRoom}) => {
               </button>
             }
           </div>
-            {(!hasStarted) && 
               <button  onClick={handleSubmit} disabled={!(!hasStarted && canStart)} className="runButton">
                   <img src={CaretForward} alt="run button" />
                   <h4>Start Agent</h4>
               </button>
-            }
-      </div>
+      </div>}
     </div>
   );
 };

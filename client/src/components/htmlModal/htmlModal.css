@@ -109,6 +109,12 @@
     overflow-y: auto;
   }
 
+  .HtmlModal-content::-webkit-scrollbar {
+    width: 10px;
+    background-color: aqua;
+    background: transparent;
+  }
+
   .HtmlModal-content * {
     display: flex;
     flex-direction: column;

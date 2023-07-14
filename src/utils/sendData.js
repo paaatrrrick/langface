@@ -1,23 +1,21 @@
 const { sendDataToClient, blogIdToSocket } = require("../endpoints/webSockets");
-const BlogDB = require("../mongo/blog");
-const DemoBlog = require("../mongo/demoBlog");
+const AgentDB = require("../mongo/agent");
+const DemoAgent = require("../mongo/demoAgent");
 
 
 const initSendData = (blogMongoID, demo = false) => {
     const sendData = async (dataForClient) => {
-      console.log('hit send data');
-      console.log(dataForClient);
         dataForClient.hasStarted = true;
         if (dataForClient.type === "ending") {
           dataForClient.hasStarted = false;
           if (!demo) {
-            BlogDB.setHasStarted(blogMongoID, false);
-            BlogDB.subtractDaysLeft(blogMongoID);
+            AgentDB.setHasStarted(blogMongoID, false);
+            AgentDB.subtractDaysLeft(blogMongoID);
           }
         }
     
         if (dataForClient.type !== "updating") {
-          const currAgent = demo ? DemoBlog : BlogDB;
+          const currAgent = demo ? DemoAgent : AgentDB;
           const postsLeft = await currAgent.addPost(blogMongoID, { url: dataForClient?.url || "", config: dataForClient?.config || "", title: dataForClient?.title || "", type: dataForClient?.type || "error", html: dataForClient?.html || "" });
           dataForClient = { ...dataForClient, ...postsLeft };
         }
