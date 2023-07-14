@@ -143,8 +143,9 @@ const Home = ({joinRoom}) => {
     };
 
     const canStart = ((version === "html") || (blogID && jwt)) !== "" && subject && loops;
-    const versionSelectorOptions = [{id: "html", text: "Raw HTML"}, {id: "wordpress", text: "Post to Wordpress"}, {id: "blogger", text: "Post to Blogger.com"}];
+    const versionSelectorOptions = [{id: "html", text: "Raw Text"}, {id: "wordpress", text: "Post to Wordpress"}, {id: "blogger", text: "Post to Blogger.com"}];
 
+    const isDataSmall = hasStarted || (!demo && currentBlog.daysLeft > 0);
   return (
     <div className="Home">
       <div className="row align-center justify-start wrap">
@@ -158,7 +159,7 @@ const Home = ({joinRoom}) => {
          }
       </div>
         <h6>Hire an AI agent that works autonomously to grow your blog</h6>
-        <div className={`home-results-container ${(hasStarted || currentBlog.daysLeft) && 'growLarge'}`}>
+        <div className={`home-results-container ${isDataSmall && 'growLarge'}`}>
         <div className="home-input-top-row">
           <p>{trimStringToChars(currentBlog.subject, 45)}</p>
           <div className="row">
@@ -199,7 +200,7 @@ const Home = ({joinRoom}) => {
           ))}
         </div>
         </div>
-        {(!hasStarted && !currentBlog.daysLeft) && 
+        {!isDataSmall && 
         <div className="home-input-container">
           <div className="home-firstInputRow">
             <div className="home-sectioned-input">
@@ -224,7 +225,7 @@ const Home = ({joinRoom}) => {
               className="input" placeholder="Optinally, is there anything in particular you want the posts to have? For example, if you'd like to market a product, include it here: Sal's climbing, affordable rock climbing equipment at www.salsclimbing.com "/>
           </div>
         </div>}
-        {(!hasStarted && !currentBlog.daysLeft) && 
+        {!isDataSmall && 
         <div className="home-tinyInputs">
           <div className="row align-center justify-start wrap">
           <div className="mock-container">
