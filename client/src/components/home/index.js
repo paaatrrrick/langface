@@ -154,14 +154,17 @@ const Home = ({joinRoom}) => {
         ? 
         <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Run Demo</button>
          : 
-         <button className="runButton2 nohover" style={{margin: "0px"}}>Standard</button>
+         <button className="runButton2 nohover" style={{margin: "0px"}}>Professional</button>
          }
       </div>
         <h6>Hire an AI agent that works autonomously to grow your blog</h6>
-        <div className={`home-results-container ${hasStarted && 'growLarge'}`}>
+        <div className={`home-results-container ${(hasStarted || currentBlog.daysLeft) && 'growLarge'}`}>
         <div className="home-input-top-row">
           <p>{trimStringToChars(currentBlog.subject, 45)}</p>
-          <p>{demo ? 'Daily' : 'Monthly'} Articles Used: {maxNumberOfPosts - postsLeftToday} / {maxNumberOfPosts}</p>
+          <div className="row">
+            {(!demo && currentBlog.daysLeft > 0) && <p style={{marginRight: "25px"}}>Days Left: {currentBlog.daysLeft}</p>}
+            <p>{demo ? 'Daily' : 'Monthly'} Articles Used: {maxNumberOfPosts - postsLeftToday} / {maxNumberOfPosts}</p>
+          </div>
         </div>
         <div className={`home-data-body`} ref={messagesEndRef}>
           {(!hasStarted && data.length === 0) &&
@@ -196,7 +199,8 @@ const Home = ({joinRoom}) => {
           ))}
         </div>
         </div>
-        {!hasStarted && <div className="home-input-container">
+        {(!hasStarted && !currentBlog.daysLeft) && 
+        <div className="home-input-container">
           <div className="home-firstInputRow">
             <div className="home-sectioned-input">
               <div className="left">
@@ -220,7 +224,8 @@ const Home = ({joinRoom}) => {
               className="input" placeholder="Optinally, is there anything in particular you want the posts to have? For example, if you'd like to market a product, include it here: Sal's climbing, affordable rock climbing equipment at www.salsclimbing.com "/>
           </div>
         </div>}
-        {!hasStarted && <div className="home-tinyInputs">
+        {(!hasStarted && !currentBlog.daysLeft) && 
+        <div className="home-tinyInputs">
           <div className="row align-center justify-start wrap">
           <div className="mock-container">
             <Dropdown options={versionSelectorOptions} selected={version} onSelectedChange={versionToggler}/>

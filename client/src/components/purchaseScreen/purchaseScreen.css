@@ -9,14 +9,24 @@
 }
 
 .PurchaseScreen-card{
-    width: min(33%, 300px);
-    height: 365px;
+    width: 32%;
+    height: 400px;
     border: 1px solid var(--lightDark);
-    padding: 24px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: space-between;
+}
+
+.PurchaseScreen-card-holder{
+    width: min(100%, 1000px);
+}
+
+.green{
+    font-size: 18px;
+    margin-right: 4px;
+    color: var(--green);
 }
 
 .PurchaseScreen-card:first-child{
@@ -24,11 +34,12 @@
     border-width: 1px 0px 1px 1px;
 }
 .PurchaseScreen-card:nth-child(2){
-    border-radius: 0px 0px 0px 0px;
-    border-width: 4px;
-    border-color: var(--brandOffColor);
+    width: 36%;
+    height: 430px;
+    border-width: 6px;
+    border-color: #dbf0ff;
     border-top: 0px solid var(--lightDark);
-    border-radius: 0px;
+    border-radius: 0px 0px 10px 10px;
 }
 .PurchaseScreen-card:last-child{
     border-radius: 0px 10px 10px 0px;
@@ -48,12 +59,12 @@
 }
 
 .PurchaseScreen-mostPopular{
-    width: min(33%, 300px);
-    height: 30px;
+    width: 36%;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--brandOffColor);
+    background-color: #dbf0ff;
     margin-bottom: -1px;
     color: var(--alwaysDark);
     font-weight: 500;
@@ -62,7 +73,7 @@
 }
 
 .PurchaseScreen-card button{
-    width: min(150px, 70%);
+    width: min(225px, 70%);
     height: 100%;
     border-radius: 20px;
     background-color: var(--brandColor);

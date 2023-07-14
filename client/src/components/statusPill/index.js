@@ -8,7 +8,6 @@ import { useSelector, useDispatch } from "react-redux";
 
 const StatusPill = ({ version, title, config, img, url, html, onClick  }) => {
     const dispatch = useDispatch();
-    console.log("StatusPill", version, title, config, img, url, html, onClick)
     if (!title && !config) return null;
     return (
         <div className={`status-pill ${version}`}>

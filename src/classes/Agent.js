@@ -13,7 +13,6 @@ const PostDB = require("../mongo/post");
 const {PineconeClient} = require("@pinecone-database/pinecone");
 const {WeaviateStore} = require("langchain/vectorstores/weaviate");
 const {OpenAIEmbeddings} = require("langchain/embeddings/openai");
-const weaviate = require('weaviate-ts-client');
 
 class Agent {
     constructor(openaiKey, sendData, jwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, demo = false, uid = null, draft = false, nextPostIndex, BFSOrderedArrayOfPostMongoID) { // AGENT

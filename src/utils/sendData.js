@@ -9,8 +9,9 @@ const initSendData = (blogMongoID, demo = false) => {
         if (dataForClient.type === "ending") {
           dataForClient.hasStarted = false;
           if (!demo) {
-            AgentDB.setHasStarted(blogMongoID, false);
-            AgentDB.subtractDaysLeft(blogMongoID);
+            await AgentDB.setHasStarted(blogMongoID, false);
+            const daysLeftBlog = await AgentDB.subtractDaysLeft(blogMongoID);
+            dataForClient.daysLeft = daysLeftBlog.daysLeft;
           }
         }
     
