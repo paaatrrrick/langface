@@ -38,7 +38,6 @@ const slice = createSlice({
   },
   reducers: {
     setHtmlModal: (state, action) => {
-      console.log(action.payload);
       state.htmlModal = action.payload;
     },
     setBlogIds (state, action) {
@@ -128,7 +127,7 @@ const slice = createSlice({
       if (state.blogAgents[blogId].data.length > 0 && state.blogAgents[blogId].data[state.blogAgents[blogId].data.length - 1].type === "updating") {
         state.blogAgents[blogId].data.pop();
       }
-      state.blogAgents[blogId].data.push(data);      
+      state.blogAgents[blogId].data.push(data);
       if (postsLeftToday !== null && maxNumberOfPosts !== null) {
         state.blogAgents[blogId].postsLeftToday = postsLeftToday || state.blogAgents[blogId].postsLeftToday;
         state.blogAgents[blogId].maxNumberOfPosts = maxNumberOfPosts || state.blogAgents[blogId].maxNumberOfPosts;

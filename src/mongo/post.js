@@ -52,8 +52,6 @@ PostSchema.statics.createPost = async function (params) {
 
 //update Post from params
 PostSchema.statics.updatePost = async function (id, params) {
-  console.log(id);
-  console.log(params);
   id = convertToObjectId(id);
   const post = await this.findByIdAndUpdate(id, params, { new: true });
   return post;

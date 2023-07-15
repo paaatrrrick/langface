@@ -60,8 +60,6 @@ basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
         if (blog.hasStarted) return res.status(400).json({error: "Blog has already started"});
         await User.addBlog(userID, blogMongoID);
         blog = await AgentDB.deleteAllMessages(blogMongoID);
-        console.log('blog at demo');
-        console.log(blog)
     } else {
         console.log('at demo')
         console.log(req.ip);

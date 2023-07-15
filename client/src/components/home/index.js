@@ -144,7 +144,6 @@ const Home = ({joinRoom}) => {
 
     const canStart = ((version === "html") || (blogID && jwt)) !== "" && subject && loops;
     const versionSelectorOptions = [{id: "html", text: "Raw Text"}, {id: "wordpress", text: "Post to Wordpress"}, {id: "blogger", text: "Post to Blogger.com"}];
-
     const isDataSmall = hasStarted || (!demo && currentBlog.daysLeft > 0);
   return (
     <div className="Home">

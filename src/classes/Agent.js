@@ -33,10 +33,7 @@ class Agent {
         this.daysLeft = daysLeft;
         this.summaries = [];
         this.BFSOrderedArrayOfPostMongoID = BFSOrderedArrayOfPostMongoID;
-        console.log('at agent top');
-        console.log(this.BFSOrderedArrayOfPostMongoID);
         this.nextPostIndex = nextPostIndex;
-        console.log(this.nextPostIndex);
         this.draft = draft;
         // TOOLS
         if (this.demo){
@@ -53,13 +50,16 @@ class Agent {
                 return
             }
 
+
+        await this.AgentDB.setHasStarted(this.blogMongoID, true);
+        var errors = 0;
+        
         if (this.nextPostIndex == 0) {
             await this.sendData({ type: "updating", config: `Building out a SEO sitemap for your posts (this usually takes a bit)`, title: `Loading... Researcher` });
             await this.researcher.generatePostsTree();
         }
 
-        await this.AgentDB.setHasStarted(this.blogMongoID, true);
-            var errors = 0;
+
             // For NextIndex in BFSOrderedArrayOfPostMongoIDs:
             //    if reached amount user wanted per day, then update NextIndex in DB and break
             //    generate + post (prompt should include outlines of children post and fake links guidance)
@@ -68,10 +68,7 @@ class Agent {
             //    update parent rawHTML (switch out fake internal links) using parent ID
             const min = this.nextPostIndex
             const max = this.nextPostIndex + this.loops
-            console.log(min, max)
             for (let i = min; i < max; i++) {
-                console.log('top of four loop')
-                console.log(min, max);
                 try {
                 await this.sendData({ type: "updating", config: `Step 1 of 3: Finding best longtail keywords`, title: `Loading... Article ${i + 1} / ${this.loops}` });
                 const post = await PostDB.getPostById(this.BFSOrderedArrayOfPostMongoID[i]);

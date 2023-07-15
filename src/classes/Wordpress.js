@@ -9,6 +9,7 @@ const Photos = require("./Photos");
 const { dummyblog } = require("../constants/dummyData");
 const { blogPost } = require("../constants/prompts");  
 const PostDB = require("../mongo/post");
+
 class Wordpress {
     constructor(config, outline, jwt, blogID, sendData, openaiKey, loops, summaries, currentIteration, draft, postMongoID, demo) {
         this.config = config;
@@ -157,7 +158,7 @@ class Wordpress {
         }),
       }
     );
-    PostDB.updatePost(child.parentMongoID, {rawHTML: newHTML});
+    await PostDB.updatePost(child.parentMongoID, {rawHTML: newHTML});
   }
 
   getFakeURL = (title) => {
