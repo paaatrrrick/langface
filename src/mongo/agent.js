@@ -95,8 +95,7 @@ AgentSchema.statics.createEmptyBlog = async function(userID, paymentID) {
 
 //removeNewlyCreated
 AgentSchema.statics.removeNewlyCreated = async function(id) {
-  id = convertToObjectId(id);
-  const blog = await this.findById(id);
+  const blog = await this.findById(convertToObjectId(id));
   blog.newlyCreated = false;
   await blog.save();
   return blog;
@@ -148,23 +147,12 @@ AgentSchema.statics.updateBlogSpecParam = async function(id, params) {
 
 
 AgentSchema.statics.checkRemainingPosts = async function(id) {
-  id = convertToObjectId(id);
-  let blog = await this.findById(id);
-  //  const today = new Date().setHours(0, 0, 0, 0);
-  // if (blog.dateRecentlyPosted.setHours(0, 0, 0, 0) < today) {
-  //   blog.postsLeftToday = blog.maxNumberOfPosts;
-  //   await blog.save();
-  // }
+  let blog = await this.findById(convertToObjectId(id));
   return {postsLeftToday: blog.postsLeftToday, maxNumberOfPosts: blog.maxNumberOfPosts};
 };
 
 AgentSchema.statics.addPost = async function(id, postContent) {
-  id = convertToObjectId(id);
-  let blog = await this.findById(id);
-  // const today = new Date().setHours(0, 0, 0, 0);
-  // if (blog.dateRecentlyPosted.setHours(0, 0, 0, 0) < today) {
-  //   blog.postsLeftToday = blog.maxNumberOfPosts;
-  // }
+  let blog = await this.findById(convertToObjectId(id));
   blog.messages.push(postContent);
   if (postContent.type === 'success' && blog.postsLeftToday > 0) {
     blog.postsLeftToday--;
@@ -179,14 +167,12 @@ AgentSchema.statics.getActive = async function() {
 }
 
 AgentSchema.statics.getOwner = async (id) => {
-  id = convertToObjectId(id);
-  const blog = await this.findById(id);
+  const blog = await this.findById(convertToObjectId(id));
   return blog.userID;
 }
 
 AgentSchema.statics.setUserId = async function(id, userID) {
-  id = convertToObjectId(id);
-  let blog = await this.findById(id);
+  let blog = await this.findById(convertToObjectId(id));
   blog.userID = userID;
   await blog.save();
   return blog;
@@ -194,9 +180,10 @@ AgentSchema.statics.setUserId = async function(id, userID) {
 
 //delete all blogPosts
 AgentSchema.statics.deleteAllMessages = async function(id) {
-  id = convertToObjectId(id);
-  let blog = await this.findById(id);
+  let blog = await this.findById(convertToObjectId(id));
   blog.messages = [];
+  blog.nextPostIndex = 0;
+  blog.BFSOrderedArrayOfPostMongoID = [];
   await blog.save();
   return blog;
 }

@@ -20,8 +20,6 @@ class LongTailResearcher {
     }
 
 
-    generatePostsTree = async () => {
-      await this.generateKeywords();
       // Put 1 blog post in posts DB with blueprint (no parent because it's the top post), push mongoID to parents queue
       // store mongoID in agent.BFS ordered array of mongoIDs + 
       // set "topPostID" property of agent in DB to top mongoID 
@@ -34,6 +32,9 @@ class LongTailResearcher {
       //        store mongoID in agent.BFS ordered array of mongIDs
       //        update .children of the parent
       // 
+    generatePostsTree = async () => {
+      await this.generateKeywords();
+
       let currBlueprint = await this.getNextBlueprint();     
       let currPost = await PostDB.createPost({blueprint: currBlueprint});
       this.BFSOrderedArrayOfPostMongoID.push(currPost._id);
@@ -58,7 +59,6 @@ class LongTailResearcher {
         console.log(postCount, this.loops);
       }
       // Have all posts posted here.
-
       // Work Left: Generate posts, update rawHTML + url properties, go back and update internal links
       // 
       // For NextIndex in BFSOrderedArrayOfPostMongoIDs:
@@ -93,22 +93,6 @@ class LongTailResearcher {
         this.LongTailKeywords  = response.text.split("\n");
         return this.LongTailKeywords;
       };
-    // initialize = async () => {
-    //     //I want to do a loop that run the research in batches of 10. Perform batches of 10 for the number of loops. The last batch should be the remainder of the loops.
-    //     const parserFromZod = StructuredOutputParser.fromZodSchema(
-    //         z.array(z.string().describe(`List ${this.loops} Longtail keywords for my blog.`)
-    //     ));
-    //     const formatInstructions = parserFromZod.getFormatInstructions()
-    //     const systemMessage =`You are a world class SEO expert who specializes in long tail keyword detections. You are hired by a company to make a list of ${this.loops} Longtail keywords that you would expect to have low competitior and high volume, making them perfect for their blog to target, meaning they would have high traffic and low competition. Clients give you the subject of their blog ${(this.content) &&` and then an very detailed specifications of what their blog, some of which might not be relevant to you.`}. Then you find the give them a list of keywords which follows the format instructions.`;
-    //     const humanMessage = `Blog Subject: "${this.subject}"${(this.content) && `\n\nBLOG SPECIFICATIONS:\n\n "${this.content}" \n\n{format_instructions}`}`
-    //     const humanPrompt = new PromptTemplate({template: humanMessage, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
-    //     const humanInput = await humanPrompt.format();
-    //     const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openaiKey});
-    //     const response = await model.call([new SystemChatMessage(systemMessage), new HumanChatMessage(humanInput)]);
-    //     const parsed = await parserFromZod.parse(response.text);
-    //     this.LongTailKeywords = parsed;
-    //     return this.LongTailKeywords;
-    // }
 
     getNextBlueprint = async () => {
         if (process.env.MOCK_RESEARCH === 'true') return dummyBlueprint[0];
@@ -131,12 +115,6 @@ class LongTailResearcher {
 
 
     generateBlueprint = async (keyword) => {
-        // const parserFromZod = StructuredOutputParser.fromZodSchema(z.object({
-        //       usableKeyword: z.string().describe("A boolean, true if the keyword could be used in a title of a blog post for the config provided. Otherwise false"),
-        //       blogTitle: z.number().describe("If usableKeyword is false, write NA. Otherwise, write an SEO optimized title for a blog post which contains the keyword and is relevant to the config provided"),
-        //       lsiKeywords: z.number().describe("If usableKeyword is false, write NA. Otherwise, what are 5 other comma separated keywords that are semantically relevant to the keyword provided. For example, the keyword 'credit cards' should return: money, credit score, credit limit, loans, interest rate."),
-        //       headers: z.array(z.string().describe("If usableKeyword is false, write NA. Write a list of ten headers that act as a blueprint for a blog post designed to rank highlighy for this keyword. This should leverage the keywords, config provided, and your knowledge of the subject."))
-        // }));
         const parserFromZod = StructuredOutputParser.fromZodSchema(z.object({
                 blogTitle: z.string().describe("Write an SEO optimized title for a blog post which contains the keyword and is relevant to the config provided"),
                 lsiKeywords: z.string().describe("What are 5 other comma separated keywords that are semantically relevant to the keyword provided. For example, the keyword 'credit cards' should return: money, credit score, credit limit, loans, interest rate."),

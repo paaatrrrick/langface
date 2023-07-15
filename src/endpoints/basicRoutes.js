@@ -59,13 +59,14 @@ basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
         blog = await AgentDB.updateBlog(blogMongoID, {blogID, version, userID, openaiKey: openaiKey, blogJwt, subject, config, loops, daysLeft});
         if (blog.hasStarted) return res.status(400).json({error: "Blog has already started"});
         await User.addBlog(userID, blogMongoID);
-        await AgentDB.deleteAllMessages(blogMongoID);
+        blog = await AgentDB.deleteAllMessages(blogMongoID);
+        console.log('blog at demo');
+        console.log(blog)
     } else {
         console.log('at demo')
         console.log(req.ip);
         console.log(req.connection.remoteAddress)
         const ip = req.ip || req.connection.remoteAddress;
-        console.log(ip);
         blog = await DemoAgent.createBlog({ip});
         blogMongoID = blog?._id?.toString();
     }

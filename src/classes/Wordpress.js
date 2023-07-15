@@ -52,22 +52,16 @@ class Wordpress {
           var childrenURLs = [];
           let parent = undefined;
           if (!this.demo){
-            // modify prompts to tell llm to naturally and contextually include title of children
             const post = await PostDB.getPostById(this.postMongoID);
             parent = await PostDB.getPostById(post.parentMongoID);
-            console.log(post, parent);
             for (let id of post.childrenMongoID){
               const child = await PostDB.getPostById(id);
               childrenURLs.push(this.getFakeURL(child.blueprint.blogTitle));
             };
-            // ^^
           }
-          console.log(childrenURLs);
           const template = blogPost(this.outline.keyword, this.outline.lsiKeywords, this.outline.blogTitle, this.outline.headers, this.config, this.summaries, this.imageNames, parent, childrenURLs);
           const response = await model.call([new HumanChatMessage(template)]);
           const text = response.text;
-          console.log('here is the post');
-          console.log(text);
           return text;
         } catch (e) {
           console.log(e)
@@ -108,41 +102,21 @@ class Wordpress {
 
     postToWordpress = async (post, imageUrls) => {
         if (process.env.MOCK_POST_TO_WORDPRESS === "true") return {title: this.outline.blogTitle, config: post, url: "https://historylover4.wordpress.com/2021/08/16/this-is-a-test-post/"};
-        console.log('posting to wordpress');
         for (let i in imageUrls) {
             post = replaceStringInsideStringWithNewString(post, this.imageNames[i], imageUrls[i]);
         }
-        var response;
-        if (this.draft){
-          response = await fetch(`https://public-api.wordpress.com/rest/v1/sites/${this.blogID}/posts/new`,
+        const body = { title: this.outline.blogTitle, content: post};
+        if (this.draft) body.status = "draft";
+        const response = await fetch(`https://public-api.wordpress.com/rest/v1/sites/${this.blogID}/posts/new`,
           {
             method: "POST",
             headers: {
               Authorization: `Bearer ${this.jwt}`,
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-              status: "draft",
-              title: this.outline.blogTitle,
-              content: post,
-            }),
+            body: JSON.stringify(body),
           }
         );
-        } else {
-          response = await fetch(`https://public-api.wordpress.com/rest/v1/sites/${this.blogID}/posts/new`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${this.jwt}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              title: this.outline.blogTitle,
-              content: post,
-            }),
-          }
-        );
-        }
         if (!response.ok) {
           const error = await response.text();
           console.log('error posting to wordpress');
@@ -150,11 +124,7 @@ class Wordpress {
           throw new Error(`Error creating your post: we failed to post to Wordpress`);
         } else {
           const result = await response.json();
-          console.log(result);
-          console.log(result.ID);
-          
-          const pp = await PostDB.updatePost(this.postMongoID, {url: result.URL, rawHTML: post, postID: result.ID.toString()});
-          console.log(pp);
+          await PostDB.updatePost(this.postMongoID, {url: result.URL, rawHTML: post, postID: result.ID.toString()});
           if (!this.draft && !this.demo){
             this.updateParent();
           }
@@ -172,11 +142,9 @@ class Wordpress {
     const rawHTML = parent.rawHTML;
     const fakeURL = this.getFakeURL(child.blueprint.blogTitle);
 
-    console.log("updateURLS: ", fakeURL, child.url);
     let newHTML = replaceStringInsideStringWithNewString(rawHTML, fakeURL, child.url);
     const update = parent.postID;
-    console.log(update);
-    let response = await fetch(`https://public-api.wordpress.com/rest/v1/sites/${this.blogID}/posts/${update}`,
+    await fetch(`https://public-api.wordpress.com/rest/v1/sites/${this.blogID}/posts/${update}`,
       {
         method: "POST",
         headers: {
@@ -189,7 +157,6 @@ class Wordpress {
         }),
       }
     );
-    console.log(await response.json());
     PostDB.updatePost(child.parentMongoID, {rawHTML: newHTML});
   }
 

@@ -33,92 +33,77 @@ class Agent {
         this.daysLeft = daysLeft;
         this.summaries = [];
         this.BFSOrderedArrayOfPostMongoID = BFSOrderedArrayOfPostMongoID;
+        console.log('at agent top');
+        console.log(this.BFSOrderedArrayOfPostMongoID);
         this.nextPostIndex = nextPostIndex;
+        console.log(this.nextPostIndex);
         this.draft = draft;
         // TOOLS
-        // this.researcher = new Researcher(subject, this.openaiKey);
         if (this.demo){
           this.researcher = new LongTailResearcher(subject, /** monthlyRateLimit=*/ this.loops, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
-        }
-        else{
+        } else{
           this.researcher = new LongTailResearcher(subject, /** monthlyRateLimit=*/ 10, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
         }
     }
+
     run = async () => {
         try {
-        if (this.demo){
-          this.demoRun();
-          return;
-        }
-        if (this.nextPostIndex == 0)  {
-          await this.researcher.generatePostsTree();
-        }
-        await AgentDB.updateBlogSpecParam(this.blogMongoID, {postsLeftToday: this.loops});
-
-        if (!this.demo) await this.AgentDB.setHasStarted(this.blogMongoID, true);
-        var errors = 0;
-        // For NextIndex in BFSOrderedArrayOfPostMongoIDs:
-        //    if reached amount user wanted per day, then update NextIndex in DB and break
-        //    generate + post (prompt should include outlines of children post and fake links guidance)
-        //    update rawHTML + url in DB
-        //    done if top post, else:
-        //    update parent rawHTML (switch out fake internal links) using parent ID
-        for (let i = this.nextPostIndex; i < this.BFSOrderedArrayOfPostMongoID.length; i++) {
-            try {
-            const { postsLeftToday } = await this.AgentDB.checkRemainingPosts(this.blogMongoID);
-            if (postsLeftToday <= 0) {
-                await this.sendData({ type: "ending", config: "Ending: You have reached your daily post limit" });
-                // update nextPostIndex to resume in next run
-                await AgentDB.updateBlogSpecParam(this.blogMongoID, {nextPostIndex: this.nextPostIndex});
-                return;
+            if (this.demo) {
+                this.demoRun();
+                return
             }
-            await this.sendData({ type: "updating", config: `Step 1 of 3: Finding best longtail keywords`, title: `Loading... Article ${i + 1} / ${this.loops}` });
-            const post = await PostDB.getPostById(this.BFSOrderedArrayOfPostMongoID[i]);
-            var blueprint = post.blueprint;
-            if (!blueprint) {
-                await this.sendData({ type: "ending", config: "Ran out of keywords" });
-                return;
-            }
-            
-            // Uniqueness, issue for when move away from 450 outlines.
-            // var rewriteAttempts = 0;
-            // while (!this.isUnique(blueprint) && (rewriteAttempts < 3)){
-            //     blueprint = await this.researcher.rewriteBlueprint(blueprint);
-            //     if (!blueprint) { 
-            //     await this.sendData({type:"ending", config:"ran out of keywords"}); 
-            //     return;
-            //     }
-            //     rewriteAttempts++;
-            // }
-            // await this.postToPincecone(i, blueprint);
 
-            
-            const BlogAgent = this.version === "blogger" ? Blogger : this.version === "html" ? Html : Wordpress;
-            const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, this.draft, this.BFSOrderedArrayOfPostMongoID[i], this.demo);
+        if (this.nextPostIndex == 0) {
+            await this.sendData({ type: "updating", config: `Building out a SEO sitemap for your posts (this usually takes a bit)`, title: `Loading... Researcher` });
+            await this.researcher.generatePostsTree();
+        }
 
-            var result = await blogSite.run();
-            this.summaries.push({summary: blueprint.headers, url: result.url});
-            await this.sendData({
-                ... result,
-                type: 'success',
-                config: blueprint.headers
-            });
-        } catch (e) {
-            errors++;
-            if (errors >= 5) {
-                await this.sendData({type: "ending", title: "Too many errors, stopping process"});
-                return;
+        await this.AgentDB.setHasStarted(this.blogMongoID, true);
+            var errors = 0;
+            // For NextIndex in BFSOrderedArrayOfPostMongoIDs:
+            //    if reached amount user wanted per day, then update NextIndex in DB and break
+            //    generate + post (prompt should include outlines of children post and fake links guidance)
+            //    update rawHTML + url in DB
+            //    done if top post, else:
+            //    update parent rawHTML (switch out fake internal links) using parent ID
+            const min = this.nextPostIndex
+            const max = this.nextPostIndex + this.loops
+            console.log(min, max)
+            for (let i = min; i < max; i++) {
+                console.log('top of four loop')
+                console.log(min, max);
+                try {
+                await this.sendData({ type: "updating", config: `Step 1 of 3: Finding best longtail keywords`, title: `Loading... Article ${i + 1} / ${this.loops}` });
+                const post = await PostDB.getPostById(this.BFSOrderedArrayOfPostMongoID[i]);
+                var blueprint = post.blueprint;
+                if (!blueprint) {
+                    await this.sendData({ type: "ending", config: "Ran out of keywords" });
+                    return;
+                }
+                const BlogAgent = this.version === "blogger" ? Blogger : this.version === "html" ? Html : Wordpress;
+                const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, this.draft, this.BFSOrderedArrayOfPostMongoID[i], this.demo);
+                var result = await blogSite.run();
+                this.summaries.push({summary: blueprint.headers, url: result.url});
+                await this.sendData({... result, type: 'success', config: blueprint.headers});
+            } catch (e) {
+                errors++;
+                if (errors >= 5) {
+                    await this.sendData({type: "ending", title: "Too many errors, stopping process"});
+                    return;
+                }
+                console.log('error from loops')
+                console.log(e);
+                await this.sendData({type: "error", title: `Error: ${e.message}`});
             }
-            console.log('error from loops')
-            console.log(e);
-            await this.sendData({type: "error", title: e.message});
-        }
-        }
-        if (this.daysLeft > 0) {
-            await this.sendData({type: "ending", title: "Process Complete. Next run scheduled for tomorrow."});
-        } else {
-            await this.sendData({type: "ending", title: "Process Complete."});
-        }
+            }
+            console.log('bottom of four loop')
+            await AgentDB.updateBlogSpecParam(this.blogMongoID, {nextPostIndex: this.nextPostIndex});
+            if (this.daysLeft > 0) {
+                await this.sendData({type: "ending", title: "Process Complete. Next run scheduled for tomorrow."});
+            } else {
+                await this.sendData({type: "ending", title: "Process Complete."});
+            }
+            return;
         } catch (e) {
             console.log('error from agent')
             console.log(e);
@@ -129,30 +114,18 @@ class Agent {
       var errors = 0;
       for (let i = 0; i < this.loops; i++) {
         try {
-        const { postsLeftToday } = await this.AgentDB.checkRemainingPosts(this.blogMongoID);
-        if (postsLeftToday <= 0) {
-            await this.sendData({ type: "ending", config: "Ending: You have reached your daily post limit" });
-            // update nextPostIndex to resume in next run
-            await AgentDB.updateBlogSpecParam(this.blogMongoID, {nextPostIndex: this.nextPostIndex});
-            return;
-        }
         await this.sendData({ type: "updating", config: `Step 1 of 3: Finding best longtail keywords`, title: `Loading... Article ${i + 1} / ${this.loops}` });
         var blueprint = await this.researcher.getNextBlueprint();
         if (!blueprint) {
             await this.sendData({ type: "ending", config: "Ran out of keywords" });
             return;
         }
-        
         const BlogAgent = this.version === "blogger" ? Blogger : this.version === "html" ? Html : Wordpress;
-        const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, this.draft, undefined, this.demo);
+        const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, this.draft, undefined, this.demo)
 
         var result = await blogSite.run();
         this.summaries.push({summary: blueprint.headers, url: result.url});
-        await this.sendData({
-            ... result,
-            type: 'success',
-            config: blueprint.headers
-        });
+        await this.sendData({... result, type: 'success', config: blueprint.headers});
     } catch (e) {
         errors++;
         if (errors >= 5) {
@@ -162,13 +135,9 @@ class Agent {
         console.log('error from loops')
         console.log(e);
         await this.sendData({type: "error", title: e.message});
+        }
     }
-    }
-    if (this.daysLeft > 0) {
-        await this.sendData({type: "ending", title: "Process Complete. Next run scheduled for tomorrow."});
-    } else {
-        await this.sendData({type: "ending", title: "Process Complete."});
-    }
+    await this.sendData({type: "ending", title: "Process Complete."});
   } 
     postToPincecone = async (id, blueprint) => {
         return;
@@ -232,3 +201,16 @@ class Agent {
 module.exports = {
     Agent
 };
+
+
+// Uniqueness, issue for when move away from 450 outlines.
+// var rewriteAttempts = 0;
+// while (!this.isUnique(blueprint) && (rewriteAttempts < 3)){
+//     blueprint = await this.researcher.rewriteBlueprint(blueprint);
+//     if (!blueprint) { 
+//     await this.sendData({type:"ending", config:"ran out of keywords"}); 
+//     return;
+//     }
+//     rewriteAttempts++;
+// }
+// await this.postToPincecone(i, blueprint);
