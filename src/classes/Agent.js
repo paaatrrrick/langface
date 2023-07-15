@@ -38,9 +38,8 @@ class Agent {
         // TOOLS
         if (this.demo){
           this.researcher = new LongTailResearcher(subject, /** monthlyRateLimit=*/ this.loops, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
-        }
-        else{
-          this.researcher = new LongTailResearcher(subject, /** monthlyRateLimit=*/ 4, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
+        } else{
+          this.researcher = new LongTailResearcher(subject, (this.loops * this.daysLeft), config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
         }
     }
 
@@ -59,8 +58,6 @@ class Agent {
             await this.sendData({ type: "updating", config: `Building out a SEO sitemap for your posts (this usually takes a bit)`, title: `Loading... Researcher` });
             await this.researcher.generatePostsTree();
         }
-
-
             // For NextIndex in BFSOrderedArrayOfPostMongoIDs:
             //    if reached amount user wanted per day, then update NextIndex in DB and break
             //    generate + post (prompt should include outlines of children post and fake links guidance)
