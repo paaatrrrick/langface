@@ -38,8 +38,9 @@ class Agent {
         // TOOLS
         if (this.demo){
           this.researcher = new LongTailResearcher(subject, /** monthlyRateLimit=*/ this.loops, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
-        } else{
-          this.researcher = new LongTailResearcher(subject, /** monthlyRateLimit=*/ 10, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
+        }
+        else{
+          this.researcher = new LongTailResearcher(subject, /** monthlyRateLimit=*/ 4, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
         }
     }
 
@@ -72,7 +73,7 @@ class Agent {
                 try {
                 await this.sendData({ type: "updating", config: `Step 1 of 3: Finding best longtail keywords`, title: `Loading... Article ${i + 1} / ${this.loops}` });
                 const post = await PostDB.getPostById(this.BFSOrderedArrayOfPostMongoID[i]);
-                var blueprint = post.blueprint;
+                const blueprint = await this.researcher.generateBlueprint(post.blueprint.keyword, post);
                 if (!blueprint) {
                     await this.sendData({ type: "ending", config: "Ran out of keywords" });
                     return;

@@ -3,11 +3,23 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const blueprintSchema = Schema({
-    blogTitle: String,
-    lsiKeywords: String,
-    keyword: String,
-    headers: String,
-}, { _id: false });
+    blogTitle: {
+      type: String,
+      default: undefined
+    },
+    lsiKeywords: {
+      type: String, 
+      default: undefined
+    },
+    keyword: {
+      type: String, 
+      default: undefined
+    },
+    headers:  {
+      type: String, 
+      default: undefined
+    },
+});
 
 
 
@@ -25,7 +37,7 @@ const PostSchema = new Schema({
     default: "",
   },
   blueprint: {
-    type: blueprintSchema,
+    type: blueprintSchema
   },
   rawHTML: {
     type: String,
