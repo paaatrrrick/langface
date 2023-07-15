@@ -55,9 +55,10 @@ class Wordpress {
             // modify prompts to tell llm to naturally and contextually include title of children
             const post = await PostDB.getPostById(this.postMongoID);
             parent = await PostDB.getPostById(post.parentMongoID);
-            console.log(post, parent);
+            console.log("writepost: ", "post: ", post, "parent ", parent);
             for (let id of post.childrenMongoID){
               const child = await PostDB.getPostById(id);
+              console.log("child ", child);
               childrenURLs.push(this.getFakeURL(child.blueprint.blogTitle));
             };
             // ^^
@@ -152,7 +153,7 @@ class Wordpress {
           const result = await response.json();
           console.log(result);
           console.log(result.ID);
-          
+
           const pp = await PostDB.updatePost(this.postMongoID, {url: result.URL, rawHTML: post, postID: result.ID.toString()});
           console.log(pp);
           if (!this.draft && !this.demo){

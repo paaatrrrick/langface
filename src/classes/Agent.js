@@ -41,7 +41,7 @@ class Agent {
           this.researcher = new LongTailResearcher(subject, /** monthlyRateLimit=*/ this.loops, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
         }
         else{
-          this.researcher = new LongTailResearcher(subject, /** monthlyRateLimit=*/ 10, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
+          this.researcher = new LongTailResearcher(subject, /** monthlyRateLimit=*/ 4, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
         }
     }
     run = async () => {
@@ -74,7 +74,8 @@ class Agent {
             }
             await this.sendData({ type: "updating", config: `Step 1 of 3: Finding best longtail keywords`, title: `Loading... Article ${i + 1} / ${this.loops}` });
             const post = await PostDB.getPostById(this.BFSOrderedArrayOfPostMongoID[i]);
-            var blueprint = post.blueprint;
+            const blueprint = await this.researcher.generateBlueprint(post.blueprint.keyword, post);
+            // Don't think this is doing anything?
             if (!blueprint) {
                 await this.sendData({ type: "ending", config: "Ran out of keywords" });
                 return;
@@ -91,7 +92,6 @@ class Agent {
             //     rewriteAttempts++;
             // }
             // await this.postToPincecone(i, blueprint);
-
             
             const BlogAgent = this.version === "blogger" ? Blogger : this.version === "html" ? Html : Wordpress;
             const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, this.draft, this.BFSOrderedArrayOfPostMongoID[i], this.demo);

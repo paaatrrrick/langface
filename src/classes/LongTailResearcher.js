@@ -14,14 +14,15 @@ class LongTailResearcher {
         this.config = config;
         this.openAIApiKey = openAIApiKey;
         this.hasInitialized = false;
-        this.LongTailKeywords = [];
+        this.demoKeywords = [];
         this.blogMongoID = blogMongoID;
         this.BFSOrderedArrayOfPostMongoID = BFSOrderedArrayOfPostMongoID;
+        this.childrenCount = 3; /** children count hard coded until consensus*/
     }
 
 
+    // generateKeywords, inLoop: generateOutline + makePost & Post it.
     generatePostsTree = async () => {
-      await this.generateKeywords();
       // Put 1 blog post in posts DB with blueprint (no parent because it's the top post), push mongoID to parents queue
       // store mongoID in agent.BFS ordered array of mongoIDs + 
       // set "topPostID" property of agent in DB to top mongoID 
@@ -33,9 +34,10 @@ class LongTailResearcher {
       //        push mongoID to queue 
       //        store mongoID in agent.BFS ordered array of mongIDs
       //        update .children of the parent
-      // 
-      let currBlueprint = await this.getNextBlueprint();     
-      let currPost = await PostDB.createPost({blueprint: currBlueprint});
+      //
+      let seedKeywordArr = await this.getKeywords(1);
+      let currKeyword = seedKeywordArr[0];
+      let currPost = await PostDB.createPost({blueprint: {keyword: currKeyword}});
       this.BFSOrderedArrayOfPostMongoID.push(currPost._id);
       await AgentDB.updateBlogSpecParam(this.blogMongoID, {topPostID: this.blogMongoID, BFSOrderedArrayOfPostMongoID: this.BFSOrderedArrayOfPostMongoID});
       const parentsQ = [];
@@ -43,9 +45,10 @@ class LongTailResearcher {
       let postCount = 1;
       while (postCount < this.loops){
         let parentMongoID = parentsQ.shift();
-        for (let i = 0; i < 3 /** children count hard coded until consensus*/; i++){
-          let currBlueprint = await this.getNextBlueprint();     
-          let currPost = await PostDB.createPost({parentMongoID: parentMongoID, blueprint: currBlueprint});
+        let childrenKeywords = await this.getKeywords(this.childrenCount, currKeyword);
+        for (let i = 0; i < childrenKeywords.length; i++){
+          currKeyword = childrenKeywords[i];
+          let currPost = await PostDB.createPost({parentMongoID: parentMongoID, blueprint: {keyword: currKeyword}});
           parentsQ.push(currPost._id);
           this.BFSOrderedArrayOfPostMongoID.push(currPost._id);
           await AgentDB.updateBlogSpecParam(this.blogMongoID, {BFSOrderedArrayOfPostMongoID: this.BFSOrderedArrayOfPostMongoID});
@@ -70,29 +73,34 @@ class LongTailResearcher {
       // 
     }
 
-    // TODO (Gautam): switch to getKeywords() to get keywords for Ads keyword planner OR SERP API
-    generateKeywords = async () => {
-        console.log("Writing titles...");
-        const parser = new CustomListOutputParser({
-          length: this.loops,
-          separator: "\n",
-        });
-        const formatInstructions = parser.getFormatInstructions();
-        const prompt = new PromptTemplate({
-          template: `Provide an unordered list of length "{loops}" of Longtail keywords that you would expect to have few competitors and high volume traffic for a blog about "{subject}". \n{format_instructions}`,
-          inputVariables: ["subject", "loops"],
-          partialVariables: { format_instructions: formatInstructions },
-        });
-        const input = await prompt.format({
-          subject: this.subject,
-          loops: this.loops,
-        });
-        console.log(input);
-        const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 3000, openAIApiKey: this.openaiKey});
-        const response = await model.call([new HumanChatMessage(input)]);
-        this.LongTailKeywords  = response.text.split("\n");
-        return this.LongTailKeywords;
-      };
+    // TODO (Gautam): switch to getKeywords() to get keywords for Ads keyword planner OR SERP API    
+    getKeywords = async(count, subject=this.subject) => {
+      const parser = new CustomListOutputParser({
+        length: count,
+        separator: "\n",
+      });
+      const formatInstructions = parser.getFormatInstructions();
+      if (subject === this.subject){
+        var template = `Provide an unordered list of length "{loops}" of Longtail keywords that you would expect to have few competitors and high volume traffic for a blog about "{subject}". \n{format_instructions}`
+      }
+      else {
+        var template = "Given the longtail keyword {subject}, provide an unordered list of length {loops} of VERY highly distinct longtail keywords that tangentially extend the given keyword and go deeper."
+      }
+      const prompt = new PromptTemplate({
+        template: template,
+        inputVariables: ["subject", "loops"],
+        partialVariables: { format_instructions: formatInstructions },
+      });
+      const input = await prompt.format({
+        subject: subject,
+        loops: count,
+      });
+      console.log(input);
+      const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 3000, openAIApiKey: this.openaiKey});
+      const response = await model.call([new HumanChatMessage(input)]);
+      const keywords  = response.text.split("\n");
+      return keywords;
+    }
     // initialize = async () => {
     //     //I want to do a loop that run the research in batches of 10. Perform batches of 10 for the number of loops. The last batch should be the remainder of the loops.
     //     const parserFromZod = StructuredOutputParser.fromZodSchema(
@@ -114,15 +122,16 @@ class LongTailResearcher {
         if (process.env.MOCK_RESEARCH === 'true') return dummyBlueprint[0];
         try {
             if (this.demo && !this.hasInitialized) {
-              await this.generateKeywords();
+              this.demoKeywords = await this.getKeywords(this.loops);
               this.hasInitialized = true;
             } 
             if (this.LongTailKeywords.length === 0) {
                 return false;
             }
-            const nextKeyword = this.LongTailKeywords.shift(); // get first thing by shifting left
-            console.log("kw" + nextKeyword);
-            return await this.generateBlueprint(nextKeyword);
+            const nextKeyword = this.demoKeywords.shift(); // get first thing by shifting left
+            console.log("kw: " + nextKeyword);
+            const blueprint = await this.generateBlueprint(nextKeyword);
+            return blueprint;
         } catch (error) {
             console.log(error);
             throw new Error('Error finding the best longtail keyword');
@@ -130,7 +139,7 @@ class LongTailResearcher {
     }
 
 
-    generateBlueprint = async (keyword) => {
+    generateBlueprint = async (keyword, post=undefined) => {
         // const parserFromZod = StructuredOutputParser.fromZodSchema(z.object({
         //       usableKeyword: z.string().describe("A boolean, true if the keyword could be used in a title of a blog post for the config provided. Otherwise false"),
         //       blogTitle: z.number().describe("If usableKeyword is false, write NA. Otherwise, write an SEO optimized title for a blog post which contains the keyword and is relevant to the config provided"),
@@ -151,13 +160,46 @@ class LongTailResearcher {
         const response = await model.call([new HumanChatMessage(input)]);
         const parsed = await parserFromZod.parse(response.text)   
         const { blogTitle, lsiKeywords, headers } = parsed;
-        console.log(parsed);
-        return { blogTitle, lsiKeywords, keyword, headers };
+        const blueprint = { blogTitle, lsiKeywords, keyword, headers };
+        if (post){
+          console.log("reached post", post._id, blueprint);
+          await PostDB.updatePost(post._id, {blueprint: blueprint});
+          await this.generateBlueprintForChildren(post);
+        }
+        return blueprint;
         }catch(e){
           console.log(e);
           return {blogTitle:"BPerror", lsiKeywords:"BPerror", keyword:"BPerror", headers:"BPerror"};
         }
       };
+
+      generateBlueprintForChildren = async(parent) => {
+        for (let i = 0; i < parent.childrenMongoID.length; i++){
+          const currChildID = parent.childrenMongoID[i];
+          const currChild = await PostDB.getPostById(currChildID);
+          const keyword = currChild.blueprint.keyword;
+          const parserFromZod = StructuredOutputParser.fromZodSchema(z.object({
+            blogTitle: z.string().describe("Write an SEO optimized title for a blog post which contains the keyword and is relevant to the config provided"),
+            lsiKeywords: z.string().describe("What are 5 other comma separated keywords that are semantically relevant to the keyword provided. For example, the keyword 'credit cards' should return: money, credit score, credit limit, loans, interest rate."),
+            headers: z.string().describe("What are ten comma seperated headers that act as a blueprint for a blog post designed to rank highlighy for this keyword. This should leverage the keywords, config provided, and your knowledge of the subject.")
+          }));
+          const formatInstructions = parserFromZod.getFormatInstructions()
+          const template = `You are worldclass SEO expert. You have been hired by a company to write a blog. The company wants to rank for the keyword "${keyword}". The blog is about "${this.subject}"${(this.config) && ` and has the following specifications: "${this.config}"`}. \n\n{format_instructions}`;
+          const prompt = new PromptTemplate({template: template, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
+          const input = await prompt.format();
+          const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 6000, openAIApiKey: this.openaiKey});
+          try{
+            const response = await model.call([new HumanChatMessage(input)]);
+            const parsed = await parserFromZod.parse(response.text)   
+            const { blogTitle, lsiKeywords, headers } = parsed;
+            const blueprint = { blogTitle, lsiKeywords, keyword, headers };
+            await PostDB.updatePost(currChild, {blueprint: blueprint});
+          }catch(e){
+            console.log(e);
+            return {blogTitle:"BPerror", lsiKeywords:"BPerror", keyword:"BPerror", headers:"BPerror"};
+          }
+        }
+      }
 
       rewriteBlueprint = async(blueprint) => {
         const parserFromZod = StructuredOutputParser.fromZodSchema(z.object({
