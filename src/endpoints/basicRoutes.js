@@ -99,21 +99,14 @@ basicRoutes.post("/dailyrun", asyncMiddleware(async (req, res) => {
         const activeBlogs = await AgentDB.getActive();
         console.log(activeBlogs);
         for (let blog of activeBlogs) {
-            console.log(blog._id.toString())
-            if (blog._id.toString() === "64b20ef36dbb8a96540f4cf7") {
-                console.log('here123');
-                console.log(blog);
-                const {openaiKey, blogID, subject, config, version, loops, daysLeft, _id, userID, nextPostIndex, BFSOrderedArrayOfPostMongoID } = blog;
-                const blogMongoID = _id.toString();
-                const blogJwt = blog.jwt;
-                const sendData = initSendData(blogMongoID);
-                console.log('about to run');
-                const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, false, userID, false, nextPostIndex, BFSOrderedArrayOfPostMongoID);
-                agent.run();
-            }
+            const {openaiKey, blogID, subject, config, version, loops, daysLeft, _id, userID, nextPostIndex, BFSOrderedArrayOfPostMongoID } = blog;
+            const blogMongoID = _id.toString();
+            const blogJwt = blog.jwt;
+            const sendData = initSendData(blogMongoID);
+            const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, false, userID, false, nextPostIndex, BFSOrderedArrayOfPostMongoID);
+            agent.run();
         }
     }
-    console.log('done');
     return res.send("done");
 }));
 
