@@ -1,14 +1,13 @@
 const { ChatOpenAI } = require("langchain/chat_models/openai");
 const { PromptTemplate } = require("langchain/prompts");
-const { HumanChatMessage, SystemChatMessage } = require("langchain/schema");
+const { HumanChatMessage } = require("langchain/schema");
 const { z } = require("zod");
 const { StructuredOutputParser, CustomListOutputParser } = require("langchain/output_parsers");
-const { parse } = require("path");
 const { dummyBlueprint } = require("../constants/dummyData");
 const AgentDB = require("../mongo/agent");
 const PostDB = require("../mongo/post");
 class LongTailResearcher {
-    constructor(subject, loops=450, config, openAIApiKey, blogMongoID, BFSOrderedArrayOfPostMongoID) {
+    constructor(subject, loops=450, config, openAIApiKey, blogMongoID, BFSOrderedArrayOfPostMongoID, demo = false) {
         this.subject = subject;
         this.loops = loops;
         this.config = config;
@@ -17,6 +16,7 @@ class LongTailResearcher {
         this.demoKeywords = [];
         this.blogMongoID = blogMongoID;
         this.BFSOrderedArrayOfPostMongoID = BFSOrderedArrayOfPostMongoID;
+        this.demo = demo;
         this.childrenCount = 3; /** children count hard coded until consensus*/
     }
 
@@ -43,7 +43,7 @@ class LongTailResearcher {
       const parentsQ = [];
       parentsQ.push(currPost._id);
       let postCount = 1;
-      while (postCount < this.loops){
+      while (postCount <= parseInt(this.loops)){
         let parentMongoID = parentsQ.shift();
         let childrenKeywords = await this.getKeywords(this.childrenCount, currKeyword);
         for (let i = 0; i < childrenKeywords.length; i++){
@@ -73,31 +73,30 @@ class LongTailResearcher {
 
     // TODO (Gautam): switch to getKeywords() to get keywords for Ads keyword planner OR SERP API    
     getKeywords = async(count, subject=this.subject) => {
-      const parser = new CustomListOutputParser({
-        length: count,
-        separator: "\n",
-      });
-      const formatInstructions = parser.getFormatInstructions();
-      if (subject === this.subject){
-        var template = `Provide an unordered list of length "{count}" of Longtail keywords that you would expect to have few competitors and high volume traffic for a blog about "{subject}". \n{format_instructions}`
-      }
-      else {
-        var template = "Given the longtail keyword {subject}, provide an unordered list of length {count} of VERY highly distinct longtail keywords that tangentially extend the given keyword and go deeper."
-      }
-      const prompt = new PromptTemplate({
-        template: template,
-        inputVariables: ["subject", "count"],
-        partialVariables: { format_instructions: formatInstructions },
-      });
-      const input = await prompt.format({
-        subject: subject,
-        count: count,
-      });
-      console.log(input);
-      const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 3000, openAIApiKey: this.openaiKey});
-      const response = await model.call([new HumanChatMessage(input)]);
-      const keywords  = response.text.split("\n");
-      return keywords;
+        const parser = new CustomListOutputParser({
+          length: count,
+          separator: "\n",
+        });
+        const formatInstructions = parser.getFormatInstructions();
+        if (subject === this.subject){
+          var template = `Provide an unordered list of length "{count}" of Longtail keywords that you would expect to have few competitors and high volume traffic for a blog about "{subject}". \n{format_instructions}`
+        }
+        else {
+          var template = "Given the longtail keyword {subject}, provide an unordered list of length {count} of VERY highly distinct longtail keywords that tangentially extend the given keyword and go deeper."
+        }
+        const prompt = new PromptTemplate({
+          template: template,
+          inputVariables: ["subject", "count"],
+          partialVariables: { format_instructions: formatInstructions },
+        });
+        const input = await prompt.format({
+          subject: subject,
+          count: count,
+        });
+        const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 3000, openAIApiKey: this.openaiKey});
+        const response = await model.call([new HumanChatMessage(input)]);
+        const keywords  = response.text.split("\n");
+        return keywords;
     }
 
     getNextBlueprint = async () => {
@@ -107,21 +106,24 @@ class LongTailResearcher {
               this.demoKeywords = await this.getKeywords(this.loops);
               this.hasInitialized = true;
             } 
-            if (this.LongTailKeywords.length === 0) {
+            if (this.demoKeywords.length === 0) {
                 return false;
             }
             const nextKeyword = this.demoKeywords.shift(); // get first thing by shifting left
-            console.log("kw: " + nextKeyword);
             const blueprint = await this.generateBlueprint(nextKeyword);
             return blueprint;
         } catch (error) {
-            console.log(error);
             throw new Error('Error finding the best longtail keyword');
         }
     }
 
 
     generateBlueprint = async (keyword, post=undefined) => {
+        await AgentDB.incrementNextPostIndex(this.blogMongoID);
+        if (post?.blueprint?.blogTitle){
+          await this.generateBlueprintForChildren(post);
+          return post.blueprint;
+        }
         const parserFromZod = StructuredOutputParser.fromZodSchema(z.object({
                 blogTitle: z.string().describe("Write an SEO optimized title for a blog post which contains the keyword and is relevant to the config provided"),
                 lsiKeywords: z.string().describe("What are 5 other comma separated keywords that are semantically relevant to the keyword provided. For example, the keyword 'credit cards' should return: money, credit score, credit limit, loans, interest rate."),
@@ -138,7 +140,6 @@ class LongTailResearcher {
         const { blogTitle, lsiKeywords, headers } = parsed;
         const blueprint = { blogTitle, lsiKeywords, keyword, headers };
         if (post){
-          console.log("reached post", post._id, blueprint);
           await PostDB.updatePost(post._id, {blueprint: blueprint});
           await this.generateBlueprintForChildren(post);
         }
@@ -169,7 +170,7 @@ class LongTailResearcher {
             const parsed = await parserFromZod.parse(response.text)   
             const { blogTitle, lsiKeywords, headers } = parsed;
             const blueprint = { blogTitle, lsiKeywords, keyword, headers };
-            await PostDB.updatePost(currChild, {blueprint: blueprint});
+            await PostDB.updatePost(currChildID, {blueprint: blueprint});
           }catch(e){
             console.log(e);
             return {blogTitle:"BPerror", lsiKeywords:"BPerror", keyword:"BPerror", headers:"BPerror"};
@@ -191,7 +192,6 @@ class LongTailResearcher {
         const response = await model.call([new HumanChatMessage(input)]);
         const parsed = await parserFromZod.parse(response.text)   
         const { blogTitle, lsiKeywords, headers } = parsed;
-        console.log(parsed);
         const keyword = blueprint.keyword;
         return { blogTitle, lsiKeywords, keyword, headers };
       }

@@ -35,15 +35,22 @@ class Agent {
         this.BFSOrderedArrayOfPostMongoID = BFSOrderedArrayOfPostMongoID;
         this.nextPostIndex = nextPostIndex;
         this.draft = draft;
+
+        
         // TOOLS
         if (this.demo){
-          this.researcher = new LongTailResearcher(subject, /** monthlyRateLimit=*/ this.loops, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
+          this.researcher = new LongTailResearcher(subject, this.loops, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID, true);
         } else{
-          this.researcher = new LongTailResearcher(subject, (this.loops * this.daysLeft), config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
+        
+            const tempDaysLeft = this.daysLeft || 1;
+            const researcherLoops = this.loops * tempDaysLeft;
+            console.log('researcherLoops', researcherLoops)
+          this.researcher = new LongTailResearcher(subject, researcherLoops, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
         }
     }
 
     run = async () => {
+        console.log('runnnnnn')
         try {
             if (this.demo) {
                 this.demoRun();
@@ -58,18 +65,23 @@ class Agent {
             await this.sendData({ type: "updating", config: `Building out a SEO sitemap for your posts (this usually takes a bit)`, title: `Loading... Researcher` });
             await this.researcher.generatePostsTree();
         }
+        console.log('continuing');
             // For NextIndex in BFSOrderedArrayOfPostMongoIDs:
             //    if reached amount user wanted per day, then update NextIndex in DB and break
             //    generate + post (prompt should include outlines of children post and fake links guidance)
             //    update rawHTML + url in DB
             //    done if top post, else:
             //    update parent rawHTML (switch out fake internal links) using parent ID
-            const min = this.nextPostIndex
-            const max = this.nextPostIndex + this.loops
+            const min = parseInt(this.nextPostIndex)
+            const max = this.nextPostIndex + parseInt(this.loops)
             for (let i = min; i < max; i++) {
                 try {
                 await this.sendData({ type: "updating", config: `Step 1 of 3: Finding best longtail keywords`, title: `Loading... Article ${i + 1} / ${this.loops}` });
                 const post = await PostDB.getPostById(this.BFSOrderedArrayOfPostMongoID[i]);
+                if (!post) {
+                    await this.sendData({ type: "ending", config: "Ran out of keywords" });
+                    return;
+                }
                 const blueprint = await this.researcher.generateBlueprint(post.blueprint.keyword, post);
                 if (!blueprint) {
                     await this.sendData({ type: "ending", config: "Ran out of keywords" });
@@ -93,7 +105,7 @@ class Agent {
             }
             console.log('bottom of four loop')
             await AgentDB.updateBlogSpecParam(this.blogMongoID, {nextPostIndex: this.nextPostIndex});
-            if (this.daysLeft > 0) {
+            if (this.daysLeft > 1) {
                 await this.sendData({type: "ending", title: "Process Complete. Next run scheduled for tomorrow."});
             } else {
                 await this.sendData({type: "ending", title: "Process Complete."});

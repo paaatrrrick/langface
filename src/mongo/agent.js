@@ -163,7 +163,7 @@ AgentSchema.statics.addPost = async function(id, postContent) {
 };
 
 AgentSchema.statics.getActive = async function() {
-  return await mongoose.model('Blog').find({ daysLeft: { $gt: 0 }, hasStarted: false });
+  return await this.find({ daysLeft: { $gt: 0 }, hasStarted: false });
 }
 
 AgentSchema.statics.getOwner = async (id) => {
@@ -174,6 +174,14 @@ AgentSchema.statics.getOwner = async (id) => {
 AgentSchema.statics.setUserId = async function(id, userID) {
   let blog = await this.findById(convertToObjectId(id));
   blog.userID = userID;
+  await blog.save();
+  return blog;
+}
+
+//increment nextPostIndex
+AgentSchema.statics.incrementNextPostIndex = async function(id) {
+  let blog = await this.findById(convertToObjectId(id));
+  blog.nextPostIndex++;
   await blog.save();
   return blog;
 }

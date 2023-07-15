@@ -70,7 +70,7 @@ basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
     }
     // use new agent data to run
     const sendData = initSendData(blogMongoID, demo);
-    const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft - 1, blogMongoID, demo, userID, draft, blog.nextPostIndex, blog.BFSOrderedArrayOfPostMongoID);
+    const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, demo, userID, draft, blog.nextPostIndex, blog.BFSOrderedArrayOfPostMongoID);
     agent.run();
     return res.json(blog);
 }));
@@ -94,18 +94,27 @@ basicRoutes.post("/wordpress", asyncMiddleware(async (req, res) => {
     }
 }));
 
-basicRoutes.post("/dailyrun", asyncMiddleware(async (req) => {
+basicRoutes.post("/dailyrun", asyncMiddleware(async (req, res) => {
     if (req.body.password === process.env.dailyRunPassword) {
-        const activeBlog = await AgentDB.getActive();
-        for (let blog of activeBlog) {
-            const {openaiKey, blogID, subject, config, version, loops, daysLeft, _id, userID } = blog;
-            const blogMongoID = _id.toString();
-            const blogJwt = blog.jwt;
-            const sendData = initSendData(blogMongoID);
-            const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, false, userID);
-            agent.run();
+        const activeBlogs = await AgentDB.getActive();
+        console.log(activeBlogs);
+        for (let blog of activeBlogs) {
+            console.log(blog._id.toString())
+            if (blog._id.toString() === "64b20ef36dbb8a96540f4cf7") {
+                console.log('here123');
+                console.log(blog);
+                const {openaiKey, blogID, subject, config, version, loops, daysLeft, _id, userID, nextPostIndex, BFSOrderedArrayOfPostMongoID } = blog;
+                const blogMongoID = _id.toString();
+                const blogJwt = blog.jwt;
+                const sendData = initSendData(blogMongoID);
+                console.log('about to run');
+                const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, false, userID, false, nextPostIndex, BFSOrderedArrayOfPostMongoID);
+                agent.run();
+            }
         }
     }
+    console.log('done');
+    return res.send("done");
 }));
 
 basicRoutes.post('/create-checkout-session', isLoggedInMiddleware, asyncMiddleware(async (req, res) => {
@@ -120,6 +129,7 @@ basicRoutes.post('/create-checkout-session', isLoggedInMiddleware, asyncMiddlewa
       mode: 'subscription',
       success_url: `${process.env.WORDPRESS_REDIRECT_URI}/?success=true`,
       cancel_url: `${process.env.WORDPRESS_REDIRECT_URI}/?canceled=true`,
+      allow_promotion_codes: true,
       metadata: {userId},
       client_reference_id: req.headers['referral-id'] || "checkout-#{SecureRandom.uuid}"
     });
