@@ -166,7 +166,13 @@ const PurchaseScreen = () => {
                         <button id='PurchaseScreen-button-contact'
                             onClick={
                                 () => {
-                                    window.open(constants.discordUrl, '_blank');
+                                    const recipient = "patrick@langface.ai"
+                                    const subject = encodeURIComponent("Hello 👋");
+                                    const body = encodeURIComponent(
+                                      "Hey Patrick,\n\nI'd love to hear more about SEO with langface.ai. What's your availability this week?"
+                                    );
+                                    const mailtoLink = `mailto:${recipient}?subject=${subject}&body=${body}`;
+                                    window.open(mailtoLink, "_blank");
                                 }
                         }>Contact</button>
                     </div>
