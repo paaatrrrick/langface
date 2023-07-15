@@ -145,6 +145,7 @@ const Home = ({joinRoom}) => {
     const canStart = ((version === "html") || (blogID && jwt)) !== "" && subject && loops;
     const versionSelectorOptions = [{id: "html", text: "Raw Text"}, {id: "wordpress", text: "Post to Wordpress"}, {id: "blogger", text: "Post to Blogger.com"}];
     const isDataSmall = hasStarted || (!demo && currentBlog.daysLeft > 0);
+
   return (
     <div className="Home">
       <div className="row align-center justify-start wrap">
@@ -152,13 +153,13 @@ const Home = ({joinRoom}) => {
         <h1 style={{marginRight: "15px"}}>BloggerGPT</h1>
         {(demo) 
         ? 
-        <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Run Demo</button>
+        <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Demo</button>
          : 
          <button className="runButton2 nohover" style={{margin: "0px"}}>Professional</button>
          }
       </div>
-        <h6>Hire an AI agent that works autonomously to grow your blog</h6>
-        <div className={`home-results-container ${isDataSmall && 'growLarge'}`}>
+      <h6>Launch an AI Agent to start generating blog posts for your website</h6>
+      <div className={`home-results-container ${isDataSmall && 'growLarge'}`}>
         <div className="home-input-top-row">
           <p>{trimStringToChars(currentBlog.subject, 45)}</p>
           <div className="row">
@@ -239,7 +240,6 @@ const Home = ({joinRoom}) => {
                 type="number" 
                 value={loops} 
                 min={1}
-                max={postsLeftToday}
                 onChange={loopSetter}
               />
           </div>

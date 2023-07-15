@@ -115,9 +115,11 @@ const slice = createSlice({
     },
     updateBlogAgentData: (state, action) => {
       const { blogId, type, title, url, html, config, postsLeftToday, maxNumberOfPosts, hasStarted, daysLeft } = action.payload;
-      console.log("updateBlogAgentData", action.payload)
       const data = { type, title, url, config, html };
     
+      if (action.payload.action === "buyNow") {
+        state.bannerMessage = {type: 'success', message: "Hire a pro agent to post more blogs today."}
+      }
       state.blogAgents[blogId].hasStarted = hasStarted;
       if (daysLeft === 0) {
         state.blogAgents[blogId].daysLeft = 0
@@ -128,10 +130,12 @@ const slice = createSlice({
         state.blogAgents[blogId].data.pop();
       }
       state.blogAgents[blogId].data.push(data);
-      if (postsLeftToday !== null && maxNumberOfPosts !== null) {
+      if (postsLeftToday === 0) {
+        state.blogAgents[blogId].postsLeftToday = 0
+      } else {
         state.blogAgents[blogId].postsLeftToday = postsLeftToday || state.blogAgents[blogId].postsLeftToday;
-        state.blogAgents[blogId].maxNumberOfPosts = maxNumberOfPosts || state.blogAgents[blogId].maxNumberOfPosts;
       }
+      state.blogAgents[blogId].maxNumberOfPosts = maxNumberOfPosts || state.blogAgents[blogId].maxNumberOfPosts;
     },
 
     initializeBlogAgent: (state, action) => {

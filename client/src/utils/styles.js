@@ -3,7 +3,7 @@ const setColorScheme = (colorScheme) => {
         document.documentElement.style.setProperty('--brandColor', '#625df4');
         document.documentElement.style.setProperty('--brandOffColor', '#e0e1f7');
         document.documentElement.style.setProperty('--mainDark', '#212121');
-        document.documentElement.style.setProperty('--lightDark', '#6c6685');
+        document.documentElement.style.setProperty('--lightDark', '#212121');
         document.documentElement.style.setProperty('--darkerBackground', '#f7f7f8');
         document.documentElement.style.setProperty('--lighterBackground', '#fff');
         document.documentElement.style.setProperty('--blackFiler', 'invert(0%) sepia(1%) saturate(7438%) hue-rotate(123deg) brightness(107%) contrast(100%)');

@@ -1,6 +1,5 @@
-import LibrarySvg from "./assets/library-outline.svg";
+
 import ImageSvg from "./assets/image-outline.svg";
-import StoreFrontSvg from "./assets/storefront-outline.svg";
 import DocumentSvg from "./assets/document.svg";
 import MagnifyingSvg from "./assets/magnifying-glass.svg";
 
@@ -19,9 +18,9 @@ const constants = {
 const defualtPills = [
   {
     version: "initializing",
-    title: "Research",
+    title: "Keyword Generation",
     img: MagnifyingSvg,
-    config: "For each blog post, our AI agent studies top performing articles in your niche to use as a model & identify gaps.",
+    config: "For each blog post, our AI agent targets optimal keywords in your niche.",
   },
   {
     version: "initializing",
@@ -31,7 +30,7 @@ const defualtPills = [
   },
   {
     version: "initializing",
-    title: "Text Generation",
+    title: "Article Writing",
     img: DocumentSvg,
     config: `A Search Engine Optimized article is posted to your blog with specific long tail keywords & an optimal HTML header structure.`,
   }

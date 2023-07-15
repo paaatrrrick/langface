@@ -62,8 +62,7 @@ DemoAgentSchema.statics.addPost = async function(id, postContent) {
     blog.dateRecentlyPosted = Date.now();
     await blog.save();
     return {postsLeftToday: blog.postsLeftToday, maxNumberOfPosts: blog.maxNumberOfPosts};
-  };
-
+};
 
 // Create and export Blog Model
 const DemoAgent = mongoose.model('DemoAgent', DemoAgentSchema);

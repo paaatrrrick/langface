@@ -1,7 +1,7 @@
 .navController{
     width: 224px;
     min-height: 100%;
-    padding: 16px 8px 4dvh 8px;
+    padding: 16px 8px 0px 8px;
     background-color: var(--darkerBackground);
     display: flex;
     flex-direction: column;
@@ -90,6 +90,8 @@
     filter: invert(34%) sepia(70%) saturate(3944%) hue-rotate(232deg) brightness(101%) contrast(91%);
 }
 
+
+
 .navController-pill img{
     width: 20px;
     height: 20px;
@@ -101,6 +103,36 @@
     font-weight: 700;
 }
 
+#navControllerPurchase{
+    height: 60px;
+    width: 100%;
+    background-color: var(--brandColor);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 10px;
+}
+
+#navControllerPurchase:hover{
+    background-color: #7b77fe;
+    cursor: pointer;
+}
+
+#navControllerPurchase h6{
+    color: white;
+    font-weight: 500;
+}
+#navControllerPurchase img{
+    width: 30px;
+    height: 30px;
+    margin-right: 5px;
+    margin-left: -10px;
+    filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(83deg) brightness(108%) contrast(101%)
+}
+
 .navController hr{
     width: 100%;
     height: 2px;
@@ -108,6 +140,43 @@
 }
 
 
+.navController-socials{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 0px
+}
+
+.navController-socialBtn{
+    width: 36px;
+    height: 36px;
+    padding: 6px 6px;
+    background-color: var(--lighterBackground);
+    border-radius: 18px;
+    margin: 0px 5px;
+    background-color: transparent;
+}
+
+.navController-socialBtn img{
+    width: 24px;
+    height: 24px;
+    margin-right: 0px;
+    transition: all 0.3s ease-in-out;
+}
+
+.navController-socialBtn:hover{
+    background-color: var(--brandOffColor);
+}
+
+.navController-socialBtn:hover h6{
+    color: var(--brandColor);
+}
+
+.navController-socialBtn:hover img{
+    filter: invert(34%) sepia(70%) saturate(3944%) hue-rotate(232deg) brightness(101%) contrast(91%);
+}
 
 @media only screen and (max-width: 1000px) {
     .navController{

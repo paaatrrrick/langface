@@ -143,6 +143,15 @@ a:hover{
     cursor: default;
 }
 
+/*set no highlight for all images*/
+img {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 .App-right-section{
     background-color: var(--lighterBackground);
     flex: 1;

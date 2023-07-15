@@ -26,8 +26,11 @@ const sendDataToClient = (dataForClient, blogIdToSocketMap) => {
     }
     if (dataForClient.type !== "updating"){
       SuccesfulPostsCount += 1;
+      console.log('')
       console.log(`sending data to client: ${SuccesfulPostsCount}:`);
-      console.log(dataForClient);
+      console.log("Type: " + dataForClient.type);
+      console.log("url: " + dataForClient.url);
+      console.log("title: " + dataForClient.title);
     }
     for (let tabId of blogIdToSocketMap[blogId]){
       io.to(tabId).emit('updateData', dataForClient);

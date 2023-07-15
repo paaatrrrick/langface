@@ -61,9 +61,6 @@ basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
         await User.addBlog(userID, blogMongoID);
         blog = await AgentDB.deleteAllMessages(blogMongoID);
     } else {
-        console.log('at demo')
-        console.log(req.ip);
-        console.log(req.connection.remoteAddress)
         const ip = req.ip || req.connection.remoteAddress;
         blog = await DemoAgent.createBlog({ip});
         blogMongoID = blog?._id?.toString();

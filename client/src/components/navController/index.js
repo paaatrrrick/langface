@@ -9,6 +9,7 @@ import DiscordSvg from '../../assets/logo-discord.svg';
 import BookSvg from '../../assets/book-outline.svg';
 import Auth from "../auth"
 import RobotSvg from '../../assets/robot-outline.svg'
+import Mail from '../../assets/mail-outline.svg'
 import { trimStringToChars } from "../../utils/helpers";
 import constants from '../../constants';
 
@@ -29,7 +30,7 @@ const NavController = ({launch}) => {
         newAgentCount++;
         text = `New Agent ${newAgentCount}`;
       }
-      dropDownOptions.push({id: agentsKeys[i], text: trimStringToChars(text, 25)});
+      dropDownOptions.push({id: agentsKeys[i], text: trimStringToChars(text, 18)});
     }
 
     const payment = () => {
@@ -63,18 +64,13 @@ const NavController = ({launch}) => {
                         <img src={RocketSvg} />
                         <h6>Tutorial</h6>
                     </div>
-                    {isLoggedIn && <div className={`navController-pill ${currentView === "purchase" ? "selected" : ""}`} onClick={payment}>
-                            <img src={RobotSvg} />
-                            <h6>Add Agent</h6>
-                    </div>}
-
-                    {!isLoggedIn && <Auth launch={launch} mask="true" payment={payment}/> }
                     </div>
                 <div className="navController-pageSelectors">
                     
                     {isLoggedIn && (<>
                         <p className="italic" style={{marginLeft: '10px', marginBottom: '5px'}}>Your Agents</p>
                         <div className="navController-agentSel-col">
+                        <hr style={{marginTop: "5px", marginBottom: "10px", marginLeft: '2px'}}/>
                         {
                             dropDownOptions.map((option, index) => {
                                 return (
@@ -88,6 +84,7 @@ const NavController = ({launch}) => {
                                 )
                             })
                         }
+                        {dropDownOptions.length > 4 && <hr style={{marginTop: "5px", marginBottom: "10px", marginLeft: '2px'}}/>}
                         </div>
                     </>)}
                     {/* {isLoggedIn && 
@@ -99,19 +96,28 @@ const NavController = ({launch}) => {
                 </div>
             </div>
                 <div className="navController-pageSelectors">
-                    <a 
-                        className={`navController-pill`}
-                        href={constants.discordUrl} target='_blank'>
-                            <img src={DiscordSvg} />
-                            <h6>Discord</h6>
-                    </a>
-                    <a 
-                        className={`navController-pill`}
-                        href="https://blog.langface.ai" target='_blank'>
-                            <img src={BookSvg} />
-                            <h6>Our Blog</h6>
-                    </a>
-
+                    <div className="navController-socials">
+                        <div className="navController-socialBtn">
+                            <a href={constants.discordUrl} target='_blank'>
+                                <img src={DiscordSvg} />
+                            </a>
+                        </div>
+                        <div className="navController-socialBtn">
+                            <a href="https://blog.langface.ai" target='_blank'>
+                                <img src={BookSvg} />
+                            </a>
+                        </div>
+                        <div className="navController-socialBtn">
+                            <a href="mailto:patrick@langface.ai" target='_blank'>
+                                <img src={Mail} />
+                            </a>
+                        </div>
+                    </div>
+                    {isLoggedIn && <div id="navControllerPurchase" onClick={payment}>
+                            <img src={RobotSvg} />
+                            <h6>Hire Agent</h6>
+                    </div>}
+                    {!isLoggedIn && <Auth launch={launch} mask="true" payment={payment}/> }
                 <Auth launch={launch}/>
             </div>
         </div>

@@ -57,7 +57,6 @@ class Wordpress {
             parent = await PostDB.getPostById(post.parentMongoID);
             for (let id of post.childrenMongoID){
               const child = await PostDB.getPostById(id);
-              console.log("child ", child);
               childrenURLs.push(this.getFakeURL(child.blueprint.blogTitle));
             };
           }

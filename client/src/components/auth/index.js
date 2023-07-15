@@ -62,12 +62,10 @@ const Auth = ({ launch, mask, payment }) => {
 
     if (mask==="true"){
         return (
-            <div className="Auth">
-                <button className={`navController-pill`} onClick={handleGoogle}>
-                    <img src={RobotSvg} />
-                    <h6>Add Agent</h6>
-                </button>
-            </div>
+<               div id="navControllerPurchase" onClick={payment}>
+                            <img src={RobotSvg} />
+                            <h6>Hire Agent</h6>
+                </div>
         )
     }
 
@@ -79,13 +77,10 @@ const Auth = ({ launch, mask, payment }) => {
             </div>
         );
     }
-    return (
-        <div className="Auth">
-            <button className="login-with-google-btn" onClick={handleGoogle}>
-                Login with Google
+    return (<button className="login-with-google-btn" onClick={handleGoogle}>
+            Google Login 
             </button>
 
-        </div>
     );
 }
 

@@ -1,6 +1,6 @@
 .banner-message {
     position: relative;
-    top: 1%;
+    top: 0%;
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;
@@ -11,6 +11,9 @@
     padding: 10px 25px;
     max-width: 90%;
     width: 800px;
+    height: 40px;
+    margin-bottom: -40px;
+    z-index: 1000;
 }
 
 .banner-message p{
