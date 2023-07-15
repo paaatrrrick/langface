@@ -113,13 +113,14 @@ class LongTailResearcher {
             const blueprint = await this.generateBlueprint(nextKeyword);
             return blueprint;
         } catch (error) {
+            console.log(error);
             throw new Error('Error finding the best longtail keyword');
         }
     }
 
 
     generateBlueprint = async (keyword, post=undefined) => {
-        await AgentDB.incrementNextPostIndex(this.blogMongoID);
+        if (!this.demo) await AgentDB.incrementNextPostIndex(this.blogMongoID);
         if (post?.blueprint?.blogTitle){
           await this.generateBlueprintForChildren(post);
           return post.blueprint;
