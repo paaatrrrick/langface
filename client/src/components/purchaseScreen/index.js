@@ -27,7 +27,7 @@ const PurchaseScreen = () => {
                     marginTop: '10px',
                     fontSize: '14px'
                 }
-            }>Hire an AI Agent that works 24/7, to bring traffic to your site by writing optimized articles.</h6>
+            }>Hire an AI Agent that works autonomously to grow your blog by posting SEO content.</h6>
         </div>
         <div className="row w-100 align-center justify-center"
             style={
@@ -45,7 +45,7 @@ const PurchaseScreen = () => {
                             fontSize: '18px',
                             fontWeight: '700'
                         }
-                    }>Hobbiest</h3>
+                    }>Hobbyist</h3>
                     <p style={
                             {fontSize: '14px'}
                         }
@@ -53,8 +53,9 @@ const PurchaseScreen = () => {
                     <div className="PurchaseScreen-list">
                         <div className="PurchaseScreen-list-item">
                             <p><span className="green">&#10003;</span> 3 Articles / Day</p>
+                            <p><span className="green">&#10003;</span> Keyword generation </p>
+                            <p><span className="green">&#10003;</span> Images</p>
                             <p><span className="green">&#10003;</span> Post directly to Wordpress</p>
-                            <p><span className="green">&#10003;</span> AI Photos</p>
                         </div>
                     </div>
                 </div>
@@ -96,10 +97,11 @@ const PurchaseScreen = () => {
                     <div className="PurchaseScreen-list">
                         <div className="PurchaseScreen-list-item">
                             <p><span className="green">&#10003;</span> 450 Articles / Month</p>
-                            <p><span className="green">&#10003;</span> Run for weeks on end</p>
-                            <p><span className="green">&#10003;</span> SEO sitemaps that link posts</p>
-                            <p><span className="green">&#10003;</span> Keyword research</p>
-                            <p><span className="green">&#10003;</span> Everything in Hobbiest</p>
+                            <p><span className="green">&#10003;</span> Internal linking </p>
+                            <p><span className="green">&#10003;</span> Autonomous daily execution </p>
+                            <p><span className="green">&#10003;</span> Everything in Hobbyist</p>
+                            <p><span className="green">&#10003;</span> Coming soon: keyword research</p>
+                            <p><span className="green">&#10003;</span> Coming soon: continuous, 24/7, execution</p>
                         </div>
                     </div>
                 </div>

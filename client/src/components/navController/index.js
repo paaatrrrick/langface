@@ -65,7 +65,7 @@ const NavController = ({launch}) => {
                     </div>
                     {isLoggedIn && <div className={`navController-pill ${currentView === "purchase" ? "selected" : ""}`} onClick={payment}>
                             <img src={RobotSvg} />
-                            <h6>Add Agent +</h6>
+                            <h6>Add Agent</h6>
                     </div>}
 
                     {!isLoggedIn && <Auth launch={launch} mask="true" payment={payment}/> }
