@@ -42,8 +42,8 @@ class Blogger {
     writePost = async () => {
       if (process.env.MOCK_WRITING_BLOG === "true") return dummyblog;
       try {
-        const modelType = process.env.CHEAP_GPT === 'true' ? "gpt-3.5-turbo-16k" : "gpt-4";
-        // const modelType = "gpt-4";
+        // const modelType = process.env.CHEAP_GPT === 'true' ? "gpt-3.5-turbo-16k" : "gpt-4";
+        const modelType = "gpt-4";
         const model = new ChatOpenAI({ modelName: modelType, temperature: 0, openAIApiKey: this.openaiKey});
         var childrenURLs = [];
         let parent = undefined;
