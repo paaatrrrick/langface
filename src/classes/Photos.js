@@ -42,30 +42,28 @@ class Photos {
     }
 
     summarizeImages = async () => {
-        const parserFromZod = StructuredOutputParser.fromZodSchema(
-          z.object({
-            "imageArray" : z.array(z.object({
-                paragraphDescription: z.string().describe("A description of an image that could go there. A good image in the scenario does not include people or faces"),
+        const parserFromZod = StructuredOutputParser.fromZodSchema(z.array(z.object({
+                paragraphDescription: z.string().describe("A unique description of an image that could go there. A good image in the scenario does not include people or faces"),
                 width: z.number().describe("The width of the image. That must be divisible by 64"),
                 height: z.number().describe("The height of the image. That must be divisible by 64"),
-            })),
-            "style" : z.string().describe("The style of the image. It must be: 'cinematic', 'digital-art', 'low-poly', 'pixel-art', 'fantasy-art', or 'enhance'"),
-           }));
+          })));
         const formatInstructions = parserFromZod.getFormatInstructions()
         const template = `For the following ${this.imageNamesUsedInBlog.length} images: ${arrayToString(this.imageNamesUsedInBlog)} which are in the following blog, write a description of them: BLOG:${this.text} \n{format_instructions}.`;
         const prompt = new PromptTemplate({template: template, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const input = await prompt.format();
         const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k",temperature: 0, maxTokens: 1000, openAIApiKey: this.openaiKey});
         const response = await model.call([new HumanChatMessage(input)]);
-        const parsed = await parserFromZod.parse(response.text)
-        const { style, imageArray } = parsed;
-        const stylesArr = ["cinematic", "digital-art", "low-poly", "pixel-art", "fantasy-art", "enhance"]
-        if (stylesArr.includes(style) === false) {
-          this.style = "digital-art"
-        } else {
-          this.style = style;
-        }
-        return imageArray;
+        console.log(response.text);
+        const parsed = await parserFromZod.parse(response.text);
+        console.log(parsed)
+        this.styles = "digital-art";
+        // const stylesArr = ["cinematic", "digital-art", "low-poly", "pixel-art", "fantasy-art", "enhance"]
+        // if (stylesArr.includes(style) === false) {
+        //   this.style = "digital-art"
+        // } else {
+        //   this.style = style;
+        // }
+        return parsed;
     }
 
     // style: z.string().describe('The style of the image. It must be: "anime", "cinematic", "digital-art", "low-poly", "photographic", "pixel-art", or "enhance"')
