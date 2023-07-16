@@ -55,7 +55,6 @@ class Photos {
         const response = await model.call([new HumanChatMessage(input)]);
         console.log(response.text);
         const parsed = await parserFromZod.parse(response.text);
-        console.log(parsed)
         this.styles = "digital-art";
         // const stylesArr = ["cinematic", "digital-art", "low-poly", "pixel-art", "fantasy-art", "enhance"]
         // if (stylesArr.includes(style) === false) {
