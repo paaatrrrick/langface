@@ -26,9 +26,9 @@ const blogPost = (keyword, lsiKeyword, title, headers, config, previousArticles,
   -All config in the blog should only be relvant to to articles's goal. Do not reference social media pages (twitter, instagram, youtube, etc) or other things unrelated to the config. Do not talk about about our team members or authors. \n
   -Use the following longtail keyword EXTREMELY frequently "${keyword}" as well as these other relvant keywords: "${lsiKeyword}". \n
   ${(config) && `-${config}\n`}
-  ${(imageNames.length > 0) && `-Include exactly ${imageNames.length} img tag in the blog. They should have the following src's respsectively: ${arrayToString(imageNames)}. Each img should have inline styles for a width and height, which are between 256px and 1280px.\n`}
+  -The blog should have EXACTLY ${imageNames.length} img tags in the blog. One at the close to the beginning and one close to the end. They should have the following src's respsectively: ${arrayToString(imageNames)}. Each img should have inline styles for a width and height, which are between 256px and 1280px. \n
   -Output only valid HTML. Add inline styles of margin and padding to headers and paragraphs to add elegant spacing. DO NOT STATE THE TITLE. Start with an article tag and then an h2 tag. \n
-  ${(parent) && (parent.url) && (parent.blueprint.blogTitle) && `-You MUST include the following <a> tag as an in-context reference in your blog: <a href=${parent.url}>${parent.blueprint.blogTitle}</a>. In-context means naturally placed in the middle of a sentence under a relevant header.\n`}
+  ${(parent?.url && parent?.blueprint?.blogTitle) ? `-You MUST include the following <a> tag as an in-context reference in your blog: <a href=${parent.url}>${parent.blueprint.blogTitle}</a>. In-context means naturally placed in the middle of a sentence under a relevant header.\n` : ''}
   ${(childrenTitles) && `-You MUST include exactly ${childrenTitles.length} additional <a> tags with the following as href: ${arrayToString(childrenTitles)}. The <a> tags should be dispersed throughout the blog in-context. The tags should not just be crammed in at the end. DO NOT INCLUDE ANY MORE THAN  ${childrenTitles.length} ADDTIONAL TAGS.`}
   `
 };

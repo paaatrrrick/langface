@@ -158,7 +158,7 @@ const Home = ({joinRoom}) => {
          <button className="runButton2 nohover" style={{margin: "0px"}}>Professional</button>
          }
       </div>
-      <h6>Launch an AI Agent to start generating blog posts for your website</h6>
+      <h6>Hire an AI agent that works autonomously to grow your blog</h6>
       <div className={`home-results-container ${isDataSmall && 'growLarge'}`}>
         <div className="home-input-top-row">
           <p>{trimStringToChars(currentBlog.subject, 45)}</p>

@@ -10,10 +10,10 @@ const PurchaseScreen = () => {
     const dispatch = useDispatch();
     const payment = async () => {
         const res = await createCheckoutSession();
-        if (! res) {
+        if (!res) {
             dispatch(actions.setBannerMessage({message: "Payment failed. Reach out in the discord if you have any questions", type: "error"}));
         } else {
-            dispatch(actions.setBannerMessage({message: "Payment succeeded. ", type: "success", timeout: 5000}));
+            dispatch(actions.setBannerMessage({message: "Payment succeeded. ", type: "success", timeout: 25000}));
             dispatch(actions.addBlogAgent(res))
             dispatch(actions.setCurrentView("home"));
         }
@@ -27,7 +27,7 @@ const PurchaseScreen = () => {
                     marginTop: '10px',
                     fontSize: '14px'
                 }
-            }>Hire an AI Agent that works autonomously to grow your blog by posting SEO content.</h6>
+            }>Hire an AI agent that works autonomously to grow your blog</h6>
         </div>
         <div className="row w-100 align-center justify-center"
             style={

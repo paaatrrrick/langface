@@ -112,6 +112,8 @@ class Photos {
     
     getImageBuffers = async () => {
         const images = [];
+        //set this.imagePrompts to its first two elements
+        this.imagePrompts = this.imagePrompts.slice(0,2);
         for (let i in this.imagePrompts) {
           const dimension = this.summarizeImages[i] || {};
           var width = this.findNearestMultipleOf64(dimension.width || 512);

@@ -28,7 +28,7 @@ const NavController = ({launch}) => {
       }
       if (!text) {
         newAgentCount++;
-        text = `New Agent ${newAgentCount}`;
+        text = `Pro Agent #${newAgentCount}`;
       }
       dropDownOptions.push({id: agentsKeys[i], text: trimStringToChars(text, 18)});
     }
@@ -69,8 +69,8 @@ const NavController = ({launch}) => {
                     
                     {isLoggedIn && (<>
                         <p className="italic" style={{marginLeft: '10px', marginBottom: '5px'}}>Your Agents</p>
+                        <hr style={{marginTop: "10px", marginBottom: "10px", marginLeft: '2px'}}/>
                         <div className="navController-agentSel-col">
-                        <hr style={{marginTop: "5px", marginBottom: "10px", marginLeft: '2px'}}/>
                         {
                             dropDownOptions.map((option, index) => {
                                 return (
@@ -84,9 +84,9 @@ const NavController = ({launch}) => {
                                 )
                             })
                         }
-                        {dropDownOptions.length > 4 && <hr style={{marginTop: "5px", marginBottom: "10px", marginLeft: '2px'}}/>}
                         </div>
                     </>)}
+                    {dropDownOptions.length > 4 && <hr style={{marginTop: "5px", marginBottom: "10px", marginLeft: '2px'}}/>}
                     {/* {isLoggedIn && 
                         <a className={`navController-pill`} href="https://billing.stripe.com/p/login/28obKwfrLb5L6WIaEE" target="_blank">
                             <img src={RobotSvg} />
