@@ -62,10 +62,10 @@ const Auth = ({ launch, mask, payment }) => {
 
     if (mask==="true"){
         return (
-<               div id="navControllerPurchase" onClick={payment}>
-                            <img src={RobotSvg} />
-                            <h6>Hire Agent</h6>
-                </div>
+            <div id="navControllerPurchase" onClick={handleGoogle}>
+                <img src={RobotSvg} />
+                <h6>Hire Agent</h6>
+            </div>
         )
     }
 
