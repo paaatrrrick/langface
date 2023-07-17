@@ -26,7 +26,7 @@ const defualtPills = [
     version: "initializing",
     title: "Image Generation",
     img: ImageSvg,
-    config: "Our agent generates unique images to compliment the message of your blog and improve your search ranking.",
+    config: "(Currently turned off) Unique images are generated to compliment the message of your blog and improve your search ranking.",
   },
   {
     version: "initializing",

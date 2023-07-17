@@ -10,6 +10,7 @@ import BookSvg from '../../assets/book-outline.svg';
 import Auth from "../auth"
 import RobotSvg from '../../assets/robot-outline.svg'
 import Mail from '../../assets/mail-outline.svg'
+import Twitter from '../../assets/logo-twitter.svg'
 import { trimStringToChars } from "../../utils/helpers";
 import constants from '../../constants';
 
@@ -110,6 +111,11 @@ const NavController = ({launch}) => {
                         <div className="navController-socialBtn">
                             <a href="mailto:patrick@langface.ai" target='_blank'>
                                 <img src={Mail} />
+                            </a>
+                        </div>
+                        <div className="navController-socialBtn">
+                            <a href="https://twitter.com/gautam_sharda_" target='_blank'>
+                                <img src={Twitter} />
                             </a>
                         </div>
                     </div>

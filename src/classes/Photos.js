@@ -26,6 +26,7 @@ class Photos {
     }
 
     run = async () => {
+        return [];
         if (process.env.MOCK_PHOTOS === "true") return dummyWordpressPhotos;
         try {
             this.summarizedImages = await this.summarizeImages();
