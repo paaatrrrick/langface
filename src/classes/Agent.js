@@ -102,12 +102,21 @@ class Agent {
                 await this.sendData({type: "error", title: `Error: ${e.message}`});
             }
             }
-            await AgentDB.updateBlogSpecParam(this.blogMongoID, {nextPostIndex: this.nextPostIndex});
+            await AgentDB.updateBlogSpecParam(this.blogMongoID, {nextPostIndex: this.nextPostIndex + 1});
             if (this.daysLeft > 1) {
                 await this.sendData({type: "ending", title: "Process Complete. Next run scheduled for tomorrow."});
+                const tree = await this.AgentDB.getTree(this.blogMongoID);
+                if (tree) {
+                    await this.sendData({type: "tree", tree: tree, title: "Temporary sitemap of your posts"});
+                }
             } else {
                 await this.sendData({type: "ending", title: "Process Complete."});
+                const tree = await this.AgentDB.getTree(this.blogMongoID);
+                if (tree) {
+                    await this.sendData({type: "tree", tree: tree, title: "Sitemap of your posts"});
+                }
             }
+
             return;
         } catch (e) {
             console.log('error from agent')

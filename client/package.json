@@ -11,13 +11,16 @@
     "dayjs": "^1.11.9",
     "firebase": "^9.23.0",
     "html-react-parser": "^4.0.0",
+    "html2canvas": "^1.4.1",
     "jsonwebtoken": "^9.0.0",
     "react": "^18.2.0",
+    "react-d3-tree": "^3.6.1",
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.5",
     "react-scripts": "5.0.1",
     "socket.io-client": "^4.6.1",
     "styled-components": "^5.3.11",
+    "treefun2": "^2.0.13",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

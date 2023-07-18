@@ -165,6 +165,25 @@ basicRoutes.get('/checkForNewBlog', isLoggedInMiddleware, asyncMiddleware(async(
     return res.json({});
 }));
 
+basicRoutes.post('/configureBlog', isLoggedInMiddleware, asyncMiddleware(async(req, res) => {
+    const { id } = req.body;
+    const post = await AgentDB.changeBlog(id, {hasStarted: false, newlyCreated: false, BFSOrderedArrayOfPostMongoID: [], daysLeft: 0});
+    return res.json(post);
+}));
+
+basicRoutes.post('/runNextDay', isLoggedInMiddleware, asyncMiddleware(async(req, res) => {
+    console.log('run next day');
+    const { id } = req.body;
+    const blog = await AgentDB.getBlog(id);
+    const {openaiKey, blogID, subject, config, version, loops, daysLeft, _id, userID, nextPostIndex, BFSOrderedArrayOfPostMongoID } = blog;
+    const blogMongoID = _id.toString();
+    const blogJwt = blog.jwt;
+    const sendData = initSendData(blogMongoID);
+    const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, false, userID, false, nextPostIndex, BFSOrderedArrayOfPostMongoID);
+    agent.run();
+    return res.json(blog);
+}));
+
 basicRoutes.use((err, req, res, next) => {
     console.log(err); // Log the stack trace of the error
     res.status(500).json({ error: `Oops, we had an error ${err.message}` });

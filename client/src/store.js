@@ -113,9 +113,13 @@ const slice = createSlice({
       window.localStorage.setItem("bloggerGPT-colorScheme", action.payload);
       state.colorScheme = action.payload;
     },
+    updateBlogAgent (state, action) {
+      const { id } = action.payload;
+      state.blogAgents[id] = {...state.blogAgents[id], ...action.payload};
+    },
     updateBlogAgentData: (state, action) => {
-      const { blogId, type, title, url, html, config, postsLeftToday, maxNumberOfPosts, hasStarted, daysLeft } = action.payload;
-      const data = { type, title, url, config, html };
+      const { blogId, type, title, url, html, tree, config, postsLeftToday, maxNumberOfPosts, hasStarted, daysLeft } = action.payload;
+      const data = { type, title, url, config, html, tree };
     
       if (action.payload.action === "buyNow") {
         state.bannerMessage = {type: 'success', message: "Hire a pro agent to post more blogs today."}

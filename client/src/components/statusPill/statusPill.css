@@ -59,3 +59,32 @@
 }
 
 
+.status-pill.tree{
+    max-height: 2500px !important;
+    height: 400px !important;
+}
+
+.statusPill-treewrapper{
+    margin: 10px 0px;
+    width: 100%;
+    flex-grow: 1;
+    background-color: white;
+    border-radius: 10px;
+}
+
+.statusPill-treewrapper-download{
+    position: absolute;
+}
+
+
+.node__root > circle {
+    fill: var(--brandColor);
+  }
+  
+  .node__branch > circle {
+    fill: var(--brandColor);
+  }
+  
+  .node__leaf > circle {
+    fill: var(--mainDark);
+  }

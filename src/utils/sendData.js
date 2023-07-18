@@ -5,7 +5,7 @@ const DemoAgent = require("../mongo/demoAgent");
 
 const initSendData = (blogMongoID, demo = false) => {
     const sendData = async (dataForClient) => {
-        dataForClient.hasStarted = true;
+        if (dataForClient.type !== "tree") dataForClient.hasStarted = true;
         if (dataForClient.type === "ending") {
           dataForClient.hasStarted = false;
           if (!demo) {
@@ -15,7 +15,7 @@ const initSendData = (blogMongoID, demo = false) => {
           }
         }
     
-        if (dataForClient.type !== "updating") {
+        if (dataForClient.type !== "updating" && dataForClient.type !== "tree") {
           const currAgent = demo ? DemoAgent : AgentDB;
           const postsLeft = await currAgent.addPost(blogMongoID, { url: dataForClient?.url || "", config: dataForClient?.config || "", title: dataForClient?.title || "", type: dataForClient?.type || "error", html: dataForClient?.html || "" });
           dataForClient = { ...dataForClient, ...postsLeft };

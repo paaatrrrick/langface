@@ -5,7 +5,7 @@ import constants, { defualtPills, sampleBlog } from "../../constants";
 import { getJwt, wordpressGetJwt, getUserAuthToken, isAuthenticatedResponse } from "../../utils/getJwt";
 import { scrollToBottom } from "../../utils/styles";
 import { trimStringToChars } from "../../utils/helpers";
-import { setBannerMessage, initializeBlogAgent, setVersion, signOut, setHtmlModal } from "../../store";
+import { setBannerMessage, initializeBlogAgent, setVersion, signOut, setHtmlModal, actions } from "../../store";
 import StatusPill from "../statusPill";
 import Dropdown from "../uxcore/dropdown";
 import SparklesSvg from "../../assets/sparkles-outline.svg";
@@ -13,10 +13,13 @@ import WrenchSvg from "../../assets/build-outline.svg";
 import CaretForward from "../../assets/caret-forward-outline.svg";
 import CheckMark from "../../assets/checkmark-circle.svg";
 import Close from "../../assets/close-circle-sharp.svg";
+import SettingsSvg from '../../assets/settings-outline.svg';
+
 
 const typeToImageMap = {
   error: Close,
   success: CheckMark,
+  tree: CheckMark,
 };
 
 const Home = ({joinRoom}) => {
@@ -50,7 +53,7 @@ const Home = ({joinRoom}) => {
       setHasStarted(currentBlog.hasStarted || false);
       setUsedBlogPosts(currentBlog.postsLeftToday || 0);
       setMaxBlogPosts((currentBlog.maxNumberOfPosts) ? currentBlog.maxNumberOfPosts : constants.maxPosts);
-    }, [activeBlogAgent, currentBlog.data]);
+    }, [activeBlogAgent, currentBlog.data, currentBlog.hasStarted]);
 
     useEffect(() => {
       scrollToBottom(messagesEndRef.current);
@@ -124,6 +127,35 @@ const Home = ({joinRoom}) => {
       setBlogID("");
     };
 
+    const configure = async () => {
+      dispatch(actions.updateBlogAgent({id: activeBlogAgent, hasStarted: false, daysLeft: 0}));
+      const res = await fetch(`${constants.url}/configureBlog`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-access'langface-auth-token": getUserAuthToken()
+        },
+        body: JSON.stringify({ id: activeBlogAgent }),
+      })
+      const data = await res.json();
+    };
+
+    const runNextDay = async () => {
+      dispatch(actions.updateBlogAgent({id: activeBlogAgent, hasStarted: false, daysLeft: ((currentBlog.daysLeft || 1) - 1)}));
+      console.log("running next day");
+      console.log(`${constants.url}/runNextDay`)
+      const res = await fetch(`${constants.url}/runNextDay`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-access'langface-auth-token": getUserAuthToken()
+        },
+        body: JSON.stringify({ id: activeBlogAgent }),
+      });
+      const data = await res.json();
+    };
+
+
     const loopSetter = (e) => {
       var tempLoops = e.target.value;
       if (tempLoops * daysLeft > maxNumberOfPosts) {
@@ -132,7 +164,9 @@ const Home = ({joinRoom}) => {
         setLoops(tempLoops);
       }
     };
-    
+
+
+
     const daysSetter = (e) => {
       var tempDays = e.target.value;
       if (tempDays * loops > maxNumberOfPosts) {
@@ -144,8 +178,9 @@ const Home = ({joinRoom}) => {
 
     const canStart = ((version === "html") || (blogID && jwt)) !== "" && subject && loops;
     const versionSelectorOptions = [{id: "html", text: "Raw Text"}, {id: "wordpress", text: "Post to Wordpress"}, {id: "blogger", text: "Post to Blogger.com"}];
-    const isDataSmall = hasStarted || (!demo && currentBlog.daysLeft > 0);
-
+    const isDataSmall = hasStarted || (!demo && currentBlog.daysLeft > 0); 
+    const waitingForNextDay = !hasStarted && !demo && currentBlog.daysLeft > 0;
+    
   return (
     <div className="Home">
       <div className="row align-center justify-start wrap">
@@ -193,6 +228,7 @@ const Home = ({joinRoom}) => {
               config={pill.config}
               url={pill.url}
               html={pill.html}
+              tree={pill.tree}
               onClick={
                 (pill.html === "html") ? () => {dispatch(setHtmlModal(pill.html))} : false
               }
@@ -200,6 +236,20 @@ const Home = ({joinRoom}) => {
           ))}
         </div>
         </div>
+        {waitingForNextDay &&
+         <div className="w-100 row align-center justify-center">
+            <div className="row">
+              <button style={{marginRight:"15px"}} onClick={configure} className="runButton">
+                  <img src={SettingsSvg} alt="configure button" style={{marginLeft: "10px"}}/>
+                  <h4>Configure</h4>
+              </button>
+              <button style={{marginLeft:"15px"}} onClick={runNextDay} className="runButton">
+                  <img src={CaretForward} alt="run next day button" />
+                  <h4>Run Next Day</h4>
+              </button>
+            </div>
+          </div>
+        }
         {!isDataSmall && 
         <div className="home-input-container">
           <div className="home-firstInputRow">

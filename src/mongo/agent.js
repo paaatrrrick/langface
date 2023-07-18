@@ -1,6 +1,16 @@
+const trimStringToChars = (str, N) => {
+  if (str.length > N) {
+      return str.substring(0, N - 3) + "...";
+  } else {
+      return str;
+  }
+}
+
 const { convertToObjectId } = require('../utils/helpers');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const PostDB = require("./post");
+
 
 const messageSchema = Schema({
     title: String,
@@ -192,9 +202,56 @@ AgentSchema.statics.deleteAllMessages = async function(id) {
   blog.messages = [];
   blog.nextPostIndex = 0;
   blog.BFSOrderedArrayOfPostMongoID = [];
+  blog.topPostID = null;
   await blog.save();
   return blog;
 }
+
+AgentSchema.statics.getTree = async function(id) {
+  try {
+    let blog = await this.findById(convertToObjectId(id));
+    console.log(blog);
+    if (!blog || !blog.BFSOrderedArrayOfPostMongoID || blog.BFSOrderedArrayOfPostMongoID.length === 0) {
+      return false;
+    }
+    const recursTree = async (id) => {
+      try {
+        const post = await PostDB.getPostById(id);
+        console.log(post);
+        if (!post || !post.rawHTML || !post?.blueprint?.blogTitle) {
+          return false;
+        }
+        const res = {name: trimStringToChars(post.blueprint.blogTitle, 30), children: []};
+        for (let childID of post.childrenMongoID) {
+            const child = await recursTree(childID);
+            if (child) {
+              res.children.push(child);
+            }
+        }
+        if (res.children.length === 0) {
+          delete res.children;
+        }
+        console.log(res);
+        return res;
+      } catch (err) {
+        return false;
+      }
+    }
+    const tree = await recursTree(blog.BFSOrderedArrayOfPostMongoID[0]);
+    return tree
+  } catch (err) {
+    return false;
+  }
+}
+
+AgentSchema.statics.changeBlog = async function(id, params) {
+  id = convertToObjectId(id);
+  const agent = await this.findById(id);
+  agent.set(params);
+  await agent.save();
+  return agent;
+};
+
 
 
 // Create and export Blog Model
