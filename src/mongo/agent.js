@@ -210,14 +210,12 @@ AgentSchema.statics.deleteAllMessages = async function(id) {
 AgentSchema.statics.getTree = async function(id) {
   try {
     let blog = await this.findById(convertToObjectId(id));
-    console.log(blog);
     if (!blog || !blog.BFSOrderedArrayOfPostMongoID || blog.BFSOrderedArrayOfPostMongoID.length === 0) {
       return false;
     }
     const recursTree = async (id) => {
       try {
         const post = await PostDB.getPostById(id);
-        console.log(post);
         if (!post || !post.rawHTML || !post?.blueprint?.blogTitle) {
           return false;
         }
@@ -231,13 +229,13 @@ AgentSchema.statics.getTree = async function(id) {
         if (res.children.length === 0) {
           delete res.children;
         }
-        console.log(res);
         return res;
       } catch (err) {
         return false;
       }
     }
     const tree = await recursTree(blog.BFSOrderedArrayOfPostMongoID[0]);
+
     return tree
   } catch (err) {
     return false;

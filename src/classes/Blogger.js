@@ -32,7 +32,7 @@ class Blogger {
     run = async () => {
         this.sendData({ type: "updating", config: `Step 2 of 3: Writing the article`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}` });
         const post = await this.writePost();
-        this.sendData({ type: "updating", config: `Step 3 of 3: Generating images`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}`});
+        this.sendData({ type: "updating", config: `Step 3 of 3: Publishing content`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}`});
         const photosObject = new Photos(post, this.openaiKey, this.blogID, this.jwt, this.imageNames);
         const cloudinaryUrls = await photosObject.run();
         const result = await this.postToBlogger(post, cloudinaryUrls);

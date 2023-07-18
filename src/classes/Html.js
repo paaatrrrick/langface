@@ -31,7 +31,7 @@ if (process.env.NODE_ENV !== "production") {
       run = async () => {
           this.sendData({ type: "updating", config: `Step 2 of 3: Writing the article`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}` });
           const post = await this.writePost();
-          this.sendData({ type: "updating", config: `Step 3 of 3: Generating images`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}`});
+          this.sendData({ type: "updating", config: `Step 3 of 3: Finalizing changes`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}`});
           const photosObject = new Photos(post, this.openaiKey, this.blogID, this.jwt, this.imageNames);
           const cloudinaryUrls = await photosObject.run();
           const result = await this.postBlog(post, cloudinaryUrls);
@@ -69,6 +69,9 @@ if (process.env.NODE_ENV !== "production") {
         if (process.env.MOCK_POST_TO_WORDPRESS === "true") return {title: this.outline.blogTitle, config: post, url: "https://historylover4.wordpress.com/2021/08/16/this-is-a-test-post/", html: post};
         for (let i in imageUrls) {
             post = replaceStringInsideStringWithNewString(post, this.imageNames[i], imageUrls[i]);
+        }
+        if (!this.demo){
+          await PostDB.updatePost(this.postMongoID, {rawHTML: post});
         }
         return { title: this.outline.blogTitle, config: post, html: post };
     };
