@@ -26,7 +26,7 @@ class Photos {
     }
 
     run = async () => {
-        return [];
+      try{
         if (process.env.MOCK_PHOTOS === "true") return dummyWordpressPhotos;
         try {
             this.summarizedImages = await this.summarizeImages();
@@ -40,6 +40,7 @@ class Photos {
           throw new Error("Error creating images");
         }
         return this.cloudinaryImages.map((images) => images.url);
+      }catch(e){ console.log('image error: ', e);}
     }
 
     summarizeImages = async () => {
