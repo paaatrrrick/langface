@@ -1,6 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { setBannerMessage, setColorScheme } from '../../store';
+import Specifications from "../specifications";
 import { useDispatch, useSelector } from "react-redux";
 import "./settings.css";
 
@@ -23,20 +24,6 @@ const Settings = () => {
       })
     );
   };
-  // const toggleCliked = (e, toggle) => {
-  //   if (
-  //     (toggle === "wordpress" && version === "wordpress") ||
-  //     (toggle === "blogger" && version === "wordpress")
-  //   ) {
-  //     dispatch(setVersion("blogger"));
-  //   }
-  //   if (
-  //     (toggle === "blogger" && version === "blogger") ||
-  //     (toggle === "wordpress" && version === "blogger")
-  //   ) {
-  //     dispatch(setVersion("wordpress"));
-  //   }
-  // };
 
   const toggleColorScheme = () => {
     if (colorScheme === "light") {
@@ -49,6 +36,10 @@ const Settings = () => {
   return (
     <div className="Settings">
       <h1>Settings</h1>
+      <div className="w-100 row align-center justify-center">
+        <div className="Settings-spec-container"> <Specifications /> </div>
+      </div>
+      {/* <h2>General Settings</h2>
       <div className="row align-center" style={{marginTop: "30px", marginBottom: "30px"}}>
         <p
         style={{marginRight: "10px"}}
@@ -64,7 +55,7 @@ const Settings = () => {
             />
             <button onClick={addOpenAIKeyToLocalStorage}>Save Key</button>
         </div>
-      </div>
+      </div> */}
       {/* <div className="toggleContent">
         <div className="row align-center">
         <div className="toggleContentRow">
@@ -101,7 +92,7 @@ const Settings = () => {
         </div>
         </div> */}
       {/* </div> */}
-      <div className="toggleContent">
+      {/* <div className="toggleContent">
         <div className="row align-center">
         <div className="toggleContentRow">
           <p>Using Dark Color Scheme</p>
@@ -118,7 +109,7 @@ const Settings = () => {
           </div>
         </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

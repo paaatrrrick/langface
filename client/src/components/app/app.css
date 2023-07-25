@@ -5,7 +5,7 @@
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
     color: var(--mainDark);
-    transition: all 0.3s ease;
+    transition: all 0.3s ease-in-out;
 }
 
 
@@ -31,6 +31,17 @@
     overflow-x: hidden;
   }
 
+
+  #closeButton{
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    outline: none;
+    border: none;
+    z-index: 100;
+  }
 
 
 .App {
@@ -173,6 +184,14 @@ img {
     justify-content: flex-start;
 }
 
+.abs-center{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
 .flex-grow-1 {
     flex-grow: 1;
     height: 100%;
@@ -212,4 +231,19 @@ img {
         font-size: 14px;
     font-weight: 400;
     color: var(--lightDark);
+}
+
+.app-btn1{
+    width: min(200px, 70%);
+    height: 30px;
+    border-radius: 15px;
+    background-color: var(--brandColor);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.app-btn1:hover{
+    background-color: var(--brandOffColor);
+    color: var(--brandColor);
 }

@@ -184,6 +184,14 @@ basicRoutes.post('/runNextDay', isLoggedInMiddleware, asyncMiddleware(async(req,
     return res.json(blog);
 }));
 
+basicRoutes.post('/updatebusinessData', isLoggedInMiddleware, asyncMiddleware(async(req, res) => {
+    console.log('at update businessData');
+    const { blogID, businessData } = req.body;
+    console.log(req.body);
+    const blog = await AgentDB.updatebusinessData(blogID, businessData);
+    return res.status(200).json(blog);
+}));
+
 basicRoutes.use((err, req, res, next) => {
     console.log(err); // Log the stack trace of the error
     res.status(500).json({ error: `Oops, we had an error ${err.message}` });
