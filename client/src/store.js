@@ -4,7 +4,13 @@ import constants from "./constants";
 
 const defaultBlogAgent = {
   default: {
-    config: "",
+    businessData: {
+      name: "",
+      product: "",
+      valueProposition: "",
+      insights: [],
+      links: [],
+    },
     postsLeftToday: constants.maxPosts,
     daysLeft: 0,
     loops: 1,
@@ -18,10 +24,10 @@ const defaultBlogAgent = {
     version: "html",
     dropDownTitle: "New Agent",
     demo: true,
+    settingUp: true,
   }
 }
 
-// Create Redux slice for error state
 const slice = createSlice({
   name: "main",
   initialState: {
@@ -30,6 +36,7 @@ const slice = createSlice({
     currentView: "home",
     htmlModal: "",
     isLoggedIn: false,
+    showSideBar: false,
     blogIds: [],
     user: {},
     activeBlogAgent: "default",
@@ -66,10 +73,13 @@ const slice = createSlice({
     setActiveBlogAgent: (state, action) => {
       state.activeBlogAgent = action.payload;
     },
+    updatebusinessData: (state, action) => {
+      state.blogAgents[state.activeBlogAgent].businessData = {...state.blogAgents[state.activeBlogAgent].businessData, ...action.payload};
+    },
     login: (state, action) => {
       var { blogs, user } = action.payload;
       if (!blogs || blogs.length === 0) {
-        return {...state, isLoggedIn: true, user }
+        return {...state, isLoggedIn: true, user, showSideBar: true  }
       };
       const blogMap = {};
       for (let blog of blogs) {
@@ -89,7 +99,15 @@ const slice = createSlice({
         }
         blogMap[blog._id] = tempBlog;
       }
-      return {...state, isLoggedIn: true, blogAgents: blogMap, user: user, activeBlogAgent: Object.keys(blogMap)[0]}
+      return {...state, isLoggedIn: true, blogAgents: blogMap, user: user, activeBlogAgent: Object.keys(blogMap)[0], showSideBar: true}
+      // return {...state, isLoggedIn: true, blogAgents: blogMap, user: user, activeBlogAgent: Object.keys(blogMap)[0] }
+    },
+    toggleSideBar: (state, action) => {
+      if (action.payload !== undefined) {
+        state.showSideBar = action.payload;
+      } else {
+        state.showSideBar = !state.showSideBar;
+      }
     },
     setVersion: (state, action) => {
       const { activeBlogAgent, version } = action.payload;
@@ -136,7 +154,7 @@ const slice = createSlice({
       state.blogAgents[blogId].data.push(data);
       if (postsLeftToday === 0) {
         state.blogAgents[blogId].postsLeftToday = 0
-      } else {
+      // } else {
         state.blogAgents[blogId].postsLeftToday = postsLeftToday || state.blogAgents[blogId].postsLeftToday;
       }
       state.blogAgents[blogId].maxNumberOfPosts = maxNumberOfPosts || state.blogAgents[blogId].maxNumberOfPosts;

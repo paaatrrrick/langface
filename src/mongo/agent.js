@@ -20,6 +20,19 @@ const messageSchema = Schema({
     html: String,
 }, { _id: false });
 
+const linksSchema = Schema({
+    description: String,
+    url: String,
+}, { _id: false });
+
+const businessDataSchema = Schema({
+    name: String,
+    product: String,
+    valueProposition: String,
+    insights: [String],
+    links: [linksSchema],
+}, { _id: false });
+    
 
 
 const AgentSchema = new Schema({
@@ -29,6 +42,10 @@ const AgentSchema = new Schema({
     messages: {
       type: [messageSchema],
       default: []
+    },
+    businessData: {
+      type: businessDataSchema,
+      default: {}
     },
     topPostID: {
       type: String,
@@ -102,6 +119,18 @@ AgentSchema.statics.createEmptyBlog = async function(userID, paymentID) {
   await blog.save();
   return blog;
 }
+
+AgentSchema.static.updatebusinessData = async function(id, newSpecs) {
+  console.log('at update businessData');
+  console.log(newSpecs)
+  const blog = await this.findById(convertToObjectId(id));
+  console.log(blog);
+  blog.set({businessData: {...blog.businessData, ...newSpecs}});
+  console.log(blog);
+  await blog.save();
+  return blog;
+}
+
 
 //removeNewlyCreated
 AgentSchema.statics.removeNewlyCreated = async function(id) {

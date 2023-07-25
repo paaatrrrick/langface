@@ -14,6 +14,8 @@ import CaretForward from "../../assets/caret-forward-outline.svg";
 import CheckMark from "../../assets/checkmark-circle.svg";
 import Close from "../../assets/close-circle-sharp.svg";
 import SettingsSvg from '../../assets/settings-outline.svg';
+import HtmlModal from "../htmlModal";
+import Specifications from "../specifications";
 
 
 const typeToImageMap = {

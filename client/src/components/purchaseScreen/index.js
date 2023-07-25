@@ -3,10 +3,9 @@ import "./purchaseScreen.css";
 import {useDispatch} from "react-redux";
 import {actions} from "../../store";
 import {createCheckoutSession} from '../../utils/getJwt';
-import constants from '../../constants';
 
 
-const PurchaseScreen = () => {
+const PurchaseScreen = ({ tryDemo, openDemo }) => {
     const dispatch = useDispatch();
     const payment = async () => {
         const res = await createCheckoutSession();
@@ -29,6 +28,7 @@ const PurchaseScreen = () => {
                 }
             }>Hire an AI agent that works autonomously to grow your blog</h6>
         </div>
+        {tryDemo && <button className='launch-purpleButton' onClick={openDemo}>Try the out the demo</button>}
         <div className="row w-100 align-center justify-center"
             style={
                 {marginTop: '60px'}

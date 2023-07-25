@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './navController.css'
 import { useSelector, useDispatch } from 'react-redux';
-import { setCurrentView, setActiveBlogAgent } from '../../store';
+import { setCurrentView, setActiveBlogAgent, actions } from '../../store';
 import HomeSvg from '../../assets/home-outline.svg';
 import SettingsSvg from '../../assets/settings-outline.svg';
 import RocketSvg from '../../assets/rocket-outline.svg';
@@ -11,10 +11,12 @@ import Auth from "../auth"
 import RobotSvg from '../../assets/robot-outline.svg'
 import Mail from '../../assets/mail-outline.svg'
 import Twitter from '../../assets/logo-twitter.svg'
+import Sparkes from '../../assets/sparkles-outline.svg';
 import { trimStringToChars } from "../../utils/helpers";
 import constants from '../../constants';
+import MenuButton from '../app/components/menuButton';
 
-const NavController = ({launch}) => {
+const NavController = ({launch, close}) => {
     const dispatch = useDispatch();
     const { currentView, blogAgents, isLoggedIn, activeBlogAgent } = useSelector(state => state.main);
     const blogKeys = Object.keys(blogAgents);
@@ -39,21 +41,26 @@ const NavController = ({launch}) => {
     }
 
     return (
-        <div className="navController">
+        <div className={`navController ${close ? 'notClosed' : 'closed'}`}>
             <div className='column align-start' style={{width: '100%'}}>
-                <div className='row align-end'>
+                <div className='row align-center w-100 justify-sb'>
                     <h3 className="italic" style={{marginLeft: '15px'}}>BloggerGPT</h3>
-                    <p style={{marginLeft: '5px'}}>beta</p>
+                    <MenuButton/>
                 </div>
                 <div className="navController-pageSelectors">
-                    <div className={`navController-pill ${currentView === "home" ? "selected" : ""}`}
-                        onClick={() => dispatch(setCurrentView("home"))}>
+                    <div className={`navController-pill ${currentView === "launch" ? "selected" : ""}`}
+                        onClick={() => dispatch(setCurrentView("launch"))}>
                         <img src={HomeSvg} />
                         <h6>Home</h6>
                     </div>
+                    <div className={`navController-pill ${currentView === "home" ? "selected" : ""}`}
+                        onClick={() => dispatch(setCurrentView("home"))}>
+                        <img src={Sparkes} />
+                        <h6>Agent</h6>
+                    </div>
                     <div 
-                    className={`navController-pill ${currentView === "settings" ? "selected" : ""}`}
-                    onClick={() => dispatch(setCurrentView("settings"))}
+                        className={`navController-pill ${currentView === "settings" ? "selected" : ""}`}
+                        onClick={() => dispatch(setCurrentView("settings"))}
                     >
                         <img src={SettingsSvg} />
                         <h6>Settings</h6>
@@ -67,7 +74,6 @@ const NavController = ({launch}) => {
                     </div>
                     </div>
                 <div className="navController-pageSelectors">
-                    
                     {isLoggedIn && (<>
                         <p className="italic" style={{marginLeft: '10px', marginBottom: '5px'}}>Your Agents</p>
                         <hr style={{marginTop: "10px", marginBottom: "10px", marginLeft: '2px'}}/>

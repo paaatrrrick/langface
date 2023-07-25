@@ -1,19 +1,11 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import './app.css';
 import HtmlModal from "../htmlModal";
+import NightToggle from '../uxcore/nightToggle';
 import {useDispatch, useSelector} from 'react-redux';
-import {createCheckoutSession, isAuthenticatedResponse} from '../../utils/getJwt';
+import { isAuthenticatedResponse} from '../../utils/getJwt';
 import constants from '../../constants';
-import {
-    clearBannerMessage,
-    updateBlogAgentData,
-    setBannerMessage,
-    login,
-    setBlogIds,
-    signOut,
-    addBlogAgent,
-    setHtmlModal
-} from '../../store';
+import {clearBannerMessage,updateBlogAgentData, setBannerMessage, login, setBlogIds, signOut, setHtmlModal, actions } from '../../store';
 import {setColorScheme} from '../../utils/styles';
 import {getUserAuthToken} from '../../utils/getJwt';
 import NavController from '../navController';
@@ -21,8 +13,11 @@ import BannerMessage from '../bannerMessage';
 import Home from '../home';
 import Settings from '../settings';
 import Tutorial from '../tutorial';
+import Launch from '../launch';
 import PurchaseScreen from '../purchaseScreen';
 import io from "socket.io-client";
+import MenuButton from '../app/components/menuButton';
+import Specifications from '../specifications';
 let socket;
 
 
@@ -40,8 +35,12 @@ const App = () => {
         currentView,
         colorScheme,
         tabId,
-        htmlModal
+        htmlModal,
+        showSideBar,
+        activeBlogAgent,
+        blogAgents
     } = useSelector(state => state.main);
+    const currentBlog = blogAgents[activeBlogAgent];
 
     useEffect(() => {
         setColorScheme(colorScheme);
@@ -109,28 +108,40 @@ const App = () => {
         });
     });
 
+
     const Component = templateMap[currentView] || Home;
-    return (<div className="App">
-        <NavController launch={launch}/> {
-        htmlModal && <HtmlModal html={htmlModal}
-            close={
-                () => {
-                    dispatch(setHtmlModal(""))
-                }
-            }/>
-    }
-        <div className="App-right-section">
-            <div className="flex-grow-1"/>
-            <div className="body"> {
-                bannerMessage && <BannerMessage messageObject={bannerMessage}
-                    close={
-                        () => dispatch(clearBannerMessage())
-                    }/>
+    return (
+        <div className="App">
+        {!showSideBar && <MenuButton topCorner whiteImg={(currentView === 'launch') ? true : false}/>}
+
+        <NavController launch={launch} close={showSideBar}/>
+        {htmlModal && <HtmlModal html={htmlModal}close={() => {dispatch(setHtmlModal(""))}}/>}
+
+        {currentView === 'launch' ? <Launch/> :
+        <>
+            <NightToggle/>
+            {(currentBlog.settingUp && currentView === "home" && false) &&
+                <div className="HtmlModal-overlay"> 
+                    <div className="HtmlModalSpecs">
+                        <Specifications dontShowTopSave/>
+                    </div>
+                </div>
             }
-                <Component joinRoom={joinRoom}/>
+            <div className="App-right-section">
+                <div className="flex-grow-1"/>
+                <div className="body"> {
+                    bannerMessage && <BannerMessage messageObject={bannerMessage}
+                        close={
+                            () => dispatch(clearBannerMessage())
+                        }/>
+                }
+                    <Component joinRoom={joinRoom}/>
+                </div>
+                <div className="flex-grow-1"/>
             </div>
-            <div className="flex-grow-1"/>
-        </div>
+        </>
+
+            }
     </div>);
 }
 

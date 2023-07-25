@@ -1,4 +1,5 @@
 .navController{
+    position: relative;
     width: 224px;
     min-height: 100%;
     padding: 16px 8px 0px 8px;
@@ -7,8 +8,47 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: space-between;
-    transition: all 0.3s ease-in-out;
 }
+
+.navController.closed{
+    /* left: 0px;
+    width: 224px; */
+    position: absolute;
+    animation: fly-out 0.5s ease forwards;    
+}
+
+.navController.notClosed{
+    /* left: -224px;
+    width: 0px; */
+    position: relative;
+    animation: fly-in 0.5s ease-in-out forwards;
+}
+
+@keyframes fly-out {
+    0% {
+      left: 0%;
+       width: 224px;
+    }
+    100% {
+      left: -224px;
+      width: 0px;
+      /* display: none; */
+    }
+}
+
+@keyframes fly-in {
+    0% {
+      left: -244px;
+      width: 0px;
+    }
+    100% {
+      left: 0%;
+      width: 224px;
+    }
+}
+
+
+
 
 .navController .italic{
     font-style: italic;

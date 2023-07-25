@@ -23,6 +23,19 @@
     align-items: flex-start;
     justify-content: flex-start;
   }
+
+  .HtmlModalSpecs {
+    background-color: white;
+    padding: 20px;
+    width: min(1000px, 90vw);
+    height: min(550px, 90vh);
+    border-radius: 8px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
   .HtmlModal-toprow{
     width: 100%;
     display: flex;
