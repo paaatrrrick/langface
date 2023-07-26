@@ -201,9 +201,9 @@ AgentSchema.statics.getBlog = async function(id) {
 //createBlog
 AgentSchema.statics.updateBlog = async function(id, params) {
   id = convertToObjectId(id);
-  const { blogID, version, userID, openaiKey, blogJwt, subject, config, loops, daysLeft, topPostID } = params;
+  const { blogID, version, userID, openaiKey, blogJwt, businessData, loops, daysLeft, topPostID } = params;
   const blog = await this.findById(id);
-  blog.set({blogID, version, userID, openaiKey,jwt: blogJwt,subject,config,loops,daysLeft, topPostID})
+  blog.set({blogID, version, userID, openaiKey,jwt: blogJwt, businessData,loops,daysLeft, topPostID})
   return await blog.save();
 }
 

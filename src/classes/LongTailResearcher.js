@@ -1,6 +1,6 @@
 const { ChatOpenAI } = require("langchain/chat_models/openai");
 const { PromptTemplate } = require("langchain/prompts");
-const { HumanChatMessage } = require("langchain/schema");
+const { HumanChatMessage, SystemChatMessage } = require("langchain/schema");
 const { z } = require("zod");
 const { StructuredOutputParser, CustomListOutputParser } = require("langchain/output_parsers");
 const { dummyBlueprint } = require("../constants/dummyData");
@@ -18,6 +18,7 @@ class LongTailResearcher {
         this.BFSOrderedArrayOfPostMongoID = BFSOrderedArrayOfPostMongoID;
         this.demo = demo;
         this.childrenCount = 3; /** children count hard coded until consensus*/
+        this.keywords = [];
     }
 
 
@@ -73,29 +74,34 @@ class LongTailResearcher {
 
     // TODO (Gautam): switch to getKeywords() to get keywords for Ads keyword planner OR SERP API    
     getKeywords = async(count, subject=this.subject) => {
+        const systemMessage = "You are a marketing blog writer. \n\nYou will be asked to generate a given number of blog post titles that satisfy certain given conditions (KEY CONDITIONS). Then you will generate the right number of blog post titles, each of which satisfy the KEY CONDITIONS. You must use the following GOOGLE-OPTIMAL TITLE GUIDLINES for each title:\n\n-Unique, accurate & in HTML's <head>.\n-Reflect page topic.\n-Avoid vague terms e.g. \"Untitled\".\n-Concise yet informative; avoid truncation.\n-No keyword stuffing.\n-Clear & readable.\n-Well-structured with topic divisions.\n-Original & user-centric.\n-Highlight expertise.\n-Comprehensive, unique insights, & trustworthy.\n-Descriptive, accurate.\n-Prioritize quality.\n-Define primary focus.\n-Inform & satisfy readers.";
         const parser = new CustomListOutputParser({
           length: count,
           separator: "\n",
         });
         const formatInstructions = parser.getFormatInstructions();
         if (subject === this.subject){
-          var template = `Provide an unordered list of length "{count}" of Longtail keywords that you would expect to have few competitors and high volume traffic for a blog about "{subject}". \n{format_instructions}`
+          var template = `Provide an unordered list of length "{count}" of search queries made by those interested in "{subject}". \n{format_instructions}`
         }
         else {
-          var template = "Given the longtail keyword {subject}, provide an unordered list of length {count} of VERY highly distinct longtail keywords that tangentially extend the given keyword and go deeper."
+          var template = "Provide an unordered list of length {count} of distinct search queries tangentially related to {subject}.  \n{format_instructions}"
         }
         const prompt = new PromptTemplate({
           template: template,
-          inputVariables: ["subject", "count"],
+          inputVariables: ["count", "subject", "mainsubject", "keywords"],
           partialVariables: { format_instructions: formatInstructions },
         });
         const input = await prompt.format({
-          subject: subject,
           count: count,
+          subject: subject,
+          mainsubject: this.subject,
+          keywords: this.keywords
         });
         const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 3000, openAIApiKey: this.openaiKey});
         const response = await model.call([new HumanChatMessage(input)]);
         const keywords  = response.text.split("\n");
+        console.log(keywords);
+        this.keywords.concat(keywords);
         return keywords;
     }
 

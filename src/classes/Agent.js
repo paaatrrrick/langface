@@ -15,7 +15,7 @@ const {WeaviateStore} = require("langchain/vectorstores/weaviate");
 const {OpenAIEmbeddings} = require("langchain/embeddings/openai");
 
 class Agent {
-    constructor(openaiKey, sendData, jwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, demo = false, uid = null, draft = false, nextPostIndex, BFSOrderedArrayOfPostMongoID) { // AGENT
+    constructor(openaiKey, sendData, jwt, blogID, businessData, version, loops, daysLeft, blogMongoID, demo = false, uid = null, draft = false, nextPostIndex, BFSOrderedArrayOfPostMongoID) { // AGENT
         this.demo = demo;
         this.AgentDB = demo ? DemoAgentDB : AgentDB;
         this.uid = uid;
@@ -26,8 +26,8 @@ class Agent {
         this.jwt = jwt;
         this.blogID = blogID;
         this.blogMongoID = blogMongoID;
-        this.subject = subject;
-        this.config = config;
+        this.subject = businessData.name;
+        this.config = businessData.product;
         this.version = version;
         this.loops = loops;
         this.daysLeft = daysLeft;
@@ -42,11 +42,11 @@ class Agent {
         
         // TOOLS
         if (this.demo){
-          this.researcher = new LongTailResearcher(subject, this.loops, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID, true);
+          this.researcher = new LongTailResearcher(businessData.name, this.loops, businessData.product, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID, true);
         } else{
         
 
-          this.researcher = new LongTailResearcher(subject, researcherLoops, config, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
+          this.researcher = new LongTailResearcher(businessData.name, researcherLoops, businessData.product, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
         }
     }
 
