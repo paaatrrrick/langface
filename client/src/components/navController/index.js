@@ -25,7 +25,7 @@ const NavController = ({launch, close}) => {
     var newAgentCount = 0;
     const agentsKeys = Object.keys(blogAgents);
     for (let i = 0; i < agentsKeys.length; i++) {
-      var text = blogAgents[agentsKeys[i]].subject;
+      var text = blogAgents[agentsKeys[i]]?.businessData?.name;
       if (agentsKeys[i] === "default"){
         text = "Demo Agent"
       }
@@ -33,7 +33,16 @@ const NavController = ({launch, close}) => {
         newAgentCount++;
         text = `Pro Agent #${newAgentCount}`;
       }
+    //   console.log('here1')
       dropDownOptions.push({id: agentsKeys[i], text: trimStringToChars(text, 18)});
+    }
+
+    var hasANonDemoAgent = false;
+    for (let i = 0; i < agentsKeys.length; i++) {
+        if (!agentsKeys[i].demo) {
+            hasANonDemoAgent = true;
+            break;
+        }
     }
 
     const payment = () => {
@@ -48,11 +57,11 @@ const NavController = ({launch, close}) => {
                     <MenuButton/>
                 </div>
                 <div className="navController-pageSelectors">
-                    <div className={`navController-pill ${currentView === "launch" ? "selected" : ""}`}
+                    {!hasANonDemoAgent && <div className={`navController-pill ${currentView === "launch" ? "selected" : ""}`}
                         onClick={() => dispatch(setCurrentView("launch"))}>
                         <img src={HomeSvg} />
                         <h6>Home</h6>
-                    </div>
+                    </div>}
                     <div className={`navController-pill ${currentView === "home" ? "selected" : ""}`}
                         onClick={() => dispatch(setCurrentView("home"))}>
                         <img src={Sparkes} />
@@ -63,7 +72,7 @@ const NavController = ({launch, close}) => {
                         onClick={() => dispatch(setCurrentView("settings"))}
                     >
                         <img src={SettingsSvg} />
-                        <h6>Settings</h6>
+                        <h6>Configure</h6>
                     </div>
                     <div 
                         className={`navController-pill ${currentView === "tutorial" ? "selected" : ""}`}
@@ -125,11 +134,11 @@ const NavController = ({launch, close}) => {
                             </a>
                         </div>
                     </div>
-                    {isLoggedIn && <div id="navControllerPurchase" onClick={payment}>
+                    <div id="navControllerPurchase" onClick={payment}>
                             <img src={RobotSvg} />
-                            <h6>Hire Agent</h6>
-                    </div>}
-                    {!isLoggedIn && <Auth launch={launch} mask="true" payment={payment}/> }
+                            <h6 className='text-18px'>Hire Agent</h6>
+                    </div>
+                    {/* {!isLoggedIn && <Auth launch={launch} mask="true" payment={payment}/> } */}
                 <Auth launch={launch}/>
             </div>
         </div>
