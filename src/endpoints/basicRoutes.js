@@ -56,7 +56,7 @@ basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
     if (!demo) {
         const user = await User.getUserByID(jwt.verify(userAuthToken, process.env.JWT_PRIVATE_KEY));
         userID = user._id.toString();
-        blog = await AgentDB.updateBlog(blogMongoID, {blogID, version, userID, openaiKey: openaiKey, blogJwt, subject, config, loops, daysLeft});
+        blog = await AgentDB.updateBlog(blogMongoID, {blogID, version, userID, openaiKey: openaiKey, blogJwt, businessData, loops, daysLeft});
         if (blog.hasStarted) return res.status(400).json({error: "Blog has already started"});
         await User.addBlog(userID, blogMongoID);
         blog = await AgentDB.deleteAllMessages(blogMongoID);
