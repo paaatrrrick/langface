@@ -14,20 +14,27 @@
     left: 10px;
 }
 
+.topCorner{
+    background-color: var(--brandColor);
+}
+.whiteImg{
+    background-color: var(--brandColor);
+}
+.topCorner:hover{
+    background-color: var(--brandColor);
+}
+
 .menuButton img {
     width: 75%;
     height: 75%;
     transition: all 0.3s ease-in-out;
 }
 
-.menuButton:hover {
+/* .menuButton:hover {
     background-color: var(--brandOffColor);
 }
 
 .menuButton:hover img{
     filter: invert(34%) sepia(70%) saturate(3944%) hue-rotate(232deg) brightness(101%) contrast(91%);
-}
+} */
 
-.whiteImg:hover img{
-    filter: invert(34%) sepia(70%) saturate(3944%) hue-rotate(232deg) brightness(101%) contrast(91%) !important;
-}

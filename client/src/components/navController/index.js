@@ -50,14 +50,14 @@ const NavController = ({launch, close}) => {
     }
 
     return (
-        <div className={`navController ${close ? 'notClosed' : 'closed'}`}>
+        <div className={`navController ${close ? 'notClosed' : 'closed'}`} style={{'backgroundColor' : "#f7f7f8"}}>
             <div className='column align-start' style={{width: '100%'}}>
                 <div className='row align-center w-100 justify-sb'>
-                    <h3 className="italic" style={{marginLeft: '15px'}}>BloggerGPT</h3>
+                    <h3 className="italic font-bold" style={{marginLeft: '15px'}}>BloggerGPT</h3>
                     <MenuButton/>
                 </div>
                 <div className="navController-pageSelectors">
-                    {!hasANonDemoAgent && <div className={`navController-pill ${currentView === "launch" ? "selected" : ""}`}
+                    {hasANonDemoAgent && <div className={`navController-pill ${currentView === "launch" ? "selected" : ""}`}
                         onClick={() => dispatch(setCurrentView("launch"))}>
                         <img src={HomeSvg} />
                         <h6>Home</h6>
@@ -103,12 +103,6 @@ const NavController = ({launch, close}) => {
                         </div>
                     </>)}
                     {dropDownOptions.length > 4 && <hr style={{marginTop: "5px", marginBottom: "10px", marginLeft: '2px'}}/>}
-                    {/* {isLoggedIn && 
-                        <a className={`navController-pill`} href="https://billing.stripe.com/p/login/28obKwfrLb5L6WIaEE" target="_blank">
-                            <img src={RobotSvg} />
-                            <h6>Fire Agent</h6>
-                        </a>
-                    } */}
                 </div>
             </div>
                 <div className="navController-pageSelectors">
@@ -136,7 +130,7 @@ const NavController = ({launch, close}) => {
                     </div>
                     <div id="navControllerPurchase" onClick={payment}>
                             <img src={RobotSvg} />
-                            <h6 className='text-18px'>Hire Agent</h6>
+                            <h6 className='text-20'>Hire Agent</h6>
                     </div>
                     {/* {!isLoggedIn && <Auth launch={launch} mask="true" payment={payment}/> } */}
                 <Auth launch={launch}/>

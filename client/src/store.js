@@ -31,14 +31,15 @@ const slice = createSlice({
   initialState: {
     tabId: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
     bannerMessage: null,
-    currentView: "home",
+    currentView: "launch",
     htmlModal: "",
     isLoggedIn: false,
     showSideBar: false,
     blogIds: [],
     user: {},
     activeBlogAgent: "default",
-    colorScheme: localStorage.getItem("bloggerGPT-colorScheme") ? localStorage.getItem("bloggerGPT-colorScheme") : "light",
+    // colorScheme: localStorage.getItem("bloggerGPT-colorScheme") ? localStorage.getItem("bloggerGPT-colorScheme") : "light",
+    colorScheme: "light",
     blogAgents: defaultBlogAgent
   },
   reducers: {

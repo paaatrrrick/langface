@@ -85,12 +85,11 @@ const Specifications = ({dontShowTopSave, closeOnSave}) => {
         <div className="specifications">
             <h2 className='text-2xl'>Tell us about your business</h2>
             {!loading && <Components specs={specs} setSpecs={setSpecs}/>}
-            
             {loading && <div className="abs-center"><Loader/></div>}
             {(!dontShowTopSave && currentSlide !== (inputsArray.length  - 1)) && <button onClick={updateSpecsOnSlideChange} className='specs-saveBtn' disabled={(loading || !canGoNext)}>Save</button>}
             {(dontShowTopSave && currentSlide !== 0) && 
             <button onClick={() => {updateSpecsOnSlideChange('nil', true)}} 
-            className='absolute top-5 right-5 rounded-full bg-light2 w-8 h-8 text-center hover:bg-brand2 hover:text-brandColor dark:text-mainDark' 
+            className='absolute top-5 right-5 rounded-full bg-light2 w-8 h-8 bg-l-l2 text-center hover:bg-b2 hover:text-brandColor' 
             disabled={(loading || !canGoNext)}>&times;</button>}
             {(currentSlide == (inputsArray.length  - 1)) && <button onClick={() => {updateSpecsOnSlideChange('', true)}}className='app-btn1 spec-move-forward' disabled={(loading || !canGoNext)}>Save</button>}
             {(currentSlide !== 0) && <button className='app-btn1 spec-move-back' disabled={loading} onClick={() => {updateSpecsOnSlideChange("back")}}>Back</button>}

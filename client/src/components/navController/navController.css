@@ -1,25 +1,22 @@
 .navController{
-    position: relative;
-    width: 224px;
-    min-height: 100%;
-    padding: 16px 8px 0px 8px;
-    background-color: var(--darkerBackground);
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: space-between;
+    position: absolute;
+    left: -224px;
+    width: 0px;
+    display: none;
 }
 
 .navController.closed{
-    /* left: 0px;
-    width: 224px; */
     position: absolute;
     animation: fly-out 0.5s ease forwards;    
 }
 
 .navController.notClosed{
-    /* left: -224px;
-    width: 0px; */
+    min-height: 100%;
+    padding: 16px 8px 0px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
     position: relative;
     animation: fly-in 0.5s ease-in-out forwards;
 }
@@ -32,7 +29,7 @@
     100% {
       left: -224px;
       width: 0px;
-      /* display: none; */
+      display: none;
     }
 }
 

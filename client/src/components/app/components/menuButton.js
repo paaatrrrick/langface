@@ -8,10 +8,11 @@ import './menuButton.css';
 const MenuButton = (props) => {
     const {topCorner, whiteImg} = props;
     const dispatch = useDispatch();
+    // const style 
     return (
         <button 
         onClick={() => {dispatch(actions.toggleSideBar())}}
-        className={`menuButton ${topCorner && 'topCorner'} ${whiteImg && 'whiteImg'}`}>
+        className={`menuButton ${topCorner && 'topCorner'} ${whiteImg && 'whiteImg'} z-50`}>
             <img 
             style={whiteImg ? {filter:'invert(100%)' } : {}}
             src={MenuOutLine} alt='menu outline'/>

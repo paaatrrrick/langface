@@ -1,59 +1,57 @@
+// /** @type {import('tailwindcss').Config} */
+// const defaultTheme = require('tailwindcss/defaultTheme')
+
+
+const defaultTheme = require('tailwindcss/defaultTheme')
+
 /** @type {import('tailwindcss').Config} */
-// document.documentElement.style.setProperty('--brandColor', '#625df4');
-// document.documentElement.style.setProperty('--brandOffColor', '#e0e1f7');
-// document.documentElement.style.setProperty('--mainDark', '#212121');
-// document.documentElement.style.setProperty('--lightDark', '#212121');
-// document.documentElement.style.setProperty('--darkerBackground', '#f7f7f8');
-// document.documentElement.style.setProperty('--lighterBackground', '#fff');
-// document.documentElement.style.setProperty('--blackFiler', 'invert(0%) sepia(1%) saturate(7438%) hue-rotate(123deg) brightness(107%) contrast(100%)');
-// } else {
-// document.documentElement.style.setProperty('--brandColor', '#625df4');
-// document.documentElement.style.setProperty('--brandOffColor', '#fff');
-// document.documentElement.style.setProperty('--mainDark', '#fff');
-// document.documentElement.style.setProperty('--lightDark', '#f7f7f8');
-// document.documentElement.style.setProperty('--darkerBackground', '#0e0e0e');
-// document.documentElement.style.setProperty('--lighterBackground', '#212121');
-// document.documentElement.style.setProperty('--blackFiler', 'invert(100%) sepia(100%) saturate(0%) hue-rotate(83deg) brightness(108%) contrast(101%)');
-
-
-module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
+  module.exports = {
   darkMode: 'class',
+  content: ['./src/**/*.{js,jsx}'],
   theme: {
-    screens: {
-      sm: '480px',
-      md: '768px',
-      lg: '976px',
-      xl: '1440px',
-    },
-    //add font size in px
     fontSize: {
-      'xs': '8px',
-      'sm': '12px',
-      'base': '16px',
-      '18px': '18px',
-      'lg': '20px',
-      'xl': '24px',
-      '2xl': '32px',
-      '3xl': '48px',
-      '4xl': '64px',
+      "10": '10px',
+      "12": '12px',
+      "14": '14px',
+      '18': '18px',
+      '20': '20px',
+      "22": '22px',
+      "24": '24px',
+      "32": '32px',
+      "34": '34px',
+      xs: ['0.75rem', { lineHeight: '1rem' }],
+      sm: ['0.875rem', { lineHeight: '1.5rem' }],
+      base: ['1rem', { lineHeight: '1.75rem' }],
+      lg: ['1.125rem', { lineHeight: '2rem' }],
+      xl: ['1.25rem', { lineHeight: '2rem' }],
+      '2xl': ['1.5rem', { lineHeight: '2rem' }],
+      '3xl': ['2rem', { lineHeight: '2.5rem' }],
+      '4xl': ['32px', { lineHeight: '3.5rem' }],
+      '5xl': ['3rem', { lineHeight: '3.5rem' }],
+      '6xl': ['3.75rem', { lineHeight: '1' }],
+      '7xl': ['4.5rem', { lineHeight: '1.1' }],
+      '8xl': ['6rem', { lineHeight: '1' }],
+      '9xl': ['8rem', { lineHeight: '1' }],
     },
     colors: {
       'brandColor': '#625df4',
-      'brand2': '#e0e1f7',
-      'light2': '#f7f7f8',
+      'l-b2': '#e0e1f7',
+      'l-l2': '#f7f7f8',
+      'd-d2': '#f7f7f8',
+      'd-l2': '#0e0e0e',
       'mainDark': '#212121',
       'mainWhite': '#fff',
     },
     extend: {
-      spacing: {
-        '128': '32rem',
-        '144': '36rem',
-      },
       borderRadius: {
         '4xl': '2rem',
+      },
+      fontFamily: {
+        sans: ['Inter', ...defaultTheme.fontFamily.sans],
+        display: ['Lexend', ...defaultTheme.fontFamily.sans],
+      },
+      maxWidth: {
+        '2xl': '40rem',
       },
       padding: {
         sm: '8px',
@@ -67,7 +65,7 @@ module.exports = {
         lg: '24px',
         xl: '48px',
       },
-    }
+    },
   },
-  plugins: [],
+  plugins: [require('@tailwindcss/forms')],
 }

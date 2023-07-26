@@ -180,7 +180,7 @@ const Home = ({joinRoom}) => {
         <div className="home-input-top-row">
           <p>{trimStringToChars(currentBlog?.businessData?.name || '', 45)}</p>
           <div className="row">
-            {(!demo && currentBlog.daysLeft > 0) && <p style={{marginRight: "25px"}}>Days Left: {currentBlog.daysLeft}</p>}
+            {(!demo && currentBlog.daysLeft > 0) && <p style={{marginRight: "25px"}}>Loops Left: {currentBlog.daysLeft}</p>}
             <p>{demo ? 'Articles Written: ' : 'Monthly Articles Used: '}{maxNumberOfPosts - postsLeftToday} / {maxNumberOfPosts}</p>
           </div>
         </div>
@@ -222,7 +222,7 @@ const Home = ({joinRoom}) => {
               </button>
               <button style={{marginLeft:"15px"}} onClick={runNextDay} className="runButton">
                   <img src={CaretForward} alt="run next day button" />
-                  <h4>Run Next Day</h4>
+                  <h4>Run Next Loop</h4>
               </button>
             </div>
           </div>
@@ -233,9 +233,9 @@ const Home = ({joinRoom}) => {
           <div className="mock-container">
             <Dropdown options={versionSelectorOptions} selected={version} onSelectedChange={versionToggler}/>
           </div>
-          <div className="article-count">
-            <label for="postsToday">
-              {(!demo) ? "Posts Per Day:" : "Post Count:"}
+          {!demo && <div className="article-count">
+           <label for="postsToday">
+              Posts Per Loop
             </label>
               <input
                 id="postsToday"
@@ -244,11 +244,11 @@ const Home = ({joinRoom}) => {
                 min={1}
                 onChange={loopSetter}
               />
-          </div>
-          {(!demo && false) &&
+          </div> }
+          {(!demo) &&
             <div className="article-count">
             <label for="postsToday">
-            Days to Run
+            How manys loops?
             </label>
               <input
                 id="postsToday"

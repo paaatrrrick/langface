@@ -69,7 +69,7 @@ const PurchaseScreen = ({ tryDemo, openDemo, launch }) => {
 
     return (<div className="PurchaseScreen">
         <div className="w-100 column align-center justify-center">
-            <h1>Supercharge your web traffic</h1>
+            <h1 className="text-4xl mb-2 font-semibold">Supercharge your web traffic</h1>
             <h6 style={
                 {
                     marginTop: '10px',
@@ -89,22 +89,17 @@ const PurchaseScreen = ({ tryDemo, openDemo, launch }) => {
         <div className="row PurchaseScreen-card-holder align-center justify-center">
             <div className="PurchaseScreen-card">
                 <div className="column w-100 align-start justify-start">
-                    <h3 style={
-                        {
-                            fontSize: '18px',
-                            fontWeight: '700'
-                        }
-                    }>Hobbyist</h3>
+                    <h3 style={{ fontSize: '18px', fontWeight: '700' }}>Hobbyist</h3>
                     <p style={
                             {fontSize: '14px'}
                         }
                         className="PurchaseScreen-list-black">Quickly generate articles</p>
                     <div className="PurchaseScreen-list">
                         <div className="PurchaseScreen-list-item">
-                            <p><span className="green">&#10003;</span> 3 Articles / Day</p>
-                            <p><span className="green">&#10003;</span> Keyword generation </p>
-                            <p><span className="green">&#10003;</span> Images</p>
-                            <p><span className="green">&#10003;</span> Post directly to Wordpress</p>
+                            <p><span className="text-brandColor text-xl">&#10003;</span> 3 Articles / Day</p>
+                            <p><span className="text-brandColor text-xl">&#10003;</span> Keyword generation </p>
+                            <p><span className="text-brandColor text-xl">&#10003;</span> Images</p>
+                            <p><span className="text-brandColor text-xl">&#10003;</span> Post directly to Wordpress</p>
                         </div>
                     </div>
                 </div>
@@ -145,12 +140,12 @@ const PurchaseScreen = ({ tryDemo, openDemo, launch }) => {
                         className="PurchaseScreen-list-black">Scale your business's traffic</p>
                     <div className="PurchaseScreen-list">
                         <div className="PurchaseScreen-list-item">
-                            <p><span className="green">&#10003;</span> 450 Articles / Month</p>
-                            <p><span className="green">&#10003;</span> Internal linking </p>
-                            <p><span className="green">&#10003;</span> Autonomous daily execution </p>
-                            <p><span className="green">&#10003;</span> Everything in Hobbyist</p>
-                            <p><span className="green">&#10003;</span> Coming soon: keyword research</p>
-                            <p><span className="green">&#10003;</span> Coming soon: continuous, 24/7, execution</p>
+                            <p><span className="text-brandColor text-xl">&#10003;</span> 450 Articles / Month</p>
+                            <p><span className="text-brandColor text-xl">&#10003;</span> Internal linking </p>
+                            <p><span className="text-brandColor text-xl">&#10003;</span> Autonomous daily execution </p>
+                            <p><span className="text-brandColor text-xl">&#10003;</span> Everything in Hobbyist</p>
+                            <p><span className="text-brandColor text-xl">&#10003;</span> Coming soon: keyword research</p>
+                            {/* <p><span className="text-brandColor text-xl">&#10003;</span> Coming soon: continuous, 24/7, execution</p> */}
                         </div>
                     </div>
                 </div>
@@ -193,10 +188,10 @@ const PurchaseScreen = ({ tryDemo, openDemo, launch }) => {
                         className="PurchaseScreen-list-black">Blanket a whole niche</p>
                     <div className="PurchaseScreen-list">
                         <div className="PurchaseScreen-list-item">
-                            <p><span className="green">&#10003;</span> Pay on per Article basis</p>
-                            <p><span className="green">&#10003;</span> Tailored workflow for your business</p>
-                            <p><span className="green">&#10003;</span> 1-1 customer support</p>
-                            <p><span className="green">&#10003;</span> Everything in Professional</p>
+                            <p><span className="text-brandColor text-xl">&#10003;</span> Pay on per Article basis</p>
+                            <p><span className="text-brandColor text-xl">&#10003;</span> Tailored workflow for your business</p>
+                            <p><span className="text-brandColor text-xl">&#10003;</span> 1-1 customer support</p>
+                            <p><span className="text-brandColor text-xl">&#10003;</span> Everything in Professional</p>
                         </div>
                     </div>
                 </div>

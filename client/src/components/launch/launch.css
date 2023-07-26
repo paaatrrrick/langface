@@ -35,6 +35,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+    background-color: var(--alwaysDark);
 }
 
 .launch-top{
@@ -46,10 +47,11 @@
 }
 
 .introArea h1{
-    font-weight: 400;
-    font-size: 30px;
+    font-weight: 500;
+    font-size: 50px;
     margin-top: 125px;
     text-align: center;
+    color: #fff;
 }
 
 .htmlWrapper{
@@ -58,25 +60,28 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    height: 350px;
+    height: 650px;
 }
 
 .launch .tryIt{
-    border: 1px solid white;
-    height: 36px;
+    border: 1px solid var(--brandColor);
+    height: 40px;
     border-radius: 18px;
-    width: 150px;
+    width: 175px;
     margin-top: 25px;
     margin-bottom: 40px;
-    background-color: transparent;
-    color: white;
+    font-size: 16px;
+    background-color: var(--brandColor);
+    color: #fff;
 }
 
 .launch h2{
     font-size: 40px;
     line-height: 60px;
-    margin-top: 100px;
     text-align: center;
+    color: #fff;
+    margin-bottom: 15px;
+    margin-right: 20px;
 }
 
 .howItWorks{
@@ -85,6 +90,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+    background-color: #f9f9f9;
 }
 
 .howItWorks h2{
@@ -97,8 +103,7 @@
 
 
 .howItWorks h2{
-    margin: 40px 0px;
-    
+    margin: 40px 0px;    
 }
 
 .howItWorksRows{
@@ -106,13 +111,13 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    width: min(1150px, 100%);
+    width: min(1250px, 100%);
     margin: -40px 0px;
 }
 
 .howItWorksRows img{
     filter: none;
-    width: 450px;
+    width: 500px;
 }
 
 .howIt-left{
@@ -170,7 +175,7 @@
 }
 
 .custom-shape-divider-bottom-1689906032 .shape-fill {
-    fill: #fff;
+    fill: #f9f9f9;
 }
 
 
@@ -219,14 +224,31 @@
     background-color: #625df4;
 }
 
-.PurchaseScreen * {
+
+.launch-payments .PurchaseScreen-card:first-of-type{
+    border-color: white !important;
+}
+
+.launch-payments .PurchaseScreen-card:last-of-type{
+    border-color: white !important;
+}
+
+.launch-payments .PurchaseScreen h1{
     color: white;
 }
 
-.PurchaseScreen-card:first-of-type{
-    border-color: white !important;
+.launch-payments .PurchaseScreen h3{
+    color: white;
 }
 
-.PurchaseScreen-card:last-of-type{
-    border-color: white !important;
+.launch-payments .PurchaseScreen h4{
+    color: white;
+}
+
+.launch-payments .PurchaseScreen h6{
+    color: white;
+}
+
+.launch-payments .PurchaseScreen p{
+    color: white !important;
 }

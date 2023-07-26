@@ -25,7 +25,8 @@ const templateMap = {
     blogger: Home,
     settings: Settings,
     tutorial: Tutorial,
-    purchase: PurchaseScreen
+    purchase: PurchaseScreen,
+    launch: Launch
 }
 
 const App = () => {
@@ -110,15 +111,24 @@ const App = () => {
     console.log(colorScheme)
     const Component = templateMap[currentView] || Home;
     return (
-        <div className={`App ${(colorScheme === 'dark') && 'dark'}`}>
-        {!showSideBar && <MenuButton topCorner whiteImg={(currentView === 'launch') ? true : false}/>}
+        <div className={`App`}>
+        {!showSideBar && <MenuButton topCorner whiteImg/>}
 
         <NavController launch={launch} close={showSideBar}/>
-        {htmlModal && <HtmlModal html={htmlModal}close={() => {dispatch(setHtmlModal(""))}}/>}
-
-        {currentView === 'launch'  ? <Launch/> :
-        <>
-            <NightToggle/>
+        {htmlModal && <HtmlModal html={htmlModal} close={() => {dispatch(setHtmlModal(""))}}/>}
+            {currentView !== 'launch' &&  (
+                <>
+                    {/* <NightToggle/> */}
+                    <div className="App-right-section">
+                            <div className="flex-grow-1"/>
+                            <div className="body"> 
+                            {bannerMessage && <BannerMessage messageObject={bannerMessage} close={() => dispatch(clearBannerMessage())}/>}
+                                <Component joinRoom={joinRoom} launch={launch}/>
+                            </div>
+                            <div className="flex-grow-1"/>
+                    </div>
+                </>
+            )}
             {(currentBlog.settingUp && currentView === "home") &&
                 <div className="HtmlModal-overlay"> 
                     <div className="HtmlModalSpecs">
@@ -126,22 +136,9 @@ const App = () => {
                     </div>
                 </div>
             }
-            <div className="App-right-section">
-                <div className="flex-grow-1"/>
-                <div className="body"> {
-                    bannerMessage && <BannerMessage messageObject={bannerMessage}
-                        close={
-                            () => dispatch(clearBannerMessage())
-                        }/>
-                }
-                    <Component joinRoom={joinRoom} launch={launch}/>
-                </div>
-                <div className="flex-grow-1"/>
-            </div>
-        </>
-
+            {currentView === 'launch' && <div className="App-right-section" style={{flexDirection: 'column'}}><Launch/></div>
             }
-    </div>);
-}
+    </div>
+)}
 
 export default App;
