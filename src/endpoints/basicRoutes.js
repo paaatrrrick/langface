@@ -45,7 +45,7 @@ basicRoutes.get("/user", isLoggedInMiddleware, asyncMiddleware(async (req, res) 
 
 basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
     // get agent data
-    var {openaiKey, blogID, subject, config, version, loops, daysLeft, userAuthToken, demo, blogMongoID, draft = false} = req.body;
+    var {openaiKey, blogID, businessData, version, loops, daysLeft, userAuthToken, demo, blogMongoID, draft = false} = req.body;
     const blogJwt = req.body.jwt;
     if (version !== "blogger" && version !== "html") {
       version = "wordpress";
@@ -67,7 +67,7 @@ basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
     }
     // use new agent data to run
     const sendData = initSendData(blogMongoID, demo);
-    const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, demo, userID, draft, blog.nextPostIndex, blog.BFSOrderedArrayOfPostMongoID);
+    const agent = new Agent(openaiKey, sendData, blogJwt, blogID, businessData, version, loops, daysLeft, blogMongoID, demo, userID, draft, blog.nextPostIndex, blog.BFSOrderedArrayOfPostMongoID);
     agent.run();
     return res.json(blog);
 }));
@@ -96,11 +96,11 @@ basicRoutes.post("/dailyrun", asyncMiddleware(async (req, res) => {
         const activeBlogs = await AgentDB.getActive();
         console.log(activeBlogs);
         for (let blog of activeBlogs) {
-            const {openaiKey, blogID, subject, config, version, loops, daysLeft, _id, userID, nextPostIndex, BFSOrderedArrayOfPostMongoID } = blog;
+            const {openaiKey, blogID, businessData, version, loops, daysLeft, _id, userID, nextPostIndex, BFSOrderedArrayOfPostMongoID } = blog;
             const blogMongoID = _id.toString();
             const blogJwt = blog.jwt;
             const sendData = initSendData(blogMongoID);
-            const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, false, userID, false, nextPostIndex, BFSOrderedArrayOfPostMongoID);
+            const agent = new Agent(openaiKey, sendData, blogJwt, blogID, businessData, version, loops, daysLeft, blogMongoID, false, userID, false, nextPostIndex, BFSOrderedArrayOfPostMongoID);
             agent.run();
         }
     }
@@ -184,11 +184,9 @@ basicRoutes.post('/runNextDay', isLoggedInMiddleware, asyncMiddleware(async(req,
     return res.json(blog);
 }));
 
-basicRoutes.post('/updatebusinessData', isLoggedInMiddleware, asyncMiddleware(async(req, res) => {
-    console.log('at update businessData');
-    const { blogID, businessData } = req.body;
-    console.log(req.body);
-    const blog = await AgentDB.updatebusinessData(blogID, businessData);
+basicRoutes.post('/updateBusinessData', isLoggedInMiddleware, asyncMiddleware(async(req, res) => {
+    const { blogID, businessData } = req.body; 
+    const blog = await AgentDB.updateBusinessData(blogID, businessData);
     return res.status(200).json(blog);
 }));
 

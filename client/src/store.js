@@ -16,8 +16,6 @@ const defaultBlogAgent = {
     loops: 1,
     jwt: "",
     blogID: "",
-    subject: "",
-    config: "",
     data: [],
     hasStarted: false,
     maxNumberOfPosts: constants.maxPosts,
@@ -53,19 +51,19 @@ const slice = createSlice({
       state.blogIds = [...new Set(res)];
     },
     addBlogAgent: (state, action) => {
-      const { config, version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, subject, messages, _id } = action.payload;
+      const { version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, messages, _id, businessData } = action.payload;
       const tempBlog = {
-        config: config || "",
-        version: version || "wordpress",
+        version: version || "html",
         maxNumberOfPosts: maxNumberOfPosts || 0,
         postsLeftToday: postsLeftToday || 0,
         daysLeft: daysLeft || 0,
         loops: loops || "",
         jwt: jwt || "",
         blogID: blogID || "",
-        subject: subject || '',
         data: messages || [],
         hasStarted: false,
+        businessData: businessData || {},
+        settingUp: !businessData.name || !businessData.product,
       }
       state.blogAgents[_id] = tempBlog;
       state.activeBlogAgent = _id;
@@ -83,24 +81,23 @@ const slice = createSlice({
       };
       const blogMap = {};
       for (let blog of blogs) {
-        const { config, version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, subject, messages, hasStarted } = blog;
+        const { version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, messages, hasStarted, businessData } = blog;
         const tempBlog = {
-          config: config || "",
-          version: version || "wordpress",
+          version: version || "html",
           maxNumberOfPosts: maxNumberOfPosts || 0,
           postsLeftToday: postsLeftToday || 0,
           daysLeft: daysLeft || 0,
           loops: loops || "",
           jwt: jwt || "",
           blogID: blogID || "",
-          subject: subject || ``,
           data: messages || [],
           hasStarted: hasStarted,
+          businessData: businessData || {},
+          settingUp: !businessData.name || !businessData.product,
         }
         blogMap[blog._id] = tempBlog;
       }
       return {...state, isLoggedIn: true, blogAgents: blogMap, user: user, activeBlogAgent: Object.keys(blogMap)[0], showSideBar: true}
-      // return {...state, isLoggedIn: true, blogAgents: blogMap, user: user, activeBlogAgent: Object.keys(blogMap)[0] }
     },
     toggleSideBar: (state, action) => {
       if (action.payload !== undefined) {
@@ -115,7 +112,7 @@ const slice = createSlice({
     },
     signOut: (state) => {
       deleteCookie();
-      return {...state, isLoggedIn: false, user: {}, blogAgents: defaultBlogAgent, activeBlogAgent: "default"}
+      return {...state, isLoggedIn: false, user: {}, blogAgents: defaultBlogAgent, activeBlogAgent: "default", currentView: 'launch', showSideBar: false}
     },
     setBannerMessage: (state, action) => {
       state.bannerMessage = action.payload;
@@ -161,8 +158,8 @@ const slice = createSlice({
     },
 
     initializeBlogAgent: (state, action) => {
-      const { subject, config, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, version, dropDownTitle, demo, _id } = action.payload;
-      const mapActualsTooInputs = {config, maxNumberOfPosts, daysLeft, loops, jwt, blogID, subject, version, dropDownTitle, demo, data: [], hasStarted: true, postsLeftToday};
+      const { maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, version, dropDownTitle, demo, _id, businessData } = action.payload;
+      const mapActualsTooInputs = { maxNumberOfPosts, daysLeft, loops, jwt, blogID, version, dropDownTitle, demo, data: [], hasStarted: true, postsLeftToday, businessData};
       if (!state.blogAgents[_id]) {
         delete state.blogAgents[state.activeBlogAgent];
         state.activeBlogAgent = _id;

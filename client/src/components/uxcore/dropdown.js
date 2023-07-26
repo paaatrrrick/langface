@@ -14,6 +14,7 @@ const Dropdown = ({ options, selected, onSelectedChange }) => {
     }
     const active = options.find((option) => option.id === selected);
     const optionsWithoutSelected = options.filter((option) => option.id !== selected);
+    console.log(active);
 
     if (!open){
         return (

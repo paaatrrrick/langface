@@ -51,9 +51,7 @@ const App = () => {
         if (! userToken) 
             return;
         
-        const res = await fetch(`${
-            constants.url
-        }/user`, {
+        const res = await fetch(`${constants.url}/user`, {
             method: 'GET',
             headers: {
                 "x-access'langface-auth-token": getUserAuthToken()
@@ -67,7 +65,7 @@ const App = () => {
             return
         };
 
-        if (! res.ok) {
+        if (!res.ok) {
             dispatch(setBannerMessage({type: 'error', message: 'Error: Could not authenticate user', timeout: 5000}));
             dispatch(signOut());
             return;
@@ -109,21 +107,22 @@ const App = () => {
     });
 
 
+    console.log(colorScheme)
     const Component = templateMap[currentView] || Home;
     return (
-        <div className="App">
+        <div className={`App ${(colorScheme === 'dark') && 'dark'}`}>
         {!showSideBar && <MenuButton topCorner whiteImg={(currentView === 'launch') ? true : false}/>}
 
         <NavController launch={launch} close={showSideBar}/>
         {htmlModal && <HtmlModal html={htmlModal}close={() => {dispatch(setHtmlModal(""))}}/>}
 
-        {currentView === 'launch' ? <Launch/> :
+        {currentView === 'launch'  ? <Launch/> :
         <>
             <NightToggle/>
-            {(currentBlog.settingUp && currentView === "home" && false) &&
+            {(currentBlog.settingUp && currentView === "home") &&
                 <div className="HtmlModal-overlay"> 
                     <div className="HtmlModalSpecs">
-                        <Specifications dontShowTopSave/>
+                        <Specifications dontShowTopSave closeOnSave/>
                     </div>
                 </div>
             }
@@ -135,7 +134,7 @@ const App = () => {
                             () => dispatch(clearBannerMessage())
                         }/>
                 }
-                    <Component joinRoom={joinRoom}/>
+                    <Component joinRoom={joinRoom} launch={launch}/>
                 </div>
                 <div className="flex-grow-1"/>
             </div>
