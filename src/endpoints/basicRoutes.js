@@ -189,7 +189,6 @@ basicRoutes.post('/runNextDay', isLoggedInMiddleware, asyncMiddleware(async(req,
 basicRoutes.post('/updateBusinessData', isLoggedInMiddleware, asyncMiddleware(async(req, res) => {
     const { blogID, businessData } = req.body; 
     const blog = await AgentDB.updateBusinessData(blogID, businessData);
-    console.log(blog);
     return res.status(200).json(blog);
 }));
 
