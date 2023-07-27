@@ -10,9 +10,6 @@ const {LongTailResearcher} = require("./LongTailResearcher");
 const AgentDB = require("../mongo/agent");
 const DemoAgentDB = require("../mongo/demoAgent");;
 const PostDB = require("../mongo/post");
-const {PineconeClient} = require("@pinecone-database/pinecone");
-const {WeaviateStore} = require("langchain/vectorstores/weaviate");
-const {OpenAIEmbeddings} = require("langchain/embeddings/openai");
 
 class Agent {
     constructor(openaiKey, sendData, jwt, blogID, businessData, version, loops, daysLeft, blogMongoID, demo = false, uid = null, draft = false, nextPostIndex, BFSOrderedArrayOfPostMongoID) { // AGENT

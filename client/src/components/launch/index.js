@@ -59,7 +59,7 @@ const Launch = () => {
                 <div className="howItWorksRows">
                     <div className="howIt-left">
                     <AnimatedWrapper direction='left'>
-                        <h4 className='text-3xl font-semibold mb-4'>Niche Research</h4>
+                        <h4 className='text-xl md:text-3xl font-semibold mb-4'>Niche Research</h4>
                         <p>Unlock the power of your business's specific market through our unique research process. We meticulously dig out valuable long-tail keywords, revealing untapped opportunities and guiding your strategic focus.</p>
                     </AnimatedWrapper>
                     </div>
@@ -67,8 +67,7 @@ const Launch = () => {
                     <img src={researchVectore} alt="AI rearch" />
                     </AnimatedWrapper>
                 </div>
-                <div className="howItWorksRows"
-                style={{height: '500px'}}
+                <div className="howItWorksRows treesSection"
                 >
                     <AnimatedWrapper direction='left' className='launch-tree'>
                         <Tree 
@@ -86,7 +85,7 @@ const Launch = () => {
                     </AnimatedWrapper>
                     <div className="howIt-left">
                     <AnimatedWrapper direction='right'>
-                        <h4 className='text-3xl font-semibold mb-4'>Sitemap Generation</h4>
+                        <h4 className='text-xl md:text-3xl font-semibold mb-4'>Sitemap Generation</h4>
                         <p>Experience seamless navigation and better SEO with our intuitive sitemap design. We craft a linked architecture for your blog posts, making your website more user-friendly and information-rich.</p>
                     </AnimatedWrapper>
                     </div>
@@ -94,7 +93,7 @@ const Launch = () => {
                 <div className="howItWorksRows">
                     <div className="howIt-left">
                     <AnimatedWrapper direction='left'>
-                        <h4 className='text-3xl font-semibold mb-4'>Post creation</h4>
+                        <h4 className='text-xl md:text-3xl font-semibold mb-4'>Post creation</h4>
                         <p>We handle your blog posts with care, incorporating elements like headers, tables, and images for a reader-friendly experience. They're then directly posted to your blog, giving you more time to focus on growing your business. </p></AnimatedWrapper>
                     </div>
                     <AnimatedWrapper direction='right'>

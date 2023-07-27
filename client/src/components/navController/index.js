@@ -16,7 +16,7 @@ import { trimStringToChars } from "../../utils/helpers";
 import constants from '../../constants';
 import MenuButton from '../app/components/menuButton';
 
-const NavController = ({launch, close}) => {
+const NavController = ({launch, close, isAuthorized}) => {
     const dispatch = useDispatch();
     const { currentView, blogAgents, isLoggedIn, activeBlogAgent } = useSelector(state => state.main);
     const blogKeys = Object.keys(blogAgents);
@@ -36,15 +36,6 @@ const NavController = ({launch, close}) => {
     //   console.log('here1')
       dropDownOptions.push({id: agentsKeys[i], text: trimStringToChars(text, 18)});
     }
-
-    var hasANonDemoAgent = false;
-    for (let i = 0; i < agentsKeys.length; i++) {
-        if (!agentsKeys[i].demo) {
-            hasANonDemoAgent = true;
-            break;
-        }
-    }
-
     const payment = () => {
         dispatch(setCurrentView("purchase"));
     }
@@ -57,7 +48,7 @@ const NavController = ({launch, close}) => {
                     <MenuButton/>
                 </div>
                 <div className="navController-pageSelectors">
-                    {hasANonDemoAgent && <div className={`navController-pill ${currentView === "launch" ? "selected" : ""}`}
+                    {!isAuthorized && <div className={`navController-pill ${currentView === "launch" ? "selected" : ""}`}
                         onClick={() => dispatch(setCurrentView("launch"))}>
                         <img src={HomeSvg} />
                         <h6>Home</h6>

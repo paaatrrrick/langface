@@ -52,7 +52,7 @@ const Links = ({specs, setSpecs}) => {
 
 const LinkRow = ({link, index, linkChange, removelink}) => {
     return (
-        <div className="insights-row ">
+        <div className="insights-row">
             <input type="text" className='specificatication-inputs-input specificatication-input-xsmall' name="link" value={link.url} placeholder='www.apple.com/buy/iphone-12' onChange={(e) => linkChange(e, index, "url")}/>
             <input type="text" className='specificatication-inputs-input specificatication-input-small' name="link" value={link.description} placeholder='Guide users to visiting this url to purchase an iPhone-12' onChange={(e) => linkChange(e, index, "description")}/>
             {(link.url || link.description) && <button onClick={() => {removelink(index)}} className='links-btn x'>&times;</button>}

@@ -2,12 +2,20 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import './html.css';
 import redwood from '../../../assets/redwood.jpg';
+import coffee from '../../../assets/coffee.jpg';
 
 const data = [
     {
         IMG: redwood,
         H1: "Embracing the Giants: A Memorable Camping Trip in the Redwood Forest",
         P1: "A camping trip in the Redwood Forest is a breathtaking encounter with the world's tallest trees. It's a serene yet awe-inspiring environment, perfect for every camper seeking tranquility and adventure. The keys to a successful journey here involve thoughtful preparation and environmental respect....",
+        H2: "",
+        P2: "",
+    },
+    {
+        IMG: coffee,
+        H1: "From Bean to Brew: Delving into the World of Coffee",
+        P1: "There's an art to understanding coffee, a beloved beverage celebrated worldwide. Its rich history, fascinating cultivation process, diverse types, and brewing techniques make coffee more than just a morning pick-me-up. The first step to truly appreciating this liquid gold begins with understanding the journey of the coffee bean....",
         H2: "",
         P2: "",
     },
@@ -43,7 +51,7 @@ const HTML = () => {
                 return timeout - 1;
             } 
             setDisplay({ h1: "", p1: "", img: "", h2: "", p2: "" });
-            if (dataIndex > -1){
+            if (dataIndex >= data.length - 1){
                 setDataIndex(0);
             } else {
                 setDataIndex(dataIndex + 1);
@@ -55,17 +63,17 @@ const HTML = () => {
     useEffect(() => {
         var timeout = 200;
         const interval = setInterval(() => {
-            console.log(timeout)
             timeout = displayText(timeout);
         }, 16);
         return () => clearInterval(interval);
     }, [display]);
 
     const { h1, p1, img, h2, p2 } = display;
+    const imsrc = !dataIndex ? redwood : coffee;
     return (
         <div className='launch-HTML'>
             <div className="html-imgWrapeer">
-                <img src={redwood} />
+                <img src={imsrc} />
             </div>
             {h1 && <h3>{h1}</h3>}
             {p1 && <p>{p1}</p>}

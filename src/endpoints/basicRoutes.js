@@ -46,6 +46,7 @@ basicRoutes.get("/user", isLoggedInMiddleware, asyncMiddleware(async (req, res) 
 basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
     // get agent data
     var {openaiKey, blogID, businessData, version, loops, daysLeft, userAuthToken, demo, blogMongoID, draft = false} = req.body;
+    console.log(req.body);
     const blogJwt = req.body.jwt;
     if (version !== "blogger" && version !== "html") {
       version = "wordpress";
@@ -175,11 +176,11 @@ basicRoutes.post('/runNextDay', isLoggedInMiddleware, asyncMiddleware(async(req,
     console.log('run next day');
     const { id } = req.body;
     const blog = await AgentDB.getBlog(id);
-    const {openaiKey, blogID, subject, config, version, loops, daysLeft, _id, userID, nextPostIndex, BFSOrderedArrayOfPostMongoID } = blog;
+    const {openaiKey, blogID, businessData, version, loops, daysLeft, _id, userID, nextPostIndex, BFSOrderedArrayOfPostMongoID } = blog;
     const blogMongoID = _id.toString();
     const blogJwt = blog.jwt;
     const sendData = initSendData(blogMongoID);
-    const agent = new Agent(openaiKey, sendData, blogJwt, blogID, subject, config, version, loops, daysLeft, blogMongoID, false, userID, false, nextPostIndex, BFSOrderedArrayOfPostMongoID);
+    const agent = new Agent(openaiKey, sendData, blogJwt, blogID, businessData, version, loops, daysLeft, blogMongoID, false, userID, false, nextPostIndex, BFSOrderedArrayOfPostMongoID);
     agent.run();
     return res.json(blog);
 }));

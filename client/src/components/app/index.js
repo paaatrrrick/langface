@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import './app.css';
 import HtmlModal from "../htmlModal";
-import NightToggle from '../uxcore/nightToggle';
 import {useDispatch, useSelector} from 'react-redux';
 import { isAuthenticatedResponse} from '../../utils/getJwt';
 import constants from '../../constants';
 import {clearBannerMessage,updateBlogAgentData, setBannerMessage, login, setBlogIds, signOut, setHtmlModal, actions } from '../../store';
 import {setColorScheme} from '../../utils/styles';
 import {getUserAuthToken} from '../../utils/getJwt';
+import {hasNonDemoBlog} from '../../utils/helpers';
 import NavController from '../navController';
 import BannerMessage from '../bannerMessage';
 import Home from '../home';
@@ -108,13 +108,14 @@ const App = () => {
     });
 
 
-    console.log(colorScheme)
+    const isAuthorized = hasNonDemoBlog(blogAgents);
+    if(isAuthorized && currentView === 'launch') dispatch(actions.setCurrentView('home')); 
     const Component = templateMap[currentView] || Home;
     return (
         <div className={`App`}>
         {!showSideBar && <MenuButton topCorner whiteImg/>}
 
-        <NavController launch={launch} close={showSideBar}/>
+        <NavController launch={launch} close={showSideBar} isAuthorized={isAuthorized}/>
         {htmlModal && <HtmlModal html={htmlModal} close={() => {dispatch(setHtmlModal(""))}}/>}
             {currentView !== 'launch' &&  (
                 <>

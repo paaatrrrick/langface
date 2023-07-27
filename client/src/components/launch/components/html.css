@@ -56,3 +56,15 @@
 
 
 
+@media only screen and (max-width: 900px) {
+
+    .launch-HTML h3 {
+        font-size: 20px;
+    }
+
+    .launch-HTML p {
+        font-size: 16px;
+    }
+}
+
+
