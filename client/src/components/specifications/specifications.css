@@ -28,9 +28,6 @@
 }
 
 
-
-
-
 .specificatication-inputs{
     width: 100%;
     height: calc(100% - 100px);
@@ -135,4 +132,37 @@ textarea.specificatication-inputs-input{
 
 .specificatication-input-xsmall:first-of-type{
     margin-right: 20px;
+}
+
+@media only screen and (max-width: 900px) {
+    .app-btn1{
+        width: 80px;
+    }
+
+    .specs-saveBtn{
+        position: absolute;
+        top: -40px;
+    }
+
+    .insights-row input{
+        height: 30px;
+    }
+
+    .insights-row input::placeholder{
+        font-size: 10px;
+    }
+
+    .specificatication-input-xsmall{
+        width: calc(40% - 30px);
+    }
+    
+    .specificatication-input-small{
+        width: calc(60% - 30px);
+    }
+
+    .insights-row button{
+        width: 15px;
+        height: 15px;
+
+    }
 }

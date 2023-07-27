@@ -9,7 +9,6 @@ const HtmlModal = ({html, close}) => {
         
         <div className="HtmlModal">
         <button className="close-button text-sm" onClick={close}>&times;</button>
-        
             <div className="HtmlModal-toprow">
                 <div className="HtmlModal-slider">
                     <button className={`HtmlModal-html-button ${!raw ? 'HtmlModal-html-button-active' : ''}`}

@@ -68,7 +68,7 @@ const PurchaseScreen = ({ tryDemo, openDemo, launch }) => {
     }
 
     return (<div className="PurchaseScreen">
-        <div className="w-100 column align-center justify-center">
+        <div className="w-100 column align-center justify-center shrinkwidth">
             <h1 className="text-4xl mb-2 font-semibold">Supercharge your web traffic</h1>
             <h6 style={
                 {
@@ -86,7 +86,7 @@ const PurchaseScreen = ({ tryDemo, openDemo, launch }) => {
                 Recommended
             </div>
         </div>
-        <div className="row PurchaseScreen-card-holder align-center justify-center">
+        <div className="PurchaseScreen-card-holder">
             <div className="PurchaseScreen-card">
                 <div className="column w-100 align-start justify-start">
                     <h3 style={{ fontSize: '18px', fontWeight: '700' }}>Hobbyist</h3>

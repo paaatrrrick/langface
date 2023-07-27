@@ -85,10 +85,9 @@ const Home = ({joinRoom}) => {
     };
 
     const handleSubmit = async () => {
-      const openaiKey = window.localStorage.getItem("openaiKey");
       const userAuthToken = getUserAuthToken();
       const { businessData }  = currentBlog;
-      const newData = {jwt, loops, blogID, openaiKey, version, daysLeft, userAuthToken, businessData, demo, blogMongoID: activeBlogAgent };
+      const newData = {jwt, loops, blogID, version, daysLeft, userAuthToken, businessData, demo, blogMongoID: activeBlogAgent };
       const res = await fetch(`${constants.url}/launchAgent`, {
         method: "POST",
         headers: {
@@ -248,7 +247,7 @@ const Home = ({joinRoom}) => {
           {(!demo) &&
             <div className="article-count">
             <label for="postsToday">
-            How manys loops?
+            How Manys Loops?
             </label>
               <input
                 id="postsToday"

@@ -22,6 +22,7 @@
     justify-content: flex-start;
     height: auto;
     overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 
@@ -224,6 +225,9 @@
     background-color: #625df4;
 }
 
+.treesSection{
+    height: 500px;
+}
 
 .launch-payments .PurchaseScreen-card:first-of-type{
     border-color: white !important;
@@ -252,3 +256,38 @@
 .launch-payments .PurchaseScreen p{
     color: white !important;
 }
+
+@media only screen and (max-width: 900px) {
+
+    .howItWorks h2{
+        font-size: 32px;
+        line-height: 36px;
+    }
+    .howItWorksRows{
+        margin: 40px 0px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    .treesSection{
+        height: 800px;
+        margin-top: -40px;
+        flex-direction: column-reverse;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    .howIt-left{
+        width: 95%;
+    }
+
+    .howItWorksRows img{
+        width: 400px;
+    }
+
+    .launch-tree{
+        width: 650px;
+    }
+}
+
