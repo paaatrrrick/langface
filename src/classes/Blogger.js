@@ -12,7 +12,7 @@ const PostDB = require("../mongo/post");
 
 
 class Blogger {
-    constructor(config, outline, jwt, blogID, sendData, openaiKey, loops, summaries, currentIteration, draft, postMongoID, demo) {
+    constructor(config, outline, jwt, blogID, sendData, openaiKey, loops, summaries, currentIteration, draft, postMongoID, demo, businessData) {
       this.config = config;
       this.outline = outline;
       this.jwt = jwt; 
@@ -27,6 +27,7 @@ class Blogger {
       this.draft = draft;
       this.postMongoID = postMongoID;
       this.demo = demo;
+      this.businessData = businessData;
     }
 
     run = async () => {
