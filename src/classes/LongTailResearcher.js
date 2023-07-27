@@ -74,31 +74,59 @@ class LongTailResearcher {
 
     // TODO (Gautam): switch to getKeywords() to get keywords for Ads keyword planner OR SERP API    
     getKeywords = async(count, subject=this.subject) => {
-        const systemMessage = "You are a marketing blog writer. \n\nYou will be asked to generate a given number of blog post titles that satisfy certain given conditions (KEY CONDITIONS). Then you will generate the right number of blog post titles, each of which satisfy the KEY CONDITIONS. You must use the following GOOGLE-OPTIMAL TITLE GUIDLINES for each title:\n\n-Unique, accurate & in HTML's <head>.\n-Reflect page topic.\n-Avoid vague terms e.g. \"Untitled\".\n-Concise yet informative; avoid truncation.\n-No keyword stuffing.\n-Clear & readable.\n-Well-structured with topic divisions.\n-Original & user-centric.\n-Highlight expertise.\n-Comprehensive, unique insights, & trustworthy.\n-Descriptive, accurate.\n-Prioritize quality.\n-Define primary focus.\n-Inform & satisfy readers.";
+        const tree = `Parent (Root) Query: 
+        - Dustless blasting techniques
+        
+        Children Queries for "Dustless blasting techniques":
+        1. Dustless blasting techniques for automotive restoration
+        2. Environmental impact of dustless blasting methods
+        3. Comparison of wet and dry dustless blasting techniques
+        
+        Children Queries for "Dustless blasting techniques for automotive restoration":
+        1. Advantages of using dustless blasting on classic cars
+        2. How dustless blasting can prevent metal warping in autos
+        3. Safety measures to consider in automotive dustless blasting
+        
+        Children Queries for "Environmental impact of dustless blasting methods":
+        1. Eco-friendly abrasives used in dustless blasting
+        2. Water waste management in dustless blasting operations
+        3. Air quality concerns with dustless blasting
+        
+        Children Queries for "Comparison of wet and dry dustless blasting techniques":
+        1. Effectiveness of dry dustless blasting on concrete surfaces
+        2. Benefits of wet dustless blasting in humid climates
+        3. Cost analysis: wet vs. dry dustless blasting equipment
+        
+        Children Queries for "Advantages of using dustless blasting on classic cars":
+        1. Preserving original paint layers with dustless blasting
+        2. Dustless blasting for rust removal in vintage vehicles
+        3. Time efficiency: dustless blasting in car restorations
+        `
+        const systemMessage = `I am trying to generate a tree of Google Search queries. I will give you a parent query and ask you to generate 3 children search queries. I want each of the children queries to add their own unique meaningful twists to the parent query and be very different from the parent query as well as from each other. My end goal is the root query of the tree should be extremely different from the leaf queries. The following is an example of such a tree: ${tree}`;
         const parser = new CustomListOutputParser({
           length: count,
           separator: "\n",
         });
         const formatInstructions = parser.getFormatInstructions();
         if (subject === this.subject){
-          var template = `Provide an unordered list of length "{count}" of search queries made by those interested in "{subject}". \n{format_instructions}`
+          var template = `Provide an unordered list of length "{count}" search queries related to "{subject}". This will be the root query for a tree of Google Search queries. \n{format_instructions}`
         }
         else {
-          var template = "Provide an unordered list of length {count} of distinct search queries tangentially related to {subject}.  \n{format_instructions}"
+          var template = "Provide an unordered list of length {count} unique children search queries for the parent query {subject}. You have already generated the following queries: {keywords} so stray away from them. \n{format_instructions}"
         }
         const prompt = new PromptTemplate({
           template: template,
-          inputVariables: ["count", "subject", "mainsubject", "keywords"],
+          inputVariables: ["count", "subject",/* "mainsubject",*/ "keywords"],
           partialVariables: { format_instructions: formatInstructions },
         });
         const input = await prompt.format({
           count: count,
           subject: subject,
-          mainsubject: this.subject,
-          keywords: this.keywords
+          // mainsubject: this.subject,
+          keywords: this.keywords.toString()
         });
         const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 3000, openAIApiKey: this.openaiKey});
-        const response = await model.call([new HumanChatMessage(input)]);
+        const response = await model.call([new SystemChatMessage(systemMessage), new HumanChatMessage(input)]);
         const keywords  = response.text.split("\n");
         console.log(keywords);
         this.keywords.concat(keywords);

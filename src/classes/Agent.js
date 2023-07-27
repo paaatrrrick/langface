@@ -35,6 +35,7 @@ class Agent {
         this.BFSOrderedArrayOfPostMongoID = BFSOrderedArrayOfPostMongoID;
         this.nextPostIndex = nextPostIndex;
         this.draft = draft;
+        this.businessData = businessData;
 
         const tempDaysLeft = this.daysLeft || 1;
         const researcherLoops = this.loops * tempDaysLeft;
@@ -87,7 +88,7 @@ class Agent {
                     return;
                 }
                 const BlogAgent = this.version === "blogger" ? Blogger : this.version === "html" ? Html : Wordpress;
-                const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.researcherLoops, this.summaries, i, this.draft, this.BFSOrderedArrayOfPostMongoID[i], this.demo);
+                const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.researcherLoops, this.summaries, i, this.draft, this.BFSOrderedArrayOfPostMongoID[i], this.demo, this.businessData);
                 var result = await blogSite.run();
                 this.summaries.push({summary: blueprint.headers, url: result.url});
                 await this.sendData({... result, type: 'success', config: blueprint.headers});
@@ -140,7 +141,7 @@ class Agent {
             return;
         }
         const BlogAgent = this.version === "blogger" ? Blogger : this.version === "html" ? Html : Wordpress;
-        const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, this.draft, undefined, this.demo)
+        const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.loops, this.summaries, i, this.draft, undefined, this.demo, this.businessData)
 
         var result = await blogSite.run();
         this.summaries.push({summary: blueprint.headers, url: result.url});

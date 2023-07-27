@@ -6,12 +6,12 @@ if (process.env.NODE_ENV !== "production") {
   const { HumanChatMessage, } = require("langchain/schema");
   const Photos = require("./Photos");
   const { dummyblog } = require("../constants/dummyData");
-  const { blogPost } = require("../constants/prompts");
+  const { newBlogPost, blogPost } = require("../constants/prompts");
   const PostDB = require("../mongo/post");
 
   
   class Html {
-    constructor(config, outline, jwt, blogID, sendData, openaiKey, loops, summaries, currentIteration, draft, postMongoID, demo) {
+    constructor(config, outline, jwt, blogID, sendData, openaiKey, loops, summaries, currentIteration, draft, postMongoID, demo, businessData) {
       this.config = config;
       this.outline = outline;
       this.jwt = jwt;
@@ -26,6 +26,7 @@ if (process.env.NODE_ENV !== "production") {
       this.draft = draft;
       this.postMongoID = postMongoID;
       this.demo = demo;
+      this.businessData = businessData;
     }
   
       run = async () => {
@@ -42,7 +43,7 @@ if (process.env.NODE_ENV !== "production") {
         if (process.env.MOCK_WRITING_BLOG === "true") return dummyblog;
         try {
           // const modelType = process.env.CHEAP_GPT === 'true' ? "gpt-3.5-turbo-16k" : "gpt-4";
-          const modelType = process.env.RUNNING_LOCAL === 'true' ? "gpt-3.5-turbo-16k" : "gpt-4";
+          const modelType = process.env.RUNNING_LOCAL === 'true' ? "gpt-4" : "gpt-4";
           const model = new ChatOpenAI({ modelName: modelType, temperature: 0, openAIApiKey: this.openaiKey});
           var childrenURLs = [];
           let parent = undefined;
@@ -54,7 +55,7 @@ if (process.env.NODE_ENV !== "production") {
               childrenURLs.push(this.getFakeURL(child.blueprint.blogTitle));
             };
           }
-          const template = blogPost(this.outline.keyword, this.outline.lsiKeywords, this.outline.blogTitle, this.outline.headers, this.config, this.summaries, this.imageNames, parent, childrenURLs);
+          const template = newBlogPost(this.outline.keyword, this.outline.lsiKeywords, this.outline.blogTitle, this.outline.headers, this.config, this.summaries, this.imageNames, parent, childrenURLs, this.businessData);
           const response = await model.call([new HumanChatMessage(template)]);
           const text = response.text; 
           return text;

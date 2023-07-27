@@ -13,7 +13,7 @@ const defaultBlogAgent = {
     },
     postsLeftToday: constants.maxPosts,
     daysLeft: 0,
-    loops: 1,
+    loops: 3,
     jwt: "",
     blogID: "",
     data: [],
