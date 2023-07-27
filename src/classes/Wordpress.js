@@ -90,7 +90,7 @@ class Wordpress {
           const data = await response.text();
           console.log('error getting image urls from wordpress')
           console.log(data);
-          throw new Error(`Error creating your post: we to upload your images to Wordpress`);
+          throw new Error(`Error creating your post: we failed to upload your images to Wordpress`);
         }
         const data = await response.json();
         const imageData = data?.media;
