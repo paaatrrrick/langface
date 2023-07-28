@@ -73,9 +73,9 @@ const newBlogPost = (keyword, lsiKeyword, headers, previousArticles, imageNames,
   4) Follow these additional content guidelines:
   -Title your introduction or conclusion headings/paragraphs creatively. Do not use the words “Introduction” or “Conclusion”.
   -MUST use subheadings, lists, or tables. 
-  -ABSOLUTELY MUST include a table of contents with links that jump to the headers. 
+  -ABSOLUTELY MUST include a table of contents with links that jump to the headers near the start of the post. 
   -EACH of the TEN heading MUST have 3 paragraphs with 10 sentences with 10 words each for a total of 1000 words while maintaining your readability, succinctness, engagingness, and coherence. Include so much insightful information and so many useful and entertaining facts that you naturally meet the word count. Often you don’t meet the word count, so be extra sure that include at least 10 sentences and 3 paragraphs for each of the the headings. Again, you MUST include 10 sentences and 3 paragraphs for each of the 10 heading.
-  -While you should number the headers in your head, do not number the headers in the blog or state they are headers. Just say the header's title.
+  -While you should number the headers in your head, do not number the headers in the blog or state they are headers. Just say the header's title. Do not state the string 'header' in your headers. They should be immediately digestable in the article.
   -Generate a complete post. Do not ask me to fill things in.
   -Include expert-level information (things beyond what the layman knows). Incorporate the business insights.
   -Include real-world examples whenever applicable.
