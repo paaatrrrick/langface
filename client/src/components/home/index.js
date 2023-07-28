@@ -131,7 +131,6 @@ const Home = ({joinRoom}) => {
 
     const runNextDay = async () => {
       dispatch(actions.updateBlogAgent({id: activeBlogAgent, hasStarted: false, daysLeft: ((currentBlog.daysLeft || 1) - 1)}));
-      console.log("running next day");
       console.log(`${constants.url}/runNextDay`)
       const res = await fetch(`${constants.url}/runNextDay`, {
         method: "POST",

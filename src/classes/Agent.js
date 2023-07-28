@@ -23,8 +23,8 @@ class Agent {
         this.jwt = jwt;
         this.blogID = blogID;
         this.blogMongoID = blogMongoID;
-        this.subject = businessData.name;
-        this.config = businessData.product;
+        this.subject = businessData?.name;
+        this.config = businessData?.product;
         this.version = version;
         this.loops = loops;
         this.daysLeft = daysLeft;
@@ -40,11 +40,11 @@ class Agent {
         
         // TOOLS
         if (this.demo){
-          this.researcher = new LongTailResearcher(businessData.name, this.loops, businessData.product, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID, true);
+          this.researcher = new LongTailResearcher(businessData?.name, this.loops, businessData?.product, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID, true);
         } else{
         
 
-          this.researcher = new LongTailResearcher(businessData.name, researcherLoops, businessData.product, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
+          this.researcher = new LongTailResearcher(businessData?.name, researcherLoops, businessData?.product, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID);
         }
     }
 
@@ -88,7 +88,7 @@ class Agent {
                 const blogSite = new BlogAgent(this.config, blueprint, this.jwt, this.blogID, this.sendData, this.openaiKey, this.researcherLoops, this.summaries, i, this.draft, this.BFSOrderedArrayOfPostMongoID[i], this.demo, this.businessData);
                 var result = await blogSite.run();
                 this.summaries.push({summary: blueprint.headers, url: result.url});
-                await this.sendData({... result, type: 'success', config: blueprint.headers});
+                await this.sendData({... result, type: 'success', config: blueprint?.headers || ''});
             } catch (e) {
                 errors++;
                 if (errors >= 5) {
