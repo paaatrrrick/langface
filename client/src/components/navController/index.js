@@ -33,7 +33,6 @@ const NavController = ({launch, close, isAuthorized}) => {
         newAgentCount++;
         text = `Pro Agent #${newAgentCount}`;
       }
-    //   console.log('here1')
       dropDownOptions.push({id: agentsKeys[i], text: trimStringToChars(text, 18)});
     }
     const payment = () => {

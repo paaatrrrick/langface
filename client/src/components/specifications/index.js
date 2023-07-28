@@ -61,8 +61,6 @@ const Specifications = ({dontShowTopSave, closeOnSave}) => {
         setLoading(false);
     }
 
-    console.log(activeBlogAgent);
-
     const moveSlide = (direction, final) => {
         if (final && closeOnSave) {
             dispatch(actions.updateBlogAgent({id : activeBlogAgent, settingUp: false}));

@@ -11,12 +11,29 @@ const nLengthArray = (n, array) => {
     }
 };
 
-const newBlogPost = (keyword, lsiKeyword, title, headers, config, previousArticles, imageNames, parent, childrenTitles=undefined, businessData) => {
+// Then you will generate the HTML for a blog post written in first-person (as though you are the business owner) such that people who look up the question it addresses will find the article useful and will become interested in the business. 
+
+// ${(parent?.url && parent?.blueprint?.blogTitle) ? `-You MUST include the following <a> tag as an in-context reference in your blog: <a href=${parent.url}>${parent.blueprint.blogTitle}</a>. In-context means naturally placed in the middle of a sentence under a relevant header.\n` : ''}
+//${(childrenTitles) && `-You MUST include exactly ${childrenTitles.length} additional <a> tags with the following as href: ${arrayToString(childrenTitles)}. The <a> tags should be dispersed throughout the blog in-context. The tags should not just be crammed in at the end. DO NOT INCLUDE ANY MORE THAN  ${childrenTitles.length} ADDTIONAL TAGS.`}
+
+
+// Include a <meta> tag:
+
+// -In HTML's <head> & summarizes page.
+// -Informative, relevant & search display-friendly length.
+// -No generic or keyword-only descriptions.
+// -No content duplication.
+// -Distinct.
+
+
+
+
+const newBlogPost = (keyword, lsiKeyword, headers, previousArticles, imageNames, businessData, urls) => {
   let prompt = `You are a marketing blog writer.
 
   I will give you (1) some context about the business you are marketing (2) the title of your blog post (3) guidelines for writing a Google optimal blog post (4) additional content guidlines
 
-  Then you will generate the HTML for a blog post written in first-person (as though you are the business owner) such that people who look up the question it addresses will find the article useful and will become interested in the business. 
+  Then you will generate the HTML for a blog post written such that people who look up the question it addresses will find the article useful and will become interested in the business. 
 
   1) Here is the relevant data about the business:
   {
@@ -24,21 +41,14 @@ const newBlogPost = (keyword, lsiKeyword, title, headers, config, previousArticl
   productDescription: ${businessData.product},
   valueProposition: ${businessData.valueProposition},
   uniqueInsights:  ${businessData.insights.toString()},
-  Links: ${businessData.links}
   }
 
   2) The title of your blog post should be: ${keyword} 
 
   3) Follow these Google-Optimal Writing Guidelines:
 
-  Include a <meta> tag:
-
-  -In HTML's <head> & summarizes page.
-  -Informative, relevant & search display-friendly length.
-  -No generic or keyword-only descriptions.
-  -No content duplication.
-  -Distinct.
-
+  Content:
+  
   Include Headings:
 
   -Highlight topics & structure content.
@@ -48,8 +58,7 @@ const newBlogPost = (keyword, lsiKeyword, title, headers, config, previousArticl
   -Consistent size progression.
   -Use wisely; avoid overuse/confusion.
   -Concise & structurally prioritized.
-
-  Content:
+  -Include TEN unique headings
 
   -Clear & readable.
   -Well-structured with topic divisions.
@@ -63,22 +72,23 @@ const newBlogPost = (keyword, lsiKeyword, title, headers, config, previousArticl
 
   4) Follow these additional content guidelines:
   -Title your introduction or conclusion headings/paragraphs creatively. Do not use the words “Introduction” or “Conclusion”.
-  -You MUST use subheadings, lists, and tables. 
-  -You ABSOLUTELY MUST include a table of contents with links that jump to the headers. 
-  -Include at least 10 headings with 10 sentences with 10 words each for a total of 1000 words while maintaining your readability, succinctness, engagingness, and coherence. Include so much insightful information and so many useful and entertaining facts that you naturally meet the word count. You often don’t meet the word count, so be extra sure that include at least 10 sentences for each of the 10 headings. Again, you MUST include 10 sentences for every heading.
+  -MUST use subheadings, lists, or tables. 
+  -ABSOLUTELY MUST include a table of contents with links that jump to the headers. 
+  -EACH of the TEN heading MUST have 3 paragraphs with 10 sentences with 10 words each for a total of 1000 words while maintaining your readability, succinctness, engagingness, and coherence. Include so much insightful information and so many useful and entertaining facts that you naturally meet the word count. Often you don’t meet the word count, so be extra sure that include at least 10 sentences and 3 paragraphs for each of the the headings. Again, you MUST include 10 sentences and 3 paragraphs for each of the 10 heading.
+  -While you should number the headers in your head, do not number the headers in the blog or state they are headers. Just say the header's title.
   -Generate a complete post. Do not ask me to fill things in.
-  -Include expert-level information (things beyond what the layman knows) under every heading. Incorporate the business insights.
-  -Include real-world examples whenever applicable, but do not just make fictional examples up. 
-  -In fact, do not make anything up. No fictional or fake quotes, studies, authors, links, news etc. You absolutely must be sure it’s real.
+  -Include expert-level information (things beyond what the layman knows). Incorporate the business insights.
+  -Include real-world examples whenever applicable.
+  -Do not make anything up. No fictional or fake quotes, studies, authors, links, news etc. You absolutely must be sure it’s real.
   -Don’t focus too much on selling the business, most of your content should be thoroughly answering the question. For example, you should include alternative solutions and compare them.
   -Do not include a discussion of the business if it is not relevant to answering the main question.
   -You must specific actionable step-by-step instructions to address the problem.
-  -The blog should have EXACTLY ${imageNames.length} img tags in the blog. One at the close to the beginning and one close to the end. They should have the following src's respsectively: ${arrayToString(imageNames)}. Each img should have inline styles for a width and height, which are between 256px and 1280px. \n
-  -Output only valid HTML. Add inline styles of margin and padding to headers and paragraphs to add elegant spacing. \n
-  ${(parent?.url && parent?.blueprint?.blogTitle) ? `-You MUST include the following <a> tag as an in-context reference in your blog: <a href=${parent.url}>${parent.blueprint.blogTitle}</a>. In-context means naturally placed in the middle of a sentence under a relevant header.\n` : ''}
-  ${(childrenTitles) && `-You MUST include exactly ${childrenTitles.length} additional <a> tags with the following as href: ${arrayToString(childrenTitles)}. The <a> tags should be dispersed throughout the blog in-context. The tags should not just be crammed in at the end. DO NOT INCLUDE ANY MORE THAN  ${childrenTitles.length} ADDTIONAL TAGS.`}
+  ${urls.length > 2 && `-Include EVERY url in this list throughout this article EXACTLY once: ${urls}. Link to them with an <a> tag and set the href to the url. Place them accordingly based on their descriptions.\n`}
+  ${(imageNames && imageNames.length) && `-The blog should have EXACTLY ${imageNames.length} img tags in the blog. One at the close to the beginning and one close to the end. They should have the following src's respsectively: ${arrayToString(imageNames)}. Each img should have inline styles for a width and height, which are between 256px and 1280px.\n`}
+  -Output only valid HTML. Add inline styles of margin and padding to headers and paragraphs to add elegant spacing. Start with an article tag and end with its respective closing article tag.
   -Above all, your job is to answer the specific question as comprehensively as possible and improve the end-user’s life.`;
   return prompt;
+
   }
   const blogPost = (keyword, lsiKeyword, title, headers, config, previousArticles, imageNames, parent, childrenTitles=undefined) => {
     var previousArticlesString = `-Add a tags throughout the blog to reference these blog articles you previously wrote: ${arrayToString(previousArticles)}.\n`;
@@ -102,9 +112,6 @@ const newBlogPost = (keyword, lsiKeyword, title, headers, config, previousArticl
 };
 //  -The blog should have EXACTLY ${imageNames.length} img tags in the blog. One at the close to the beginning and one close to the end. They should have the following src's respsectively: ${arrayToString(imageNames)}. Each img should have inline styles for a width and height, which are between 256px and 1280px. \n
 
-const blogPostForBlogger = (keyword, lsiKeyword, title, headers, config, previousArticles) => {
-  return blogPost(keyword, lsiKeyword, title, headers, config, previousArticles, []);
-}
 
 const text2ImgPrompt = (imageDescriptions, style) => {
     return `Attached is list of paragraphs explaining, each explaining a different photos. 
@@ -132,4 +139,4 @@ const text2ImgPrompt = (imageDescriptions, style) => {
 }
 
 
-module.exports = { newBlogPost, blogPost, text2ImgPrompt, blogPostForBlogger };
+module.exports = { newBlogPost, blogPost, text2ImgPrompt };

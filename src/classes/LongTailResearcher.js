@@ -128,7 +128,6 @@ class LongTailResearcher {
         const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 3000, openAIApiKey: this.openaiKey});
         const response = await model.call([new SystemChatMessage(systemMessage), new HumanChatMessage(input)]);
         const keywords  = response.text.split("\n");
-        console.log(keywords);
         this.keywords.concat(keywords);
         return keywords;
     }

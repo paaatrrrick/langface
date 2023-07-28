@@ -5,6 +5,7 @@ import constants, { defualtPills, sampleBlog } from "../../constants";
 import { getJwt, wordpressGetJwt, getUserAuthToken, isAuthenticatedResponse } from "../../utils/getJwt";
 import { scrollToBottom } from "../../utils/styles";
 import { trimStringToChars } from "../../utils/helpers";
+import Toggle from "../uxcore/toggle";
 import { setBannerMessage, initializeBlogAgent, setVersion, signOut, setHtmlModal, actions } from "../../store";
 import StatusPill from "../statusPill";
 import Dropdown from "../uxcore/dropdown";
@@ -33,19 +34,21 @@ const Home = ({joinRoom}) => {
     const [data, setData] = useState([]);
     const [hasStarted, setHasStarted] = useState(false);
     const [postsLeftToday, setUsedBlogPosts] = useState(0);
+    const [includeAIImages, setIncludeAIImages] = useState(false);
     const [maxNumberOfPosts, setMaxBlogPosts] = useState(constants.maxPosts);
     const messagesEndRef = useRef(null);
     const demo = currentBlog.demo;
 
     useEffect(() => {
       setActiveVersion(currentBlog.version || "html");
-      setLoops(currentBlog.loops || 1);
+      setLoops(currentBlog.loops || 3);
       setDaysToRun(currentBlog.daysLeft || 1);
       setJwt(currentBlog.jwt || "");
       setBlogID(currentBlog.blogID || "");
       setData(currentBlog.data || []);
       setHasStarted(currentBlog.hasStarted || false);
       setUsedBlogPosts(currentBlog.postsLeftToday || 0);
+      setIncludeAIImages(currentBlog.includeAIImages || false);
       setMaxBlogPosts((currentBlog.maxNumberOfPosts) ? currentBlog.maxNumberOfPosts : constants.maxPosts);
     }, [activeBlogAgent, currentBlog.data, currentBlog.hasStarted]);
 
@@ -87,7 +90,7 @@ const Home = ({joinRoom}) => {
     const handleSubmit = async () => {
       const userAuthToken = getUserAuthToken();
       const { businessData }  = currentBlog;
-      const newData = {jwt, loops, blogID, version, daysLeft, userAuthToken, businessData, demo, blogMongoID: activeBlogAgent };
+      const newData = {jwt, loops, blogID, version, daysLeft, userAuthToken, businessData, demo, blogMongoID: activeBlogAgent, includeAIImages };
       const res = await fetch(`${constants.url}/launchAgent`, {
         method: "POST",
         headers: {
@@ -232,6 +235,7 @@ const Home = ({joinRoom}) => {
           <div className="mock-container">
             <Dropdown options={versionSelectorOptions} selected={version} onSelectedChange={versionToggler}/>
           </div>
+          {/* <Toggle value={includeAIImages} setValue={setIncludeAIImages} text={'Include AI Image'} tinyText={'beta'}/> */}
           {!demo && <div className="article-count">
            <label for="postsToday">
               Posts Per Loop

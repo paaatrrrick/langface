@@ -23,6 +23,7 @@ const defaultBlogAgent = {
     dropDownTitle: "New Agent",
     demo: true,
     settingUp: true,
+    includeAIImages: false,
   }
 }
 
@@ -52,18 +53,19 @@ const slice = createSlice({
       state.blogIds = [...new Set(res)];
     },
     addBlogAgent: (state, action) => {
-      const { version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, messages, _id, businessData } = action.payload;
+      const { version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, messages, _id, businessData, includeAIImages } = action.payload;
       const tempBlog = {
         version: version || "html",
         maxNumberOfPosts: maxNumberOfPosts || 0,
         postsLeftToday: postsLeftToday || 0,
         daysLeft: daysLeft || 0,
-        loops: loops || "",
+        loops: loops || 3,
         jwt: jwt || "",
         blogID: blogID || "",
         data: messages || [],
         hasStarted: false,
         businessData: businessData || {},
+        includeAIImages: includeAIImages || false,
         settingUp: !businessData.name || !businessData.product,
       }
       state.blogAgents[_id] = tempBlog;
@@ -82,18 +84,19 @@ const slice = createSlice({
       };
       const blogMap = {};
       for (let blog of blogs) {
-        const { version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, messages, hasStarted, businessData } = blog;
+        const { version, maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, messages, hasStarted, businessData, includeAIImages } = blog;
         const tempBlog = {
           version: version || "html",
           maxNumberOfPosts: maxNumberOfPosts || 0,
           postsLeftToday: postsLeftToday || 0,
           daysLeft: daysLeft || 0,
-          loops: loops || "",
+          loops: loops || 3,
           jwt: jwt || "",
           blogID: blogID || "",
           data: messages || [],
           hasStarted: hasStarted,
           businessData: businessData || {},
+          includeAIImages: includeAIImages || false,
           settingUp: !businessData.name || !businessData.product,
         }
         blogMap[blog._id] = tempBlog;
@@ -159,8 +162,8 @@ const slice = createSlice({
     },
 
     initializeBlogAgent: (state, action) => {
-      const { maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, version, dropDownTitle, demo, _id, businessData } = action.payload;
-      const mapActualsTooInputs = { maxNumberOfPosts, daysLeft, loops, jwt, blogID, version, dropDownTitle, demo, data: [], hasStarted: true, postsLeftToday, businessData};
+      const { maxNumberOfPosts, postsLeftToday, daysLeft, loops, jwt, blogID, version, dropDownTitle, demo, _id, businessData, includeAIImages } = action.payload;
+      const mapActualsTooInputs = { maxNumberOfPosts, daysLeft, loops, jwt, blogID, version, dropDownTitle, demo, data: [], hasStarted: true, postsLeftToday, businessData, includeAIImages};
       if (!state.blogAgents[_id]) {
         delete state.blogAgents[state.activeBlogAgent];
         state.activeBlogAgent = _id;

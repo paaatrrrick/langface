@@ -6,7 +6,7 @@ if (process.env.NODE_ENV !== "production") {
   const { HumanChatMessage, } = require("langchain/schema");
   const Photos = require("./Photos");
   const { dummyblog } = require("../constants/dummyData");
-  const { newBlogPost, blogPost } = require("../constants/prompts");
+  const { newBlogPost } = require("../constants/prompts");
   const PostDB = require("../mongo/post");
 
   
@@ -33,8 +33,11 @@ if (process.env.NODE_ENV !== "production") {
           this.sendData({ type: "updating", config: `Step 2 of 3: Writing the article`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}` });
           const post = await this.writePost();
           this.sendData({ type: "updating", config: `Step 3 of 3: Finalizing changes`, title: `Loading... Article ${this.currentIteration + 1} / ${this.loops}`});
-          const photosObject = new Photos(post, this.openaiKey, this.blogID, this.jwt, this.imageNames);
-          const cloudinaryUrls = await photosObject.run();
+          var cloudinaryUrls = [];
+          try {
+            const photosObject = new Photos(post, this.openaiKey, this.blogID, this.jwt, this.imageNames);
+            var cloudinaryUrls = await photosObject.run();
+          } catch (e) {}
           const result = await this.postBlog(post, cloudinaryUrls);
           return result;
       }
@@ -46,16 +49,20 @@ if (process.env.NODE_ENV !== "production") {
           const modelType = process.env.RUNNING_LOCAL === 'true' ? "gpt-4" : "gpt-4";
           const model = new ChatOpenAI({ modelName: modelType, temperature: 0, openAIApiKey: this.openaiKey});
           var childrenURLs = [];
-          let parent = undefined;
+          let parent = [];
           if (!this.demo){
             const post = await PostDB.getPostById(this.postMongoID);
-            parent = await PostDB.getPostById(post.parentMongoID);
+            const tempParent = await PostDB.getPostById(post.parentMongoID);
+            if (tempParent){
+              parent = [{url: this.getFakeURL(tempParent?.blueprint?.blogTitle), description: tempParent?.blueprint?.blogTitle}];
+            }
             for (let id of post.childrenMongoID){
               const child = await PostDB.getPostById(id);
-              childrenURLs.push(this.getFakeURL(child.blueprint.blogTitle));
+              childrenURLs.push({url: this.getFakeURL(child.blueprint.blogTitle), description: child.blueprint.blogTitle});
             };
           }
-          const template = newBlogPost(this.outline.keyword, this.outline.lsiKeywords, this.outline.blogTitle, this.outline.headers, this.config, this.summaries, this.imageNames, parent, childrenURLs, this.businessData);
+          const urls = JSON.stringify([...parent, ...childrenURLs, ...this.businessData?.links])
+          const template = newBlogPost(this.outline.keyword, this.outline.blogTitle, this.outline.headers, this.summaries, this.imageNames, this.businessData, urls);
           const response = await model.call([new HumanChatMessage(template)]);
           const text = response.text; 
           return text;

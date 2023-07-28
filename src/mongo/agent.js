@@ -102,6 +102,10 @@ const AgentSchema = new Schema({
       type: Boolean,
       default: false
     },
+    includeAIImages: {
+      type: Boolean,
+      default: true,
+    },
     newlyCreated: {
       type: Boolean,
       default: true
@@ -123,22 +127,22 @@ const AgentSchema = new Schema({
 
 
 
-//for every agent in the database add businessData with name = subject and product = config. If the agent does not have a subject or config, then set it to the default values
-// AgentSchema.statics.addBusinessData = async function() {
-//   const agents = await this.find({});
-//   for (let agent of agents) {
-//     if (!agent.businessData) {
-//       agent.businessData = {};
-//     }
-//     if (!agent.businessData.name) {
-//       agent.businessData.name = agent.subject;
-//     }
-//     if (!agent.businessData.product) {
-//       agent.businessData.product = agent.config;
-//     }
-//     await agent.save();
-//   }
-// };
+// for every agent in the database add businessData with name = subject and product = config. If the agent does not have a subject or config, then set it to the default values
+AgentSchema.statics.addBusinessData = async function() {
+  const agents = await this.find({});
+  for (let agent of agents) {
+    if (!agent.businessData) {
+      agent.businessData = {};
+    }
+    if (!agent.businessData.name) {
+      agent.businessData.name = agent.subject;
+    }
+    if (!agent.businessData.product) {
+      agent.businessData.product = agent.config;
+    }
+    await agent.save();
+  }
+};
 //create a blog with default values
 AgentSchema.statics.createEmptyBlog = async function(userID, paymentID) {
   const blog = new this({userID: userID, paymentID: paymentID});
