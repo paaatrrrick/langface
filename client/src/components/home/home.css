@@ -14,7 +14,7 @@
 .home-results-container{
     margin-top: 15px;
     width: 100%;
-    height: 425px;
+    height: 525px;
     border-radius: 20px;
     border: 2px solid var(--lightDark);
     transition: all 1s ease-in-out;
@@ -46,7 +46,6 @@
     font-weight: 400;
     color: #fff;
 }
-
 
 .runButton img{
     width: 24px;
@@ -146,7 +145,7 @@
 }
 .home-tinyInputs .article-count {
     height: 40px;
-    width: 175px;
+    width: 220px;
     border-radius: 20px;
     margin: 15px 15px 0px 0px;
     border: 2px solid var(--lightDark);
@@ -170,14 +169,25 @@
     opacity: 1;
 }
 
-
 .home-tinyInputs .article-count input {
-    border: none;
-    width: 40px;
+    height: 15px;
     margin-right: 15px;
-    width: 40px;
+    width: 50px;
     text-align: center;
     text-decoration: underline;
+    padding: 0px;
+    margin-left: -10px;
+    background-color: transparent;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+
+}
+
+.home-tinyInputs .article-count input:focus{
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
 }
 
 
@@ -197,8 +207,9 @@
 .home-tinyInputs .login-button{
     height: 40px;
     width: 150px;
+    font-size: 14px;
     border-radius: 20px;
-    color: var(--gray);
+    color: var(--mainDark);
     background-color: var(--lighterBackground);
     border: 2px solid var(--lightDark);
     padding-left: 7px 15px;
@@ -213,7 +224,7 @@
 }
 
 .runButton{
-    width: 170px;
+    width: 175px;
     height: 36px;
     background-color: var(--brandColor);
     border-radius: 18px;
@@ -253,4 +264,34 @@
 .data::-webkit-scrollbar-thumb:hover {
   background: var(--mainDark); /* Color when hovering */
   border-radius: 5px;
+}
+
+@media only screen and (max-width: 900px) {
+    .Home{
+        padding-top: 20px;
+    }
+    .status-pill{
+        max-height: 250px !important;
+    }
+
+    .status-pill h3{
+        font-size: 12px !important;
+    }
+
+    .home-input-top-row p{
+        font-size: 10px;
+    }
+
+    .runButton{
+        width: 150px;
+        height: 30px;
+    }
+
+    .runButton h4{
+        font-size: 12px;
+    }
+
+    .runButton img{
+        width: 20px;
+    }
 }

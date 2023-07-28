@@ -25,7 +25,7 @@
   }
 
   .HtmlModalSpecs {
-    background-color: white;
+    background-color: var(--lighterBackground);
     padding: 20px;
     width: min(1000px, 90vw);
     height: min(550px, 90vh);
@@ -91,7 +91,7 @@
     background-color: transparent;
     text-align: center;
     border: none;
-    font-size: 34px;
+    font-size: 24px;
     cursor: pointer;
     color: black;
     width: 35px;
@@ -106,6 +106,7 @@
     background-color: #f7f7f8;
     border-radius: 17px;
     border: 1px solid #d4d4d4;
+    color: var(--brandColor);
 
   }
   
@@ -154,7 +155,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(2px);
     z-index: 9000;
   }
   

@@ -24,7 +24,7 @@ const Insights = ({specs, setSpecs}) => {
 
     return (
         <div className='specificatication-inputs'>
-            <label htmlFor='subject'>What are unique insights you have into this business?</label>
+            <label htmlFor='subject'>What are a few things that differentiated you from other businesses in this area?</label>
             {
                 newInsights.map((insight, index) => {
                     return ( <InsightRow key={index} insight={insight} index={index} insightChange={insightChange} removeInsight={removeInsight} />)
@@ -38,7 +38,7 @@ const Insights = ({specs, setSpecs}) => {
 const InsightRow = ({insight, index, insightChange, removeInsight}) => {
     return (
         <div className="insights-row">
-            <input type="text" className='specificatication-inputs-input' name="insight" value={insight} placeholder='Chess timing should focus on the opening' onChange={(e) => insightChange(e, index)}/>
+            <input type="text" className='specificatication-inputs-input' name="insight" value={insight} placeholder=" We focus on creating products that are not only technologically advanced but also intuitive and elegant." onChange={(e) => insightChange(e, index)}/>
             {insight && <button onClick={() => {removeInsight(index)}} className='insights-btn x'>&times;</button>}
         </div>
     )

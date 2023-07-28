@@ -6,6 +6,18 @@ const trimStringToChars = (str, N) => {
     }
 }
 
+const hasNonDemoBlog = (blogs) => {
+    var res = false;
+    //cast object to array
+    blogs = Object.values(blogs);
+    blogs.forEach(blog => {
+        if (!blog.demo) {
+            res = true;
+        }
+    });
+    return res;
+}
 
 
-export { trimStringToChars }
+
+export { trimStringToChars, hasNonDemoBlog }

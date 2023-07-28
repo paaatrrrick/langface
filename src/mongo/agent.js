@@ -26,9 +26,18 @@ const linksSchema = Schema({
 }, { _id: false });
 
 const businessDataSchema = Schema({
-    name: String,
-    product: String,
-    valueProposition: String,
+    name: {
+      type: String,
+      default: ""
+    },
+    product: {
+      type: String,
+      default: ""
+    },
+    valueProposition: {
+      type: String,
+      default: ""
+    },
     insights: [String],
     links: [linksSchema],
 }, { _id: false });
@@ -93,6 +102,10 @@ const AgentSchema = new Schema({
       type: Boolean,
       default: false
     },
+    includeAIImages: {
+      type: Boolean,
+      default: true,
+    },
     newlyCreated: {
       type: Boolean,
       default: true
@@ -113,6 +126,23 @@ const AgentSchema = new Schema({
 
 
 
+
+// for every agent in the database add businessData with name = subject and product = config. If the agent does not have a subject or config, then set it to the default values
+AgentSchema.statics.addBusinessData = async function() {
+  const agents = await this.find({});
+  for (let agent of agents) {
+    if (!agent.businessData) {
+      agent.businessData = {};
+    }
+    if (!agent.businessData.name) {
+      agent.businessData.name = agent.subject;
+    }
+    if (!agent.businessData.product) {
+      agent.businessData.product = agent.config;
+    }
+    await agent.save();
+  }
+};
 //create a blog with default values
 AgentSchema.statics.createEmptyBlog = async function(userID, paymentID) {
   const blog = new this({userID: userID, paymentID: paymentID});
@@ -120,13 +150,17 @@ AgentSchema.statics.createEmptyBlog = async function(userID, paymentID) {
   return blog;
 }
 
-AgentSchema.static.updatebusinessData = async function(id, newSpecs) {
-  console.log('at update businessData');
-  console.log(newSpecs)
+AgentSchema.statics.updateBusinessData = async function(id, newSpecs) {
   const blog = await this.findById(convertToObjectId(id));
-  console.log(blog);
-  blog.set({businessData: {...blog.businessData, ...newSpecs}});
-  console.log(blog);
+  //set business data to be the union with the new specs and the old business data. Have new overwite old if there is a conflict
+  // for (let key of Object.keys(newSpecs)) {
+  //   if (newSpecs[key] === "" || (typeof newSpecs[key] === "object" && newSpecs[key].length === 0)) {
+  //     delete newSpecs[key];
+  //   }
+  // }
+  const oldBusinessData = blog.businessData.toObject();
+  const newBusinessData =  {...oldBusinessData, ...newSpecs};
+  blog.set({businessData: newBusinessData})
   await blog.save();
   return blog;
 }
@@ -171,9 +205,9 @@ AgentSchema.statics.getBlog = async function(id) {
 //createBlog
 AgentSchema.statics.updateBlog = async function(id, params) {
   id = convertToObjectId(id);
-  const { blogID, version, userID, openaiKey, blogJwt, subject, config, loops, daysLeft, topPostID } = params;
+  const { blogID, version, userID, openaiKey, blogJwt, businessData, loops, daysLeft, topPostID } = params;
   const blog = await this.findById(id);
-  blog.set({blogID, version, userID, openaiKey,jwt: blogJwt,subject,config,loops,daysLeft, topPostID})
+  blog.set({blogID, version, userID, openaiKey,jwt: blogJwt, businessData,loops,daysLeft, topPostID})
   return await blog.save();
 }
 

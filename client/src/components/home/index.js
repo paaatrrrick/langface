@@ -5,17 +5,14 @@ import constants, { defualtPills, sampleBlog } from "../../constants";
 import { getJwt, wordpressGetJwt, getUserAuthToken, isAuthenticatedResponse } from "../../utils/getJwt";
 import { scrollToBottom } from "../../utils/styles";
 import { trimStringToChars } from "../../utils/helpers";
+import Toggle from "../uxcore/toggle";
 import { setBannerMessage, initializeBlogAgent, setVersion, signOut, setHtmlModal, actions } from "../../store";
 import StatusPill from "../statusPill";
 import Dropdown from "../uxcore/dropdown";
-import SparklesSvg from "../../assets/sparkles-outline.svg";
-import WrenchSvg from "../../assets/build-outline.svg";
 import CaretForward from "../../assets/caret-forward-outline.svg";
 import CheckMark from "../../assets/checkmark-circle.svg";
 import Close from "../../assets/close-circle-sharp.svg";
 import SettingsSvg from '../../assets/settings-outline.svg';
-import HtmlModal from "../htmlModal";
-import Specifications from "../specifications";
 
 
 const typeToImageMap = {
@@ -34,26 +31,24 @@ const Home = ({joinRoom}) => {
     const [daysLeft, setDaysToRun] = useState("");
     const [jwt, setJwt] = useState("");
     const [blogID, setBlogID] = useState("");
-    const [subject, setSubject] = useState("");
-    const [config, setContent] = useState("");
     const [data, setData] = useState([]);
     const [hasStarted, setHasStarted] = useState(false);
     const [postsLeftToday, setUsedBlogPosts] = useState(0);
+    const [includeAIImages, setIncludeAIImages] = useState(false);
     const [maxNumberOfPosts, setMaxBlogPosts] = useState(constants.maxPosts);
     const messagesEndRef = useRef(null);
     const demo = currentBlog.demo;
 
     useEffect(() => {
       setActiveVersion(currentBlog.version || "html");
-      setLoops(currentBlog.loops || 1);
+      setLoops(currentBlog.loops || 3);
       setDaysToRun(currentBlog.daysLeft || 1);
       setJwt(currentBlog.jwt || "");
       setBlogID(currentBlog.blogID || "");
-      setSubject(currentBlog.subject || "");
-      setContent(currentBlog.config || "");
       setData(currentBlog.data || []);
       setHasStarted(currentBlog.hasStarted || false);
       setUsedBlogPosts(currentBlog.postsLeftToday || 0);
+      setIncludeAIImages(currentBlog.includeAIImages || false);
       setMaxBlogPosts((currentBlog.maxNumberOfPosts) ? currentBlog.maxNumberOfPosts : constants.maxPosts);
     }, [activeBlogAgent, currentBlog.data, currentBlog.hasStarted]);
 
@@ -79,13 +74,6 @@ const Home = ({joinRoom}) => {
       }
     };
 
-    const samplePrompt = async () => {
-      setLoops(sampleBlog.loops)
-      setSubject(sampleBlog.subject);
-      setContent(sampleBlog.config);
-      versionToggler('html');
-    };
-
     const handleJWT = async () => {
       const errorDispact = (myStr) => {
         dispatch(
@@ -100,9 +88,9 @@ const Home = ({joinRoom}) => {
     };
 
     const handleSubmit = async () => {
-      const openaiKey = window.localStorage.getItem("openaiKey");
       const userAuthToken = getUserAuthToken();
-      const newData = {jwt, loops, blogID, config, openaiKey, version, subject, daysLeft, userAuthToken, demo, blogMongoID: activeBlogAgent };
+      const { businessData }  = currentBlog;
+      const newData = {jwt, loops, blogID, version, daysLeft, userAuthToken, businessData, demo, blogMongoID: activeBlogAgent, includeAIImages };
       const res = await fetch(`${constants.url}/launchAgent`, {
         method: "POST",
         headers: {
@@ -113,7 +101,6 @@ const Home = ({joinRoom}) => {
       });
       if(!isAuthenticatedResponse(res, () => {dispatch(signOut())})) return;
       const data = await res.json();
-      //check if there is an error in the response. If so, dispatch an error message
       if (res.status !== 200) {
         dispatch(setBannerMessage({message: data.error, type: "error",timeout: 15000}));
       } else {
@@ -167,8 +154,6 @@ const Home = ({joinRoom}) => {
       }
     };
 
-
-
     const daysSetter = (e) => {
       var tempDays = e.target.value;
       if (tempDays * loops > maxNumberOfPosts) {
@@ -178,7 +163,7 @@ const Home = ({joinRoom}) => {
       }
     };
 
-    const canStart = ((version === "html") || (blogID && jwt)) !== "" && subject && loops;
+    const canStart = ((version === "html") || (blogID && jwt)) !== "" && loops;
     const versionSelectorOptions = [{id: "html", text: "Raw Text"}, {id: "wordpress", text: "Post to Wordpress"}, {id: "blogger", text: "Post to Blogger.com"}];
     const isDataSmall = hasStarted || (!demo && currentBlog.daysLeft > 0); 
     const waitingForNextDay = !hasStarted && !demo && currentBlog.daysLeft > 0;
@@ -188,20 +173,17 @@ const Home = ({joinRoom}) => {
       <div className="row align-center justify-start wrap">
         
         <h1 style={{marginRight: "15px"}}>BloggerGPT</h1>
-        {(demo) 
-        ? 
-        <button className="runButton2" style={{margin: "0px"}} onClick={samplePrompt}>Demo</button>
-         : 
-         <button className="runButton2 nohover" style={{margin: "0px"}}>Professional</button>
-         }
+        {(demo) ? 
+        <div className="runButton2 nohover" style={{margin: "0px"}} >Demo</div> : 
+         <div className="runButton2 nohover" style={{margin: "0px"}}>Professional</div>}
       </div>
       <h6>Hire an AI agent that works autonomously to grow your blog</h6>
       <div className={`home-results-container ${isDataSmall && 'growLarge'}`}>
         <div className="home-input-top-row">
-          <p>{trimStringToChars(currentBlog.subject, 45)}</p>
+          <p>{trimStringToChars(currentBlog?.businessData?.name || '', 45)}</p>
           <div className="row">
-            {(!demo && currentBlog.daysLeft > 0) && <p style={{marginRight: "25px"}}>Days Left: {currentBlog.daysLeft}</p>}
-            <p>{demo ? 'Daily' : 'Monthly'} Articles Used: {maxNumberOfPosts - postsLeftToday} / {maxNumberOfPosts}</p>
+            {(!demo && currentBlog.daysLeft > 0) && <p style={{marginRight: "25px"}}>Loops Left: {currentBlog.daysLeft}</p>}
+            <p>{demo ? 'Articles Written: ' : 'Monthly Articles Used: '}{maxNumberOfPosts - postsLeftToday} / {maxNumberOfPosts}</p>
           </div>
         </div>
         <div className={`home-data-body`} ref={messagesEndRef}>
@@ -215,12 +197,7 @@ const Home = ({joinRoom}) => {
               config={pill.config}
             />
           ))}
-          {(hasStarted && data.length === 0) &&
-            <StatusPill
-              version="updating"
-              title="Initializing the AI agent..."
-            />
-          }
+          {(hasStarted && data.length === 0) && <StatusPill version="updating" title="Initializing the AI agent..." /> }
           {data.map((pill, index) => (
             <StatusPill
               key={index}
@@ -247,45 +224,21 @@ const Home = ({joinRoom}) => {
               </button>
               <button style={{marginLeft:"15px"}} onClick={runNextDay} className="runButton">
                   <img src={CaretForward} alt="run next day button" />
-                  <h4>Run Next Day</h4>
+                  <h4>Run Next Loop</h4>
               </button>
             </div>
           </div>
         }
-        {!isDataSmall && 
-        <div className="home-input-container">
-          <div className="home-firstInputRow">
-            <div className="home-sectioned-input">
-              <div className="left">
-                <img src={SparklesSvg} alt="sparkles" />
-                <h4>Niche</h4>
-              </div>
-              <input 
-              onChange={(e) => setSubject(e.target.value)}
-              value={subject}
-              className="input" type="text" placeholder="Rock climbing for beginners"/>
-            </div>
-          </div>
-          <div className="home-sectioned-input" style={{height: '80px'}}>
-              <div className="left">
-                <img src={WrenchSvg} alt="sparkles" />
-                <h4>Config</h4>
-              </div>
-              <textarea 
-              value={config}
-              onChange={(e) => setContent(e.target.value)}
-              className="input" placeholder="Optinally, is there anything in particular you want the posts to have? For example, if you'd like to market a product, include it here: Sal's climbing, affordable rock climbing equipment at www.salsclimbing.com "/>
-          </div>
-        </div>}
         {!isDataSmall && 
         <div className="home-tinyInputs">
           <div className="row align-center justify-start wrap">
           <div className="mock-container">
             <Dropdown options={versionSelectorOptions} selected={version} onSelectedChange={versionToggler}/>
           </div>
-          <div className="article-count">
-            <label for="postsToday">
-              {(!demo) ? "Posts Per Day:" : "Post Count:"}
+          {/* <Toggle value={includeAIImages} setValue={setIncludeAIImages} text={'Include AI Image'} tinyText={'beta'}/> */}
+          {!demo && <div className="article-count">
+           <label for="postsToday">
+              Posts Per Loop
             </label>
               <input
                 id="postsToday"
@@ -294,11 +247,11 @@ const Home = ({joinRoom}) => {
                 min={1}
                 onChange={loopSetter}
               />
-          </div>
+          </div> }
           {(!demo) &&
             <div className="article-count">
             <label for="postsToday">
-            Days to Run
+            How Manys Loops?
             </label>
               <input
                 id="postsToday"

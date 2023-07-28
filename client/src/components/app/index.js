@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import './app.css';
 import HtmlModal from "../htmlModal";
-import NightToggle from '../uxcore/nightToggle';
 import {useDispatch, useSelector} from 'react-redux';
 import { isAuthenticatedResponse} from '../../utils/getJwt';
 import constants from '../../constants';
 import {clearBannerMessage,updateBlogAgentData, setBannerMessage, login, setBlogIds, signOut, setHtmlModal, actions } from '../../store';
 import {setColorScheme} from '../../utils/styles';
 import {getUserAuthToken} from '../../utils/getJwt';
+import {hasNonDemoBlog} from '../../utils/helpers';
 import NavController from '../navController';
 import BannerMessage from '../bannerMessage';
 import Home from '../home';
@@ -25,7 +25,8 @@ const templateMap = {
     blogger: Home,
     settings: Settings,
     tutorial: Tutorial,
-    purchase: PurchaseScreen
+    purchase: PurchaseScreen,
+    launch: Launch
 }
 
 const App = () => {
@@ -51,9 +52,7 @@ const App = () => {
         if (! userToken) 
             return;
         
-        const res = await fetch(`${
-            constants.url
-        }/user`, {
+        const res = await fetch(`${constants.url}/user`, {
             method: 'GET',
             headers: {
                 "x-access'langface-auth-token": getUserAuthToken()
@@ -67,7 +66,7 @@ const App = () => {
             return
         };
 
-        if (! res.ok) {
+        if (!res.ok) {
             dispatch(setBannerMessage({type: 'error', message: 'Error: Could not authenticate user', timeout: 5000}));
             dispatch(signOut());
             return;
@@ -109,40 +108,38 @@ const App = () => {
     });
 
 
+    const isAuthorized = hasNonDemoBlog(blogAgents);
+    if(isAuthorized && currentView === 'launch') dispatch(actions.setCurrentView('home')); 
     const Component = templateMap[currentView] || Home;
     return (
-        <div className="App">
-        {!showSideBar && <MenuButton topCorner whiteImg={(currentView === 'launch') ? true : false}/>}
+        <div className={`App`}>
+        {!showSideBar && <MenuButton topCorner whiteImg/>}
 
-        <NavController launch={launch} close={showSideBar}/>
-        {htmlModal && <HtmlModal html={htmlModal}close={() => {dispatch(setHtmlModal(""))}}/>}
-
-        {currentView === 'launch' ? <Launch/> :
-        <>
-            <NightToggle/>
-            {(currentBlog.settingUp && currentView === "home" && false) &&
+        <NavController launch={launch} close={showSideBar} isAuthorized={isAuthorized}/>
+        {htmlModal && <HtmlModal html={htmlModal} close={() => {dispatch(setHtmlModal(""))}}/>}
+            {currentView !== 'launch' &&  (
+                <>
+                    {/* <NightToggle/> */}
+                    <div className="App-right-section">
+                            <div className="flex-grow-1"/>
+                            <div className="body"> 
+                            {bannerMessage && <BannerMessage messageObject={bannerMessage} close={() => dispatch(clearBannerMessage())}/>}
+                                <Component joinRoom={joinRoom} launch={launch}/>
+                            </div>
+                            <div className="flex-grow-1"/>
+                    </div>
+                </>
+            )}
+            {(currentBlog.settingUp && currentView === "home") &&
                 <div className="HtmlModal-overlay"> 
                     <div className="HtmlModalSpecs">
-                        <Specifications dontShowTopSave/>
+                        <Specifications dontShowTopSave closeOnSave/>
                     </div>
                 </div>
             }
-            <div className="App-right-section">
-                <div className="flex-grow-1"/>
-                <div className="body"> {
-                    bannerMessage && <BannerMessage messageObject={bannerMessage}
-                        close={
-                            () => dispatch(clearBannerMessage())
-                        }/>
-                }
-                    <Component joinRoom={joinRoom}/>
-                </div>
-                <div className="flex-grow-1"/>
-            </div>
-        </>
-
+            {currentView === 'launch' && <div className="App-right-section" style={{flexDirection: 'column'}}><Launch/></div>
             }
-    </div>);
-}
+    </div>
+)}
 
 export default App;

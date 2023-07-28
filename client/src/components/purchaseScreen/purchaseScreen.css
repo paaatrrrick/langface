@@ -20,6 +20,10 @@
 }
 
 .PurchaseScreen-card-holder{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
     width: min(100%, 1000px);
 }
 
@@ -99,6 +103,37 @@
     background-color: var(--darkerBackground);
 }
 
-@media screen and (max-width: 768px) {
-    
+@media only screen and (max-width: 1000px) {
+
+
+    .PurchaseScreen-mostPopular{
+        display: none;
+    }
+
+    .PurchaseScreen-card-holder{
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    .PurchaseScreen-card{
+        width: 90% !important;
+        border-radius: 10px 10px 10px 10px !important;
+        margin: 20px 0px;
+        border-width: 1px 1px 1px 1px !important;
+        border-top: 1px solid var(--mainDark) !important;
+    }
+
+    .PurchaseScreen-card:nth-child(2){        
+        border-color: var(--brandColor) !important;
+    }
+
+    .shrinkwidth{
+        width: 90%;
+    }
+    .shrinkwidth h1{
+        font-size: 30px;
+        line-height: 36px;
+    }
 }

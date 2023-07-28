@@ -39,7 +39,7 @@ const Links = ({specs, setSpecs}) => {
     }
     return (
         <div className='specificatication-inputs'>
-            <label htmlFor='subject'>What is your value proposition?</label>
+            <label htmlFor='subject'>Add any urls with their descriptions to be included in each post?</label>
             {
                 newLinks.map((link, index) => {
                     return ( <LinkRow key={index} link={link} index={index} linkChange={linkChange} removelink={removelink} />)
@@ -52,9 +52,9 @@ const Links = ({specs, setSpecs}) => {
 
 const LinkRow = ({link, index, linkChange, removelink}) => {
     return (
-        <div className="insights-row ">
-            <input type="text" className='specificatication-inputs-input specificatication-input-small' name="link" value={link.url} placeholder='Chess timing should focus on the opening' onChange={(e) => linkChange(e, index, "url")}/>
-            <input type="text" className='specificatication-inputs-input specificatication-input-small' name="link" value={link.description} placeholder='Chess timing should focus on the opening' onChange={(e) => linkChange(e, index, "description")}/>
+        <div className="insights-row">
+            <input type="text" className='specificatication-inputs-input specificatication-input-xsmall' name="link" value={link.url} placeholder='https://www.apple.com/buy/iphone-12' onChange={(e) => linkChange(e, index, "url")}/>
+            <input type="text" className='specificatication-inputs-input specificatication-input-small' name="link" value={link.description} placeholder='Guide users to visiting this url to purchase an iPhone-12' onChange={(e) => linkChange(e, index, "description")}/>
             {(link.url || link.description) && <button onClick={() => {removelink(index)}} className='links-btn x'>&times;</button>}
         </div>
     )

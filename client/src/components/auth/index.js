@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setBannerMessage, signOut } from "../../store";
 import constants from "../../constants";
 import '../navController/navController.css'
-import RobotSvg from '../../assets/robot-outline.svg'
 
 const firebaseConfig = {
     apiKey: "AIzaSyBdOHXmq235jFOtiAg7KtnXE6zriN8r6xU",
@@ -56,18 +55,8 @@ const Auth = ({ launch, mask, payment }) => {
     };
 
     const signOutClicked = async () => {
-        // document.cookie = constants.authCookieName + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
         dispatch(signOut());
     };
-
-    if (mask==="true"){
-        return (
-            <div id="navControllerPurchase" onClick={handleGoogle}>
-                <img src={RobotSvg} />
-                <h6>Hire Agent</h6>
-            </div>
-        )
-    }
 
     if (isLoggedIn) {
         return (
