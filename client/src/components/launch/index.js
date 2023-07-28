@@ -55,7 +55,7 @@ const Launch = () => {
                         </svg>
             </div>
             <div className="howItWorks">
-                <AnimatedWrapper><h2 style={{color: "#212121"}} className='pt-4'>How Langface writes articles that rank you the 1st page</h2></AnimatedWrapper>
+                <AnimatedWrapper><h2 style={{color: "#212121"}} className='pt-4'>How Langface writes articles that rank you on the 1st page</h2></AnimatedWrapper>
                 <div className="howItWorksRows">
                     <div className="howIt-left">
                     <AnimatedWrapper direction='left'>
