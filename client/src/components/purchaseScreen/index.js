@@ -7,6 +7,7 @@ import { initializeApp } from "firebase/app";
 import { useDispatch, useSelector } from 'react-redux';
 import { setBannerMessage } from "../../store";
 import constants from "../../constants";
+import PurchaseV2 from "../uxcore/purchasev2";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBdOHXmq235jFOtiAg7KtnXE6zriN8r6xU",
@@ -65,8 +66,8 @@ const PurchaseScreen = ({ tryDemo, openDemo, launch }) => {
             dispatch(actions.addBlogAgent(res))
             dispatch(actions.setCurrentView("home"));
         }
-    }
-
+    };
+    
     return (<div className="PurchaseScreen">
         <div className="w-100 column align-center justify-center shrinkwidth">
             <h1 className="text-4xl mb-2 font-semibold">Supercharge your web traffic</h1>

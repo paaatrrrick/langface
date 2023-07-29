@@ -137,7 +137,7 @@ const App = () => {
                     </div>
                 </div>
             }
-            {currentView === 'launch' && <div className="App-right-section" style={{flexDirection: 'column'}}><Launch/></div>
+            {currentView === 'launch' && <div className="App-right-section" style={{flexDirection: 'column'}}><Launch launch={launch}/></div>
             }
     </div>
 )}

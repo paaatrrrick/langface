@@ -43,7 +43,7 @@ const newBlogPost = (keyword, lsiKeyword, headers, previousArticles, imageNames,
   uniqueInsights:  ${businessData.insights.toString()},
   }
 
-  2) The title of your blog post should be: ${keyword} 
+  2) The title of your blog post should be: ${keyword}. The content should abide to this the title
 
   3) Follow these Google-Optimal Writing Guidelines:
 
@@ -85,8 +85,8 @@ const newBlogPost = (keyword, lsiKeyword, headers, previousArticles, imageNames,
   -You must specific actionable step-by-step instructions to address the problem.
   ${urls.length > 2 && `-Include EVERY url in this list throughout this article EXACTLY once: ${urls}. Link to them with an <a> tag and set the href to the url. Place them accordingly based on their descriptions.\n`}
   ${(imageNames && imageNames.length) && `-The blog should have EXACTLY ${imageNames.length} img tags in the blog. One at the close to the beginning and one close to the end. They should have the following src's respsectively: ${arrayToString(imageNames)}. Each img should have inline styles for a width and height, which are between 256px and 1280px.\n`}
-  -Output only valid HTML. Add inline styles of margin and padding to headers and paragraphs to add elegant spacing. Start with an article tag and end with its respective closing article tag.
-  -Above all, your job is to answer the specific question as comprehensively as possible and improve the end-user’s life.`;
+  -Output only valid HTML. Add inline styles of margin and padding to headers and paragraphs to add elegant spacing. Start with an article tag, followed by the the table of contents, and ended with its respective closing article tag.
+  -Above all, your job is to answer the specific question as comprehensively as possible and improve the end-user’s life by writing an article for this title ${keyword}.`;
   return prompt;
 
   }

@@ -13,7 +13,11 @@ const Links = ({specs, setSpecs}) => {
     }
 
     const linkChange = (e, index, aspect) => {
-        const newLinks = [...links];
+        const newLinks = []
+        links.forEach(link => {
+            const { url, description } = link;
+            newLinks.push({ url, description });
+        })
         if (e.target.value === '' && ((aspect === 'url' &&  newLinks[index]['description'] === '') ||  (aspect === 'description' &&  newLinks[index]['url'] === ''))) {
             newLinks.splice(index, 1);
         } else {

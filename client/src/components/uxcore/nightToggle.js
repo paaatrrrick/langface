@@ -14,7 +14,7 @@ const NightToggle = ({nightMode, setNightMode}) => {
         }
     };
     return (
-        <div class = 'toggle-switch'>
+        <div className = 'toggle-switch'>
             <label>
                 <input type = 'checkbox' onClick={toggleColorScheme} checked={colorScheme === 'light'}/>
                 <span className = 'slider'></span>

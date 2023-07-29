@@ -123,6 +123,72 @@
     overflow-y: auto;
   }
 
+  .HtmlModal-content  h1{
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .HtmlModal-content  h2{
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .HtmlModal-content  h3{
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .HtmlModal-content  h4{
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .HtmlModal-content  h5{
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .HtmlModal-content  h6{
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .HtmlModal-content  p{
+    font-size: 14px;
+    font-weight: 400;
+    margin-bottom: 15px;
+  }
+
+  .HtmlModal-content  a{
+    font-size: 14px;
+    font-weight: 400;
+    margin-bottom: 15px;
+    color: var(--brandColor);
+  }
+
+  .HtmlModal-content  a:hover{
+    text-decoration: underline;
+  }
+
+  .HtmlModal-content  ul{
+    font-size: 14px;
+    font-weight: 400;
+    margin-bottom: 15px;
+    list-style-type: none;
+  }
+
+  .HtmlModal-content  li{
+    font-size: 14px;
+    font-weight: 400;
+    list-style-type: circle !important;
+  }
+
   .HtmlModal-content::-webkit-scrollbar {
     width: 10px;
     background-color: aqua;

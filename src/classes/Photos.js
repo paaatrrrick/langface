@@ -74,8 +74,7 @@ class Photos {
         const formatInstructions = parserFromZod.getFormatInstructions()
         const prompt = new PromptTemplate({template: `${text2ImgPrompt(imageDescriptions, this.style)} \n{format_instructions}.`, inputVariables: [], partialVariables: { format_instructions: formatInstructions }});
         const input = await prompt.format();
-        const modelType = process.env.CHEAP_GPT === 'true' ? "gpt-3.5-turbo-16k" : "gpt-4";
-        const model = new ChatOpenAI({modelName: modelType,temperature: 0.1, maxTokens: 1000, openAIApiKey: this.openaiKey});
+        const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k",temperature: 0.1, maxTokens: 1000, openAIApiKey: this.openaiKey});
         const response = await model.call([new HumanChatMessage(input)]);
         const parsed = await parserFromZod.parse(response.text) ;
         return parsed;

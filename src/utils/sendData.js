@@ -1,4 +1,4 @@
-const { sendDataToClient, blogIdToSocket } = require("../endpoints/webSockets");
+ const { sendDataToClient, blogIdToSocket } = require("../endpoints/webSockets");
 const AgentDB = require("../mongo/agent");
 const DemoAgent = require("../mongo/demoAgent");
 

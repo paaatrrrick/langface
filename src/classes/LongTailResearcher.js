@@ -48,6 +48,10 @@ class LongTailResearcher {
         let parentMongoID = parentsQ.shift();
         let childrenKeywords = await this.getKeywords(this.childrenCount, currKeyword);
         for (let i = 0; i < childrenKeywords.length; i++){
+          if (postCount === parseInt(this.loops)) {
+            postCount += 1;
+            break;
+          }
           currKeyword = childrenKeywords[i];
           let currPost = await PostDB.createPost({parentMongoID: parentMongoID, blueprint: {keyword: currKeyword}});
           parentsQ.push(currPost._id);
@@ -57,8 +61,8 @@ class LongTailResearcher {
           const childrenMongoID = parent.childrenMongoID;
           childrenMongoID.push(currPost._id);
           await PostDB.updatePost(parentMongoID, {childrenMongoID: childrenMongoID});
+          postCount += 1;
         }
-        postCount += 3;
       }
       // Have all posts posted here.
       // Work Left: Generate posts, update rawHTML + url properties, go back and update internal links
@@ -153,6 +157,7 @@ class LongTailResearcher {
 
 
     generateBlueprint = async (keyword, post=undefined) => {
+        console.log('generating blueprint');
         if (!this.demo) await AgentDB.incrementNextPostIndex(this.blogMongoID);
         if (post?.blueprint?.blogTitle){
           await this.generateBlueprintForChildren(post);

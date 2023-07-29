@@ -45,29 +45,32 @@ basicRoutes.get("/user", isLoggedInMiddleware, asyncMiddleware(async (req, res) 
 
 basicRoutes.post("/launchAgent", asyncMiddleware(async (req, res) => {
     // get agent data
-    var {openaiKey, blogID, businessData, version, loops, daysLeft, userAuthToken, demo, blogMongoID, draft = false} = req.body;
+    var {blogID, businessData, version, loops, daysLeft, userAuthToken, demo, blogMongoID, draft = false, includeAIImages} = req.body;
     const blogJwt = req.body.jwt;
-    if (version !== "blogger" && version !== "html") {
-      version = "wordpress";
+    if (version !== "blogger" && version !== "wordpress") {
+      version = "html";
     }
     var userID;
     var blog;
+    var totalPostsToMake;
     // update agent data if it exists
     if (!demo) {
         const user = await User.getUserByID(jwt.verify(userAuthToken, process.env.JWT_PRIVATE_KEY));
         userID = user._id.toString();
-        blog = await AgentDB.updateBlog(blogMongoID, {blogID, version, userID, openaiKey: openaiKey, blogJwt, businessData, loops, daysLeft});
+        blog = await AgentDB.updateBlog(blogMongoID, {blogID, version, userID, blogJwt, businessData, loops, daysLeft, includeAIImages});
+        totalPostsToMake = blog.totalPostsToMake;
         if (blog.hasStarted) return res.status(400).json({error: "Blog has already started"});
         await User.addBlog(userID, blogMongoID);
         blog = await AgentDB.deleteAllMessages(blogMongoID);
     } else {
         const ip = req.ip || req.connection.remoteAddress;
+        totalPostsToMake = loops;
         blog = await DemoAgent.createBlog({ip});
         blogMongoID = blog?._id?.toString();
     }
     // use new agent data to run
     const sendData = initSendData(blogMongoID, demo);
-    const agent = new Agent(openaiKey, sendData, blogJwt, blogID, businessData, version, loops, daysLeft, blogMongoID, demo, userID, draft, blog.nextPostIndex, blog.BFSOrderedArrayOfPostMongoID);
+    const agent = new Agent(sendData, blogJwt, blogID, businessData, version, loops, daysLeft, blogMongoID, demo, userID, draft, blog.nextPostIndex, blog.BFSOrderedArrayOfPostMongoID, includeAIImages, totalPostsToMake);
     agent.run();
     return res.json(blog);
 }));
@@ -91,20 +94,20 @@ basicRoutes.post("/wordpress", asyncMiddleware(async (req, res) => {
     }
 }));
 
-basicRoutes.post("/dailyrun", asyncMiddleware(async (req, res) => {
-    if (req.body.password === process.env.dailyRunPassword) {
-        const activeBlogs = await AgentDB.getActive();
-        for (let blog of activeBlogs) {
-            const {openaiKey, blogID, businessData, version, loops, daysLeft, _id, userID, nextPostIndex, BFSOrderedArrayOfPostMongoID } = blog;
-            const blogMongoID = _id.toString();
-            const blogJwt = blog.jwt;
-            const sendData = initSendData(blogMongoID);
-            const agent = new Agent(openaiKey, sendData, blogJwt, blogID, businessData, version, loops, daysLeft, blogMongoID, false, userID, false, nextPostIndex, BFSOrderedArrayOfPostMongoID);
-            agent.run();
-        }
-    }
-    return res.send("done");
-}));
+// basicRoutes.post("/dailyrun", asyncMiddleware(async (req, res) => {
+//     if (req.body.password === process.env.dailyRunPassword) {
+//         const activeBlogs = await AgentDB.getActive();
+//         for (let blog of activeBlogs) {
+//             const {blogID, businessData, version, loops, daysLeft, _id, userID, nextPostIndex, BFSOrderedArrayOfPostMongoID,  } = blog;
+//             const blogMongoID = _id.toString();
+//             const blogJwt = blog.jwt;
+//             const sendData = initSendData(blogMongoID);
+//             const agent = new Agent(sendData, blogJwt, blogID, businessData, version, loops, daysLeft, blogMongoID, false, userID, false, nextPostIndex, BFSOrderedArrayOfPostMongoID);
+//             agent.run();
+//         }
+//     }
+//     return res.send("done");
+// }));
 
 basicRoutes.post('/create-checkout-session', isLoggedInMiddleware, asyncMiddleware(async (req, res) => {
     const userId = req.user._id.toString();
@@ -173,11 +176,11 @@ basicRoutes.post('/configureBlog', isLoggedInMiddleware, asyncMiddleware(async(r
 basicRoutes.post('/runNextDay', isLoggedInMiddleware, asyncMiddleware(async(req, res) => {
     const { id } = req.body;
     const blog = await AgentDB.getBlog(id);
-    const {openaiKey, blogID, businessData, version, loops, daysLeft, _id, userID, nextPostIndex, BFSOrderedArrayOfPostMongoID } = blog;
+    const {blogID, businessData, version, loops, daysLeft, _id, userID, nextPostIndex, BFSOrderedArrayOfPostMongoID, totalPostsToMake, includeAIImages } = blog;
     const blogMongoID = _id.toString();
     const blogJwt = blog.jwt;
     const sendData = initSendData(blogMongoID);
-    const agent = new Agent(openaiKey, sendData, blogJwt, blogID, businessData, version, loops, daysLeft, blogMongoID, false, userID, false, nextPostIndex, BFSOrderedArrayOfPostMongoID);
+    const agent = new Agent(sendData, blogJwt, blogID, businessData, version, loops, daysLeft, blogMongoID, false, userID, false, nextPostIndex, BFSOrderedArrayOfPostMongoID, includeAIImages, totalPostsToMake);
     agent.run();
     return res.json(blog);
 }));

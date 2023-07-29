@@ -79,9 +79,6 @@ const AgentSchema = new Schema({
       type: String,
       required: true,
     },
-    openaiKey: {
-      type: String
-    },
     jwt: {
       type: String
     },
@@ -121,27 +118,41 @@ const AgentSchema = new Schema({
     nextPostIndex: {
       type: Number,
       default: 0
-    }
+    },
+    totalPostsToMake: {
+      type: Number,
+      default: 0
+    },
   });
 
 
 
 
-// for every agent in the database add businessData with name = subject and product = config. If the agent does not have a subject or config, then set it to the default values
-AgentSchema.statics.addBusinessData = async function() {
-  const agents = await this.find({});
-  for (let agent of agents) {
-    if (!agent.businessData) {
-      agent.businessData = {};
-    }
-    if (!agent.businessData.name) {
-      agent.businessData.name = agent.subject;
-    }
-    if (!agent.businessData.product) {
-      agent.businessData.product = agent.config;
-    }
-    await agent.save();
-  }
+
+
+AgentSchema.statics.updateImagesAndTotalPostsToMake = async function() {
+  // console.log('starting');
+  // const agents = await this.find({});
+  // for (let agent of agents){
+  //   const loops = agent.loops || 1;
+  //   const daysLeft = agent.daysLeft || 1;
+  //   agent.totalPostsToMake = loops * daysLeft;
+  //   agent.includeAIImages = true;
+  //   await agent.save();
+  // }
+  // console.log('done');
+  // for (let agent of agents) {
+  //   if (!agent.businessData) {
+  //     agent.businessData = {};
+  //   }
+  //   if (!agent.businessData.name) {
+  //     agent.businessData.name = agent.subject;
+  //   }
+  //   if (!agent.businessData.product) {
+  //     agent.businessData.product = agent.config;
+  //   }
+  //   await agent.save();
+  // }
 };
 //create a blog with default values
 AgentSchema.statics.createEmptyBlog = async function(userID, paymentID) {
@@ -205,9 +216,10 @@ AgentSchema.statics.getBlog = async function(id) {
 //createBlog
 AgentSchema.statics.updateBlog = async function(id, params) {
   id = convertToObjectId(id);
-  const { blogID, version, userID, openaiKey, blogJwt, businessData, loops, daysLeft, topPostID } = params;
+  const { blogID, version, userID, blogJwt, businessData, loops, daysLeft, topPostID, includeAIImages } = params;
+  const totalPostsToMake = loops * daysLeft;
   const blog = await this.findById(id);
-  blog.set({blogID, version, userID, openaiKey,jwt: blogJwt, businessData,loops,daysLeft, topPostID})
+  blog.set({blogID, version, userID,jwt: blogJwt, businessData,loops,daysLeft, topPostID, includeAIImages, totalPostsToMake})
   return await blog.save();
 }
 
@@ -254,7 +266,8 @@ AgentSchema.statics.setUserId = async function(id, userID) {
 //increment nextPostIndex
 AgentSchema.statics.incrementNextPostIndex = async function(id) {
   let blog = await this.findById(convertToObjectId(id));
-  blog.nextPostIndex++;
+  const nextPostIndex = blog.nextPostIndex + 1;
+  blog.nextPostIndex = nextPostIndex;
   await blog.save();
   return blog;
 }
@@ -298,7 +311,6 @@ AgentSchema.statics.getTree = async function(id) {
       }
     }
     const tree = await recursTree(blog.BFSOrderedArrayOfPostMongoID[0]);
-
     return tree
   } catch (err) {
     return false;

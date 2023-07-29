@@ -126,7 +126,6 @@ const Home = ({joinRoom}) => {
         },
         body: JSON.stringify({ id: activeBlogAgent }),
       })
-      const data = await res.json();
     };
 
     const runNextDay = async () => {
@@ -215,7 +214,7 @@ const Home = ({joinRoom}) => {
         </div>
         </div>
         {waitingForNextDay &&
-         <div className="w-100 row align-center justify-center">
+         <div className="w-100 row align-center justify-center mt-15px">
             <div className="row">
               <button style={{marginRight:"15px"}} onClick={configure} className="runButton">
                   <img src={SettingsSvg} alt="configure button" style={{marginLeft: "10px"}}/>
@@ -230,11 +229,9 @@ const Home = ({joinRoom}) => {
         }
         {!isDataSmall && 
         <div className="home-tinyInputs">
-          <div className="row align-center justify-start wrap">
           <div className="mock-container">
-            <Dropdown options={versionSelectorOptions} selected={version} onSelectedChange={versionToggler}/>
+              <Dropdown options={versionSelectorOptions} selected={version} onSelectedChange={versionToggler}/>
           </div>
-          {/* <Toggle value={includeAIImages} setValue={setIncludeAIImages} text={'Include AI Image'} tinyText={'beta'}/> */}
           {!demo && <div className="article-count">
            <label for="postsToday">
               Posts Per Loop
@@ -250,7 +247,7 @@ const Home = ({joinRoom}) => {
           {(!demo) &&
             <div className="article-count">
             <label for="postsToday">
-            How Manys Loops?
+            Loops Count
             </label>
               <input
                 id="postsToday"
@@ -280,11 +277,13 @@ const Home = ({joinRoom}) => {
                 {(jwt !== "") ? "Logged In" : `${(version === "blogger") ? "Blogger" : "Wordpress"} Login`}
               </button>
             }
+          <div className='mr-15px flex justify-center align-middle pb-2' >
+            <Toggle value={includeAIImages} setValue={setIncludeAIImages} text={'AI Images'} tinyText={'(beta)'}/>
           </div>
-              <button  onClick={handleSubmit} disabled={!(!hasStarted && canStart)} className="runButton">
-                  <img src={CaretForward} alt="run button" />
-                  <h4>Start Agent</h4>
-              </button>
+            <button  onClick={handleSubmit} disabled={!(!hasStarted && canStart)} className="runButton">
+                    <img src={CaretForward} alt="run button" />
+                    <h4>Start Agent</h4>
+            </button>
       </div>}
     </div>
   );

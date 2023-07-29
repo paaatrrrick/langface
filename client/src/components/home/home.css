@@ -119,9 +119,11 @@
     width: 100%;
     display: flex;
     flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    align-items: flex-end;
+    justify-content: flex-start;
     flex-wrap: wrap;
+    padding-top: 15px;
+    gap: 15px;
 }
 
 .home-sectioned-input .left h4{
@@ -145,9 +147,8 @@
 }
 .home-tinyInputs .article-count {
     height: 40px;
-    width: 220px;
+    width: 175px;
     border-radius: 20px;
-    margin: 15px 15px 0px 0px;
     border: 2px solid var(--lightDark);
     padding: 15px 0px 15px 15px;
     display: flex;
@@ -195,7 +196,6 @@
 .home-tinyInputs .mock-container{
     height: 40px;
     width: 200px;
-    margin: 15px 15px 0px 0px;
 } 
 
 
@@ -230,12 +230,19 @@
     border-radius: 18px;
     display: flex;
     flex-direction: row;
-    margin-top: 15px;
     padding: 0px 15px;
     align-items: center;
     justify-content: flex-start;
 }
 
+
+.runButtonContainer{
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-end;
+}
 
 .home-data-body {
     width: 100%;
