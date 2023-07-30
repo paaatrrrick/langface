@@ -10,8 +10,8 @@ const HeroOne = ({demoClick}) => {
                     <div className="flex flex-col align-center justify-start md:justify-between w-full md:flex-row" style={{maxWidth: '1500px'}}>
                         <div className="w-full md:w-2/5">
                             <h1 className="font-semibold tracking-tight text-mainDark text-2xl md:text-4xl lg:text-5xl">Drive organic web traffic with optimized articles</h1>
-                            <p className="mt-6 text-xl leading-8 text-mainDar">Get hundreds of SEO articles in seconds that are specialized to grow your business, using the help of AI</p>
-                            <div className="mt-10 flex items-center justify-center gap-x-6">
+                            <p className="mt-md text-xl leading-8 text-mainDar">Get hundreds of SEO articles in minutes that are specialized to grow your business, using the help of AI</p>
+                            <div className="mt-md flex items-center justify-center gap-x-6">
                                 <button onClick={demoClick} className="rounded-full w-60 h-10 bg-brandColor px-3.5 text-m text-center font-sm text-mainWhite">Try 3 free demo posts</button>
                             </div>
                         </div>
