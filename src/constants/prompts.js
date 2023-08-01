@@ -83,7 +83,7 @@ const newBlogPost = (keyword, lsiKeyword, headers, previousArticles, imageNames,
   -Don’t focus too much on selling the business, most of your content should be thoroughly answering the question. For example, you should include alternative solutions and compare them.
   -Do not include a discussion of the business if it is not relevant to answering the main question.
   -You must specific actionable step-by-step instructions to address the problem.
-  ${urls.length > 2 && `-Include EVERY url in this list throughout this article EXACTLY once: ${urls}. Link to them with an <a> tag and set the href to the url. Place them accordingly based on their descriptions.\n`}
+  ${urls.length > 0 && `-Include EVERY url in this list throughout this article EXACTLY once: ${urls}. Link to them with an <a> tag and set the href to the url. Place them accordingly based on their descriptions.\n`}
   ${(imageNames && imageNames.length) && `-The blog should have EXACTLY ${imageNames.length} img tags in the blog. One at the close to the beginning and one close to the end. They should have the following src's respsectively: ${arrayToString(imageNames)}. Each img should have inline styles for a width and height, which are between 256px and 1280px.\n`}
   -Output only valid HTML. Add inline styles of margin and padding to headers and paragraphs to add elegant spacing. Start with an article tag, followed by the the table of contents, and ended with its respective closing article tag.
   -Above all, your job is to answer the specific question as comprehensively as possible and improve the end-user’s life by writing an article for this title ${keyword}.`;

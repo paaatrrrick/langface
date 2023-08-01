@@ -13,19 +13,20 @@ const randomStringToHash24Bits = (inputString) => {
   return crypto.createHash('sha256').update(inputString).digest('hex').substring(0, 24);
 }
 
-function replaceStringInsideStringWithNewString(
-  string,
-  stringToReplace,
-  newString
-) {
-  const index = string.indexOf(stringToReplace);
-  if (index === -1) {
-    return string;
+function replaceStringInsideStringWithNewString(str, sub, newSub) {
+  if (!sub || !newSub || !str) return str;
+  if (sub === newSub) return str;
+
+  let index = str.indexOf(sub);
+  let replaced = '';
+
+  while (index !== -1) {
+    replaced += str.substring(0, index) + newSub;
+    str = str.substring(index + sub.length);
+    index = str.indexOf(sub);
   }
-  const firstHalf = string.slice(0, index);
-  const secondHalf = string.slice(index + stringToReplace.length);
-  // check if there are more occurnces
-  return replaceStringInsideStringWithNewString(firstHalf + newString + secondHalf, stringToReplace, newString);
+
+  return replaced + str;
 }
 
 function arrayToString (array) {
