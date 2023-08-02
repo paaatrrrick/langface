@@ -106,7 +106,7 @@ class LongTailResearcher {
         2. Dustless blasting for rust removal in vintage vehicles
         3. Time efficiency: dustless blasting in car restorations
         `
-        const systemMessage = `I am trying to generate a tree of Google Search queries. I will give you a parent query and ask you to generate 3 children search queries. I want each of the children queries to add their own unique meaningful twists to the parent query and be very different from the parent query as well as from each other. My end goal is the root query of the tree should be extremely different from the leaf queries. The following is an example of such a tree: ${tree}`;
+        const systemMessage = `I am trying to generate a tree of Google Search queries. I will give you a parent query and ask you to generate 3 children search queries. I want each of the children queries to add their own unique big meaningful twists to the parent query and be very different from the parent query as well as from each other. It is important not to repeat queries and nouns in queries in any way. My end goal is the root query of the tree should be extremely different from the leaf queries. The following is an example of such a tree: ${tree}`;
         const parser = new CustomListOutputParser({
           length: count,
           separator: "\n",
@@ -116,7 +116,7 @@ class LongTailResearcher {
           var template = `Provide an unordered list of length "{count}" search queries related to "{subject}". This will be the root query for a tree of Google Search queries. \n{format_instructions}`
         }
         else {
-          var template = "Provide an unordered list of length {count} unique children search queries for the parent query {subject}. You have already generated the following queries: {keywords} so stray away from them. \n{format_instructions}"
+          var template = "Provide an unordered list of length {count} unique children search queries for the parent query {subject}. You have already generated the following queries: {keywords} so sharply stray away from them and you must not repeat them in any way. \n{format_instructions}"
         }
         const prompt = new PromptTemplate({
           template: template,
