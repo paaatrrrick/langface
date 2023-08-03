@@ -101,7 +101,7 @@ const AgentSchema = new Schema({
     },
     includeAIImages: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     newlyCreated: {
       type: Boolean,
