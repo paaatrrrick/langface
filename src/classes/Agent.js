@@ -64,6 +64,12 @@ class Agent {
         const max = this.nextPostIndex + parseInt(this.loops)
         for (let i = min; i < max; i++) {
             try {
+                //bad variable naming, this should be postsLeftThisMonth
+                const { postsLeftToday, dateString } = await this.AgentDB.checkRemainingPosts(this.blogMongoID);
+                if (postsLeftToday <= 0) {
+                    await this.sendData({ type: "ending", config: `You've run out of posts this month. It will reset on ${dateString}`});
+                    return;
+                } 
                 await this.sendData({ type: "updating", config: `Step 1 of 3: Finding best longtail keywords`, title: `Loading... Article ${i + 1} / ${this.totalPostsToMake}` });
                 const post = await PostDB.getPostById(this.BFSOrderedArrayOfPostMongoID[i]);
                 if (!post?.blueprint?.keyword) {
