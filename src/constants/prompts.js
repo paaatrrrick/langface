@@ -43,14 +43,25 @@ const newBlogPost = (keyword, lsiKeyword, headers, previousArticles, imageNames,
   uniqueInsights:  ${businessData.insights.toString()},
   }
 
-  2) The title of your blog post should be: ${keyword}. The content should abide to this the title
+  2) The title of your blog post should be: ${keyword}.
 
   3) Follow these Google-Optimal Writing Guidelines:
 
   Content:
-  
-  Include Headings:
 
+  -Abide by the title.
+  -Includes your best knowledge.
+  -Clear & readable.
+  -Well-structured with topic divisions.
+  -Original & user-centric.
+  -Highlight expertise.
+  -Comprehensive, unique insights, & trustworthy.
+  -Descriptive, accurate titles.
+  -Prioritize quality.
+  -Define primary focus.
+  -Inform & satisfy readers.
+
+  Include Headings:
   -Highlight topics & structure content.
   -Outline-like planning.
   -Avoid unhelpful text.
@@ -59,36 +70,28 @@ const newBlogPost = (keyword, lsiKeyword, headers, previousArticles, imageNames,
   -Use wisely; avoid overuse/confusion.
   -Concise & structurally prioritized.
   -Include TEN unique headings
-
-  -Clear & readable.
-  -Well-structured with topic divisions.
-  -Original & user-centric.
-  -Highlight expertise & cite sources.
-  -Comprehensive, unique insights, & trustworthy.
-  -Descriptive, accurate titles.
-  -Reference quality; prioritize quality.
-  -Define primary focus.
-  -Inform & satisfy readers.
+  -The uniqueInsights from the business data should NOT be directly used as a heading.
+  -The headings should be based on content, not the other way around.
 
   4) Follow these additional content guidelines:
   -Title your introduction or conclusion headings/paragraphs creatively. Do not use the words “Introduction” or “Conclusion”.
-  -MUST use subheadings, lists, or tables. 
   -ABSOLUTELY MUST include a table of contents with links that jump to the headers near the start of the post. 
-  -EACH of the TEN heading MUST have 3 paragraphs with 10 sentences with 10 words each for a total of 1000 words while maintaining your readability, succinctness, engagingness, and coherence. Include so much insightful information and so many useful and entertaining facts that you naturally meet the word count. Often you don’t meet the word count, so be extra sure that include at least 10 sentences and 3 paragraphs for each of the the headings. Again, you MUST include 10 sentences and 3 paragraphs for each of the 10 heading.
-  -While you should number the headers in your head, do not number the headers in the blog or state they are headers. Just say the header's title. Do not state the string 'header' in your headers. They should be immediately digestable in the article.
+  -EACH of the 10 heading MUST have 3 paragraphs with 5 sentences with 10 words each for a total of 1500 words while maintaining your readability, succinctness, engagingness, and coherence. Include so much insightful information and so many useful and entertaining facts that you naturally meet the 1500 word count. Often you don’t meet the word count, so be extra sure that include at least 5 sentences and 3 paragraphs for each of the the headings. Again, you MUST include 5 sentences and 3 paragraphs for each of the 10 headings.
+  -Do not number the headers in the blog or state they are headers. Just say the header's title. Do not state the string 'header' in your headers. They should be immediately digestable in the article.
   -Generate a complete post. Do not ask me to fill things in.
-  -Include expert-level information (things beyond what the layman knows). Incorporate the business insights.
+  -Include expert-level information (things beyond what the layman knows) under every heading. 
+  -Include only 1 uniqueInsight from the business data. It should the insights that's most relevant to the title and it should be included under the most relevant heading.
+  -Do not use more than 1 uniqueInsight.
   -Include real-world examples whenever applicable.
   -Do not make anything up. No fictional or fake quotes, studies, authors, links, news etc. You absolutely must be sure it’s real.
   -Don’t focus too much on selling the business, most of your content should be thoroughly answering the question. For example, you should include alternative solutions and compare them.
   -Do not include a discussion of the business if it is not relevant to answering the main question.
   -You must specific actionable step-by-step instructions to address the problem.
-  ${urls.length > 0 && `-Include EVERY url in this list throughout this article EXACTLY once: ${urls}. Link to them with an <a> tag and set the href to the url. Place them accordingly based on their descriptions.\n`}
+  ${urls.length > 0 && `-Include EVERY url in this list throughout this article EXACTLY once and no more: ${urls}. Link to them with an <a> tag and set the href to the url. Place them naturally under an appropriate heading, ideally near the middle. Do not just put them all at the end.\n`}
   ${(imageNames && imageNames.length) && `-The blog should have EXACTLY ${imageNames.length} img tags in the blog. One at the close to the beginning and one close to the end. They should have the following src's respsectively: ${arrayToString(imageNames)}. Each img should have inline styles for a width and height, which are between 256px and 1280px.\n`}
   -Output only valid HTML. Add inline styles of margin and padding to headers and paragraphs to add elegant spacing. Start with an article tag, followed by the the table of contents, and ended with its respective closing article tag.
   -Above all, your job is to answer the specific question as comprehensively as possible and improve the end-user’s life by writing an article for this title ${keyword}.`;
   return prompt;
-
   }
   const blogPost = (keyword, lsiKeyword, title, headers, config, previousArticles, imageNames, parent, childrenTitles=undefined) => {
     var previousArticlesString = `-Add a tags throughout the blog to reference these blog articles you previously wrote: ${arrayToString(previousArticles)}.\n`;
