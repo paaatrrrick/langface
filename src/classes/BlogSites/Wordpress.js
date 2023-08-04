@@ -30,7 +30,7 @@ class Wordpress extends AbstractBlog {
     };
     
     postApi = async (post) => {
-        const body = { title: this.outline.blogTitle, content: post};
+        const body = { /* title: this.outline.blogTitle,*/ content: post};
         if (this.draft) body.status = "draft";
         const response = await fetch(`https://public-api.wordpress.com/rest/v1/sites/${this.blogID}/posts/new`,
           {
@@ -61,7 +61,7 @@ class Wordpress extends AbstractBlog {
             },
             body: JSON.stringify({
                 content: newHTML,
-                title: parentTitle,
+                // title: parentTitle,
             }),
         });
       };

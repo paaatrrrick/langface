@@ -6,8 +6,10 @@ const { StructuredOutputParser, CustomListOutputParser } = require("langchain/ou
 const { dummyBlueprint } = require("../constants/dummyData");
 const AgentDB = require("../mongo/agent");
 const PostDB = require("../mongo/post");
+const Replicate = require("replicate");
+
 class LongTailResearcher {
-    constructor(subject, loops=450, config, openAIApiKey, blogMongoID, BFSOrderedArrayOfPostMongoID, demo = false) {
+    constructor(subject, loops=450, config, openAIApiKey, blogMongoID, BFSOrderedArrayOfPostMongoID, demo = false, businessData) {
         this.subject = subject;
         this.loops = loops;
         this.config = config;
@@ -19,6 +21,9 @@ class LongTailResearcher {
         this.demo = demo;
         this.childrenCount = 3; /** children count hard coded until consensus*/
         this.keywords = [];
+        this.treeMade = false;
+        this.nextKeywordsIndex = 1;
+        this.businessData = businessData;
     }
 
 
@@ -44,12 +49,12 @@ class LongTailResearcher {
       const parentsQ = [];
       parentsQ.push(currPost._id);
       let postCount = 1;
-      while (postCount <= parseInt(this.loops)){
+      while (postCount < parseInt(this.loops)){
         let parentMongoID = parentsQ.shift();
+        console.log(postCount, this.loops)
         let childrenKeywords = await this.getKeywords(this.childrenCount, currKeyword);
         for (let i = 0; i < childrenKeywords.length; i++){
           if (postCount === parseInt(this.loops)) {
-            postCount += 1;
             break;
           }
           currKeyword = childrenKeywords[i];
@@ -78,62 +83,98 @@ class LongTailResearcher {
 
     // TODO (Gautam): switch to getKeywords() to get keywords for Ads keyword planner OR SERP API    
     getKeywords = async(count, subject=this.subject) => {
-        const tree = `Parent (Root) Query: 
-        - Dustless blasting techniques
-        
-        Children Queries for "Dustless blasting techniques":
-        1. Dustless blasting techniques for automotive restoration
-        2. Environmental impact of dustless blasting methods
-        3. Comparison of wet and dry dustless blasting techniques
-        
-        Children Queries for "Dustless blasting techniques for automotive restoration":
-        1. Advantages of using dustless blasting on classic cars
-        2. How dustless blasting can prevent metal warping in autos
-        3. Safety measures to consider in automotive dustless blasting
-        
-        Children Queries for "Environmental impact of dustless blasting methods":
-        1. Eco-friendly abrasives used in dustless blasting
-        2. Water waste management in dustless blasting operations
-        3. Air quality concerns with dustless blasting
-        
-        Children Queries for "Comparison of wet and dry dustless blasting techniques":
-        1. Effectiveness of dry dustless blasting on concrete surfaces
-        2. Benefits of wet dustless blasting in humid climates
-        3. Cost analysis: wet vs. dry dustless blasting equipment
-        
-        Children Queries for "Advantages of using dustless blasting on classic cars":
-        1. Preserving original paint layers with dustless blasting
-        2. Dustless blasting for rust removal in vintage vehicles
-        3. Time efficiency: dustless blasting in car restorations
+      if (!this.treeMade) {
+        const exampleTree = 
         `
-        const systemMessage = `I am trying to generate a tree of Google Search queries. I will give you a parent query and ask you to generate 3 children search queries. I want each of the children queries to add their own unique big meaningful twists to the parent query and be very different from the parent query as well as from each other. It is important not to repeat queries and nouns in queries in any way. My end goal is the root query of the tree should be extremely different from the leaf queries. The following is an example of such a tree: ${tree}`;
+        What Is SEO? A Comprehensive Guide for 2023,
+          10 Best Website Builder Options for 2023 and How to Choose the Best One,
+              
+              Website Builder vs Web Hosting,
+                  Understanding the Technicalities: An In-Depth Look into Web Hosting Infrastructure,
+                  The Budget Talk: Pricing Comparisons of Website Builders and Web Hosts,
+                  The Speed Factor: How Hosting Impacts Your Site's Performance,
+              
+              Website Builder vs Web Developer,
+                  Bridging the Gap: Leveraging Developer Skills in Website Builders,
+                  Customization vs Templates: Which Approach Suits Your Business?,
+                  Maintenance Aspects: Pros and Cons of Using Developers vs Website Builders,
+      
+              15 Best StoryBrand Website Examples to Help You Connect With Customers,
+                  Engaging Visuals: Top StoryBrand Design Trends for 2023,
+                  Maximizing User Engagement: StoryBrand Call-to-Action Best Practices,
+                  Diversifying Your Brand Narrative: Incorporating Diverse Voices in Your StoryBrand,
+      
+      
+          B2B Website Best Practices to Enhance Client Experience and Generate Leads + Examples,
+              Strategizing Lead Magnets: Effective B2B Offerings for 2023,
+                  The Psychology Behind B2B Offers: What Attracts Enterprises Most?,
+                  Crafting the Perfect B2B Landing Page: A Step-by-step Guide,
+                  Lead Nurturing in B2B: The Art of Maintaining Client Interest,
+      
+              B2B Client Testimonials: How Authentic Reviews Boost Business Credibility,
+                  Video vs Text Testimonials: Which Resonates More with B2B Clients?,
+                  Curating Impactful B2B Testimonials: Best Practices and Common Pitfalls,
+                  Incorporating Client Logos: Enhancing Credibility Through Visual Representation,
+      
+              B2B Content Strategies: Tailoring Articles and Videos for a Professional Audience,
+                  Engaging the Corporate Mind: Writing B2B Articles that Resonate,
+                  Video Production for B2B: Key Considerations for 2023,
+                  Distribution Strategies: Getting Your B2B Content in Front of Decision Makers,
+      
+          8 Best WordPress Hosting in 2023 + How to Choose the Right WordPress Hosting,
+              Security Aspects: Safeguarding Your WordPress Site in 2023,
+                  The Role of SSL: Why Every WordPress Site Needs It,
+                  Firewalls and WordPress: Best Practices for Site Safety,
+                  Regular Backups: Ensuring Data Integrity for Your WordPress Site,
+      
+              Scalability in Hosting: Preparing Your WordPress Site for Growth,
+                  Evaluating Hosting Plans: Which One Suits Your Traffic Expectations?,
+                  Managing Spikes: How Good Hosting Can Handle Sudden Traffic Surges,
+                  Beyond Hosting: Other Factors in Ensuring WordPress Scalability,
+      
+              WordPress-Specific Features: What Sets Specialized Hosting Apart,
+                  1-Click Installations: The Ease of Setting up WordPress,
+                  Staging Environments: Testing Changes Before Going Live,
+                  Optimized Speed: How WordPress-specific Hosting Boosts Performance     
+        `
+        const businessData = 
+        `
+        productName: ${this.businessData.name},
+        productDescription: ${this.businessData.product},
+        valueProposition: ${this.businessData.valueProposition},
+        uniqueInsightsAndExpertKnowledge: ${this.businessData.insights.toString()} 
+        `
+        const systemMessage = `You are a blog title generator. Specifically, you generate titles for blog marketing. Blog marketing is the strategic creation and distribution of valuable, relevant content to attract and engage a target audience, with the goal of driving traffic or conversions to your business website. You will be provided with marketing-relevant data about the business (include their expert knowledge and unique insights). Your job is to generate titles for that business’ blog marketing blog in a tree-like manner. You will start with a root title. Then you will generate 3 children titles for that root title. You will continue to generate 3 children titles for each new child until you reach the total number of titles requested. Each child title should be unique and should add its own meaningful change to the parent title such that it strays away from both the parent title as well as the root title such that the leaf titles should not be more than 1% similar to the root title.  I will now provide you with an example of such a tree of blog titles for a business that offers a web hosting platform. Their marketing-relevant data has a lot of expertise and insights in web hosting, website making, SEO, and generating leads, and this expertise guides their blog posts and titles. Here is the a list of title strings where the first title is the root and the next 3 titles are its children, followed by the 3 children of the first child, etc: ${exampleTree}`;
         const parser = new CustomListOutputParser({
           length: count,
           separator: "\n",
         });
         const formatInstructions = parser.getFormatInstructions();
-        if (subject === this.subject){
-          var template = `Provide an unordered list of length "{count}" search queries related to "{subject}". This will be the root query for a tree of Google Search queries. \n{format_instructions}`
-        }
-        else {
-          var template = "Provide an unordered list of length {count} unique children search queries for the parent query {subject}. You have already generated the following queries: {keywords} so sharply stray away from them and you must not repeat them in any way. \n{format_instructions}"
-        }
+        var template = "Generate a {totalcount} unique blog titles in a tree-like manner (where each parent has {childrencount} children) for a blog marketing blog for the following business: {businessdata}. You must generate {totalcount} real titles, no empty titles. \n{format_instructions}";
         const prompt = new PromptTemplate({
           template: template,
-          inputVariables: ["count", "subject",/* "mainsubject",*/ "keywords"],
+          inputVariables: ["totalcount", "childrencount", "businessdata"],
           partialVariables: { format_instructions: formatInstructions },
         });
         const input = await prompt.format({
-          count: count,
-          subject: subject,
-          // mainsubject: this.subject,
-          keywords: this.keywords.toString()
+          totalcount: parseInt(this.loops),
+          childrencount: this.childrenCount,
+          businessdata: businessData
         });
         const model = new ChatOpenAI({modelName: "gpt-3.5-turbo-16k", temperature: 0, maxTokens: 3000, openAIApiKey: this.openaiKey});
         const response = await model.call([new SystemChatMessage(systemMessage), new HumanChatMessage(input)]);
+        console.log('r:' + response);
         const keywords  = response.text.split("\n");
-        this.keywords.concat(keywords);
-        return keywords;
+        console.log(keywords);
+        this.keywords.push(...keywords);
+        console.log(this.keywords);
+        this.treeMade = true;
+        return this.keywords;
+      }
+      const kw = this.keywords.slice(this.nextKeywordsIndex, this.nextKeywordsIndex + 3);
+      console.log("kw: " + kw);
+      this.nextKeywordsIndex += 3;
+      return kw;
     }
 
     getNextBlueprint = async () => {

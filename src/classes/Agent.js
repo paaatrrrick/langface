@@ -34,7 +34,7 @@ class Agent {
         this.includeAIImages = includeAIImages;
         this.totalPostsToMake = totalPostsToMake;        
         // TOOLS
-        this.researcher = new LongTailResearcher(businessData?.name, this.totalPostsToMake, businessData?.product, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID, this.demo);
+        this.researcher = new LongTailResearcher(businessData?.name, this.totalPostsToMake, businessData?.product, this.openaiKey, this.blogMongoID, this.BFSOrderedArrayOfPostMongoID, this.demo, this.businessData);
     }
 
     run = async () => {
