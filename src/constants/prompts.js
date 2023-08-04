@@ -74,6 +74,7 @@ const newBlogPost = (keyword, lsiKeyword, headers, previousArticles, imageNames,
   -The headings should be based on content, not the other way around.
 
   4) Follow these additional content guidelines:
+  -Your output must be in the language that the business data and the title is in. If they are in french, generate french, if it's in english, then do english etc.
   -Title your introduction or conclusion headings/paragraphs creatively. Do not use the words “Introduction” or “Conclusion”.
   -ABSOLUTELY MUST include a table of contents with links that jump to the headers near the start of the post. 
   -EACH of the 10 heading MUST have 3 paragraphs with 5 sentences with 10 words each for a total of 1500 words while maintaining your readability, succinctness, engagingness, and coherence. Include so much insightful information and so many useful and entertaining facts that you naturally meet the 1500 word count. Often you don’t meet the word count, so be extra sure that include at least 5 sentences and 3 paragraphs for each of the the headings. Again, you MUST include 5 sentences and 3 paragraphs for each of the 10 headings.
