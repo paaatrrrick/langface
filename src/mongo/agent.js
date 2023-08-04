@@ -59,10 +59,6 @@ const AgentSchema = new Schema({
     topPostID: {
       type: String,
     },
-    dateRecentlyPosted: {
-      type: Date,
-      default: Date.now
-    },
     version: {
       type: String,
       enum: ['blogger', 'wordpress', 'html'],
@@ -123,40 +119,33 @@ const AgentSchema = new Schema({
       type: Number,
       default: 0
     },
+    nextPostCountResetDate: {
+      type: Date,
+      required: true,
+    }
   });
 
 
+// AgentSchema.statics.updateAllToAMonthLater = async function() {
+//   const allBlogs = await this.find({});
+//   for (let blog of allBlogs) {
+//     const dateCreated = blog._id.getTimestamp();
+//     const oneMonthLater = new Date(dateCreated);
+//     oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+//     const DateNow = new Date();
+//     blog.nextPostCountResetDate = oneMonthLater;
+//     await blog.save();
+//   }
+//   //2023-07-26T21:08:10.000Z
+//   return 'done';
+// }
 
 
-
-
-AgentSchema.statics.updateImagesAndTotalPostsToMake = async function() {
-  // console.log('starting');
-  // const agents = await this.find({});
-  // for (let agent of agents){
-  //   const loops = agent.loops || 1;
-  //   const daysLeft = agent.daysLeft || 1;
-  //   agent.totalPostsToMake = loops * daysLeft;
-  //   agent.includeAIImages = true;
-  //   await agent.save();
-  // }
-  // console.log('done');
-  // for (let agent of agents) {
-  //   if (!agent.businessData) {
-  //     agent.businessData = {};
-  //   }
-  //   if (!agent.businessData.name) {
-  //     agent.businessData.name = agent.subject;
-  //   }
-  //   if (!agent.businessData.product) {
-  //     agent.businessData.product = agent.config;
-  //   }
-  //   await agent.save();
-  // }
-};
 //create a blog with default values
 AgentSchema.statics.createEmptyBlog = async function(userID, paymentID) {
-  const blog = new this({userID: userID, paymentID: paymentID});
+  const oneMonthLater = new Date();
+  oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+  const blog = new this({userID: userID, paymentID: paymentID, nextPostCountResetDate: oneMonthLater});
   await blog.save();
   return blog;
 }
@@ -210,6 +199,8 @@ AgentSchema.statics.subtractDaysLeft = async function(id) {
   
 AgentSchema.statics.getBlog = async function(id) {
   id = convertToObjectId(id);
+  //call checkRemainingPosts
+  await this.checkRemainingPosts(id);
   return await this.findById(id);
 }
 
@@ -233,7 +224,22 @@ AgentSchema.statics.updateBlogSpecParam = async function(id, params) {
 
 AgentSchema.statics.checkRemainingPosts = async function(id) {
   let blog = await this.findById(convertToObjectId(id));
-  return {postsLeftToday: blog.postsLeftToday, maxNumberOfPosts: blog.maxNumberOfPosts};
+  const dateNow = new Date();
+  const oneMonthLater = new Date(blog.nextPostCountResetDate); 
+  if (dateNow && oneMonthLater && dateNow > oneMonthLater) {
+    while (dateNow > oneMonthLater) {
+      oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+    }
+    blog.nextPostCountResetDate = oneMonthLater;
+    blog.postsLeftToday = blog.maxNumberOfPosts;
+    await blog.save();
+  }
+  const standarized = blog.nextPostCountResetDate;
+  const month = standarized.getMonth() + 1;
+  const day = standarized.getDate();
+  const year = standarized.getFullYear();
+  const dateString = month + "/" + day + "/" + year;
+  return {postsLeftToday: blog.postsLeftToday, maxNumberOfPosts: blog.maxNumberOfPosts, dateString };
 };
 
 AgentSchema.statics.addPost = async function(id, postContent) {
@@ -242,7 +248,6 @@ AgentSchema.statics.addPost = async function(id, postContent) {
   if (postContent.type === 'success' && blog.postsLeftToday > 0) {
     blog.postsLeftToday--;
   }
-  blog.dateRecentlyPosted = Date.now();
   await blog.save();
   return {postsLeftToday: blog.postsLeftToday, maxNumberOfPosts: blog.maxNumberOfPosts };
 };
