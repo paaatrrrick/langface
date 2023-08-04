@@ -234,11 +234,16 @@ AgentSchema.statics.checkRemainingPosts = async function(id) {
     blog.postsLeftToday = blog.maxNumberOfPosts;
     await blog.save();
   }
-  const standarized = blog.nextPostCountResetDate;
-  const month = standarized.getMonth() + 1;
-  const day = standarized.getDate();
-  const year = standarized.getFullYear();
-  const dateString = month + "/" + day + "/" + year;
+  var dateString = "";
+  try {
+    const standarized = blog.nextPostCountResetDate;
+    const month = standarized.getMonth() + 1;
+    const day = standarized.getDate();
+    const year = standarized.getFullYear();
+    const dateString = month + "/" + day + "/" + year;
+  } catch {
+    
+  }
   return {postsLeftToday: blog.postsLeftToday, maxNumberOfPosts: blog.maxNumberOfPosts, dateString };
 };
 
