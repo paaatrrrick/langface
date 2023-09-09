@@ -1,5 +1,5 @@
 
-# Langchain - Autonomous SEO Blogger
+# Langface - Autonomous SEO Blogger
 View live: [Langface](https://www.langface.ai)
 > Note: This only contains code for the backend; you can access the frontend repo here:[Langface Client](https://github.com/paaatrrrick/langface-client)
 <br/>
